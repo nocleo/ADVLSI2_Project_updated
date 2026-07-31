@@ -14,6 +14,7 @@ __pycache__/
 
 # Logs and local validation artifacts
 validation_*.log
+training_metrics.json
 
 # OS / editor
 .DS_Store

@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import time
@@ -44,6 +45,15 @@ CONFIDENCE_THRESHOLD = 0.80
 BATCH_SIZE = 256
 NMS_DISTANCE_THRESHOLD = 1600
 # ---------------------------------------------------------------------------
+
+
+def configure_layout(layout_name):
+    global LAYOUT_NAME, INPUT_GDS, OUTPUT_DIR, GRADCAM_DIR, REPORT_PATH
+    LAYOUT_NAME = layout_name
+    INPUT_GDS = layout_oas(layout_name)
+    OUTPUT_DIR = inference_dataset_dir(layout_name)
+    GRADCAM_DIR = gradcam_results_dir(layout_name)
+    REPORT_PATH = cnn_drc_report_path(layout_name)
 
 
 def producer_thread(input_gds, batch_queue):
@@ -188,4 +198,14 @@ def run_end_to_end():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run optimized CNN DRC inference on a layout.")
+    parser.add_argument("--layout", default=LAYOUT_NAME, help="Layout name under real_layouts_tt (without .oas)")
+    parser.add_argument("--threshold", type=float, default=CONFIDENCE_THRESHOLD)
+    parser.add_argument("--batch-size", type=int, default=BATCH_SIZE)
+    parser.add_argument("--nms-distance", type=float, default=NMS_DISTANCE_THRESHOLD)
+    args = parser.parse_args()
+    configure_layout(args.layout)
+    CONFIDENCE_THRESHOLD = args.threshold
+    BATCH_SIZE = args.batch_size
+    NMS_DISTANCE_THRESHOLD = args.nms_distance
     run_end_to_end()

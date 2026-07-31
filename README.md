@@ -8,7 +8,7 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 4. Trains a CNN (Google Colab)
 5. Runs fast ONNX inference on a PC with Grad-CAM localization and GDS output
 
-**Repository:** https://github.com/ohadzr1/ADVLSI2_Project_updated
+**Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
 
 ---
 
@@ -37,6 +37,9 @@ code/
 ├── run_inference_pc_optimized/    # Fast PC inference (ONNX + pipelined tiling)
 ├── run_inference_pc/              # Simpler PC inference (PyTorch, no ONNX)
 ├── Colab_Code_backup/             # Google Colab notebook cells (train + infer)
+├── notebooks/                     # Colab notebooks, including the U-Net experiment
+├── training/train_classifier.py   # Reproducible baseline CNN training CLI
+├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -65,7 +68,7 @@ All local scripts resolve paths from **`project_paths.py`**, which anchors every
 ### Install dependencies
 
 ```bash
-pip install numpy matplotlib klayout Pillow torch torchvision onnxruntime opencv-python scikit-learn seaborn
+python -m pip install -r requirements.txt
 ```
 
 Generated outputs under `inference_results/` and `*.zip` archives are excluded from git (see `.gitignore`). Regenerate datasets locally after cloning.
@@ -77,6 +80,11 @@ KLayout is auto-detected in this order:
 1. `KLAYOUT_CMD` or `KLAYOUT` environment variable
 2. `klayout` on your system `PATH`
 3. Common install locations (Windows / macOS / Linux)
+
+If the KLayout command-line application is unavailable, the data generator
+automatically falls back to the `klayout` Python package for the project's
+single `m1.2` spacing check. The external CLI is still required to run the
+complete Sky130 rule deck beyond `m1.2`.
 
 Example (Windows PowerShell):
 
@@ -101,9 +109,22 @@ cd generate_training_dataset_scripts
 python run_flow.py --layout tt_um_yen
 ```
 
-### Flow B — Train CNN (Google Colab)
+### Flow B — Train CNN (Colab or local)
 
-1. Upload the zip produced by Flow A to Colab:
+Open `ADVLSI2_Project.ipynb` in Colab, or train from a clone:
+
+```bash
+python training/train_classifier.py
+```
+
+The CLI uses `training_datasets/combined_training_dataset.zip`, trains for 20
+epochs, writes `ncsu_drcnn_weights.pth`, and records the split and metrics in
+`training_metrics.json`. Use `--help` to change the dataset, seed, epochs, or
+output path.
+
+For Colab:
+
+1. Upload the zip produced by Flow A:
    - Single layout: `training_datasets/{layout}/training_dataset.zip`
    - All layouts (`--all`): `training_datasets/combined_training_dataset.zip`
 2. Run cells in order: `load_training_dataset.py` → `define_cnn_model.py` → `train_cnn_model.py` → `draw_conf_matrix.py`
@@ -120,7 +141,7 @@ python export_to_onnx.py
 
 ```bash
 cd run_inference_pc_optimized
-python run_end_to_end.py
+python run_end_to_end.py --layout tt_um_cmos_inverter
 ```
 
 This runs tile generation, ONNX inference, NMS, Grad-CAM, and writes `drc_report.txt` plus CNN mask GDS files — all in one command.
@@ -184,7 +205,32 @@ python build_cnn_violation_mask_gds.py --report inference_results/tt_um_yen_1err
 
 ---
 
-## Part 2: Google Colab (`Colab_Code_backup`)
+## Part 2: Training notebooks and CLI
+
+| Path | Purpose |
+|---|---|
+| `ADVLSI2_Project.ipynb` | Original paper-style CNN classifier notebook |
+| `notebooks/ADVLSI2_CNN_UNet_Training.ipynb` | Complete Drive notebook with CNN and experimental U-Net segmentation/localization |
+| `training/train_classifier.py` | Deterministic local/Colab-compatible classifier training entry point |
+
+The U-Net notebook is experimental: it expects a segmentation ZIP containing
+`images/` and `masks/`, while the checked-in combined classifier dataset has
+`clean/` and `dirty/`. It is retained separately so the validated classifier
+flow is not confused with the segmentation work that still needs integration.
+
+### Quick reproducibility check
+
+After installing the requirements, run:
+
+```bash
+python scripts/verify_classifier_flow.py
+```
+
+This validates the checked-in ZIP, trains a balanced 64-sample/one-epoch model,
+exports it to ONNX, and executes ONNX Runtime inference. It is a smoke test, not
+a model-quality benchmark.
+
+### Google Colab backup cells (`Colab_Code_backup`)
 
 Notebook-style cells for training and basic inference. Intended to run sequentially in Google Colab with GPU.
 
@@ -256,8 +302,8 @@ cd run_inference_pc_optimized
 # 1. Export ONNX (once, after training)
 python export_to_onnx.py
 
-# 2. Edit LAYOUT_NAME in run_end_to_end.py, then:
-python run_end_to_end.py
+# 2. Run inference for the desired layout:
+python run_end_to_end.py --layout tt_um_cmos_inverter
 ```
 
 ### `run_end_to_end.py` — two phases
