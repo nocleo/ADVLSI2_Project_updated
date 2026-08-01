@@ -8,7 +8,15 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 4. Trains a CNN (Google Colab)
 5. Runs fast ONNX inference on a PC with Grad-CAM localization and GDS output
 
+> **Project status:** **B0**, the first reproducible classifier benchmark, is
+> complete. The five-epoch baseline learns both classes and establishes the
+> comparison point for the controlled improvements in the model roadmap. Do not
+> treat the generated CNN report as a replacement for sign-off DRC.
+
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
+
+See [MODEL_ROADMAP.md](MODEL_ROADMAP.md) for the benchmark acceptance criteria
+and the controlled improvement phases planned after B0.
 
 ---
 
@@ -16,6 +24,7 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
+- [Current Benchmark — B0](#current-benchmark--b0)
 - [Quick Start — Full Flows](#quick-start--full-flows)
 - [Part 1: Training Data Pipeline](#part-1-training-data-pipeline-generate_training_dataset_scripts)
 - [Part 2: Google Colab (Training & Basic Inference)](#part-2-google-colab-colab_code_backup)
@@ -31,7 +40,7 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 ## Project Structure
 
 ```
-code/
+ADVLSI2_Project_updated/
 ├── project_paths.py               # Portable path helpers (project root)
 ├── generate_training_dataset_scripts/      # Training dataset generation pipeline
 ├── run_inference_pc_optimized/    # Fast PC inference (ONNX + pipelined tiling)
@@ -68,10 +77,19 @@ All local scripts resolve paths from **`project_paths.py`**, which anchors every
 ### Install dependencies
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Generated outputs under `inference_results/` and `*.zip` archives are excluded from git (see `.gitignore`). Regenerate datasets locally after cloning.
+On Windows PowerShell, activate the environment with
+`.venv\Scripts\Activate.ps1`. Use `python -m pip` so packages are installed into
+the same interpreter that runs the scripts.
+
+Generated inference outputs and most local archives are excluded from git (see
+`.gitignore`). The combined dataset ZIP used by B0 is currently checked in so
+the baseline can be reproduced from a clone.
 
 ### KLayout (portable setup)
 
@@ -100,6 +118,38 @@ export KLAYOUT_CMD=/usr/bin/klayout
 
 ---
 
+## Current Benchmark — B0
+
+B0 is a functional-baseline gate, not an accuracy claim. It uses the original
+`NCSU_DRCNN`, a deterministic seed, train-only Manhattan augmentation, and the
+lowest-validation-loss checkpoint. The run records accuracy, dirty-class
+precision/recall/F1, confusion matrices, and predicted-class counts.
+
+Run the current five-epoch validation benchmark with:
+
+```bash
+python training/train_classifier.py \
+  --dataset training_datasets/combined_training_dataset.zip \
+  --epochs 5 \
+  --learning-rate 0.001 \
+  --output /tmp/full_safe_aug.pth \
+  --metrics /tmp/full_safe_aug.json
+```
+
+B0 passes only if the run completes reproducibly, training loss falls by at
+least 5% from its first-epoch value, validation and test predictions contain
+both classes, and dirty-class recall is greater than zero.
+
+The accepted CPU run used seed 42 and 6,060 samples. Training loss fell from
+0.7123 to 0.4767 (33.1%). The best checkpoint was epoch 5, with validation
+accuracy 78.00% and dirty-class F1 0.761. On the held-out test split it achieved
+79.21% accuracy, 0.779 precision, 0.795 recall, and 0.786 F1, while predicting
+both classes (154 clean and 149 dirty). This is a functional baseline, not a
+final quality result; higher accuracy and layout-level generalization are the
+goals of the following phases.
+
+---
+
 ## Quick Start — Full Flows
 
 ### Flow A — Generate training data (local PC)
@@ -124,6 +174,10 @@ confusion matrices, predicted-class counts, and the selected epoch in
 `training_metrics.json`. Manhattan rotations/reflections are applied only to
 the training split; validation and test tiles remain deterministic. Use
 `--help` to change the dataset, seed, epochs, or output path.
+
+For benchmark work, always pass explicit dataset, epoch, learning-rate, output,
+and metrics paths as shown in the B0 command. The defaults are convenient for
+interactive use but are not a complete experiment record.
 
 For Colab:
 
@@ -275,7 +329,8 @@ Notebook-style cells for training and basic inference. Intended to run sequentia
 
 ## Part 3: PC Inference — Optimized (`run_inference_pc_optimized`)
 
-Production inference path optimized for speed on a local PC.
+Optimized inference path for local-PC experiments. It is not yet a validated
+production or sign-off DRC flow.
 
 ### Key design
 
