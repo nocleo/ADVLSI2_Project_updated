@@ -14,16 +14,18 @@ import sys
 import tempfile
 import warnings
 import zipfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset, Subset, random_split
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "run_inference_pc_optimized"))
 
 from define_cnn_model import NCSU_DRCNN
+from training.dataset_manifest import parse_sample_path, sha256_file
 
 
 class ManhattanAugmentation:
@@ -41,13 +43,30 @@ class ManhattanAugmentation:
 class DRCDataset(Dataset):
     CLASSES = ("clean", "dirty")
 
-    def __init__(self, root_dir: Path, augment: bool = True) -> None:
+    def __init__(
+        self,
+        root_dir: Path,
+        augment: bool = True,
+        sample_paths: list[str] | None = None,
+    ) -> None:
         self.samples: list[tuple[Path, int]] = []
-        for label, class_name in enumerate(self.CLASSES):
-            class_dir = root_dir / class_name
-            if not class_dir.is_dir():
-                raise FileNotFoundError(f"Missing dataset directory: {class_dir}")
-            self.samples.extend((path, label) for path in sorted(class_dir.glob("*.npy")))
+        self.relative_paths: list[str] = []
+        if sample_paths is None:
+            for label, class_name in enumerate(self.CLASSES):
+                class_dir = root_dir / class_name
+                if not class_dir.is_dir():
+                    raise FileNotFoundError(f"Missing dataset directory: {class_dir}")
+                for path in sorted(class_dir.glob("*.npy")):
+                    self.samples.append((path, label))
+                    self.relative_paths.append(path.relative_to(root_dir).as_posix())
+        else:
+            for relative_path in sample_paths:
+                class_name, _, _, _ = parse_sample_path(relative_path)
+                path = root_dir / PurePosixPath(relative_path)
+                if not path.is_file():
+                    raise FileNotFoundError(f"Manifest sample is missing from archive: {relative_path}")
+                self.samples.append((path, self.CLASSES.index(class_name)))
+                self.relative_paths.append(relative_path)
         if not self.samples:
             raise ValueError(f"No .npy tiles found under {root_dir}")
 
@@ -142,6 +161,53 @@ def collapse_warning(metrics: dict[str, object], split: str, epoch: int | None =
     return message
 
 
+def load_protocol(
+    manifest_path: Path, dataset_path: Path, protocol_name: str
+) -> tuple[dict[str, object], dict[str, list[str]]]:
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    expected_hash = manifest.get("dataset", {}).get("archive_sha256")
+    actual_hash = sha256_file(dataset_path)
+    if expected_hash != actual_hash:
+        raise ValueError(
+            "Dataset archive does not match the split manifest: "
+            f"expected {expected_hash}, got {actual_hash}"
+        )
+    try:
+        protocol = manifest["protocols"][protocol_name]
+        splits = protocol["splits"]
+    except KeyError as error:
+        available = sorted(manifest.get("protocols", {}))
+        raise ValueError(
+            f"Protocol {protocol_name!r} is absent from {manifest_path}; available: {available}"
+        ) from error
+    if set(splits) != {"train", "validation", "test"}:
+        raise ValueError(f"Protocol {protocol_name!r} must define train/validation/test")
+    all_paths = [path for paths in splits.values() for path in paths]
+    if len(all_paths) != len(set(all_paths)):
+        raise ValueError(f"Protocol {protocol_name!r} contains sample paths in multiple splits")
+    return manifest, {name: list(splits[name]) for name in ("train", "validation", "test")}
+
+
+def per_layout_test_metrics(
+    model: torch.nn.Module,
+    data_root: Path,
+    test_paths: list[str],
+    batch_size: int,
+    device: torch.device,
+) -> dict[str, dict[str, object]]:
+    by_layout: dict[str, list[str]] = {}
+    for path in test_paths:
+        _, layout, _, _ = parse_sample_path(path)
+        by_layout.setdefault(layout, []).append(path)
+    results: dict[str, dict[str, object]] = {}
+    for layout, paths in sorted(by_layout.items()):
+        dataset = DRCDataset(data_root, augment=False, sample_paths=paths)
+        results[layout] = evaluate(
+            model, DataLoader(dataset, batch_size=batch_size), device
+        )
+    return results
+
+
 def train(args: argparse.Namespace) -> dict[str, object]:
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -152,16 +218,38 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         with zipfile.ZipFile(args.dataset) as archive:
             archive.extractall(data_root)
 
-        evaluation_dataset = DRCDataset(data_root, augment=False)
-        selected_indices = list(range(len(evaluation_dataset)))
-        if args.max_samples and args.max_samples < len(evaluation_dataset):
-            selected_indices = balanced_indices(evaluation_dataset, args.max_samples, args.seed)
+        manifest: dict[str, object] | None = None
+        protocol_splits: dict[str, list[str]] | None = None
+        if args.manifest:
+            if args.max_samples:
+                raise ValueError("--max-samples cannot alter a frozen manifest protocol")
+            manifest, protocol_splits = load_protocol(
+                args.manifest, args.dataset, args.protocol
+            )
+            train_set = DRCDataset(
+                data_root,
+                augment=not args.no_augmentation,
+                sample_paths=protocol_splits["train"],
+            )
+            val_set = DRCDataset(
+                data_root, augment=False, sample_paths=protocol_splits["validation"]
+            )
+            test_set = DRCDataset(
+                data_root, augment=False, sample_paths=protocol_splits["test"]
+            )
+            selected_sample_count = sum(len(paths) for paths in protocol_splits.values())
+        else:
+            evaluation_dataset = DRCDataset(data_root, augment=False)
+            selected_indices = list(range(len(evaluation_dataset)))
+            if args.max_samples and args.max_samples < len(evaluation_dataset):
+                selected_indices = balanced_indices(evaluation_dataset, args.max_samples, args.seed)
 
-        train_indices, val_indices, test_indices = split_indices(selected_indices, args.seed)
-        training_dataset = DRCDataset(data_root, augment=not args.no_augmentation)
-        train_set = Subset(training_dataset, train_indices)
-        val_set = Subset(evaluation_dataset, val_indices)
-        test_set = Subset(evaluation_dataset, test_indices)
+            train_indices, val_indices, test_indices = split_indices(selected_indices, args.seed)
+            training_dataset = DRCDataset(data_root, augment=not args.no_augmentation)
+            train_set = Subset(training_dataset, train_indices)
+            val_set = Subset(evaluation_dataset, val_indices)
+            test_set = Subset(evaluation_dataset, test_indices)
+            selected_sample_count = len(selected_indices)
         train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
         val_loader = DataLoader(val_set, batch_size=args.batch_size)
         test_loader = DataLoader(test_set, batch_size=args.batch_size)
@@ -229,6 +317,17 @@ def train(args: argparse.Namespace) -> dict[str, object]:
             raise RuntimeError("Training completed without producing a checkpoint")
         model.load_state_dict(best_state)
         test_metrics = evaluate(model, test_loader, device)
+        layout_metrics = (
+            per_layout_test_metrics(
+                model,
+                data_root,
+                protocol_splits["test"],
+                args.batch_size,
+                device,
+            )
+            if protocol_splits is not None
+            else {}
+        )
         warning = collapse_warning(test_metrics, "test")
         if warning:
             run_warnings.append(warning)
@@ -237,7 +336,11 @@ def train(args: argparse.Namespace) -> dict[str, object]:
 
     result = {
         "dataset": str(args.dataset),
-        "samples": len(selected_indices),
+        "dataset_archive_sha256": sha256_file(args.dataset),
+        "manifest": str(args.manifest) if args.manifest else None,
+        "manifest_id": manifest.get("manifest_id") if manifest else None,
+        "protocol": args.protocol if args.manifest else "b0-tile-random",
+        "samples": selected_sample_count,
         "split": {"train": len(train_set), "validation": len(val_set), "test": len(test_set)},
         "epochs": args.epochs,
         "seed": args.seed,
@@ -252,6 +355,7 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         "test_f1": test_metrics["f1"],
         "test_predicted_class_counts": test_metrics["predicted_class_counts"],
         "test_confusion_matrix": test_metrics["confusion_matrix"],
+        "test_per_layout": layout_metrics,
         "weights": str(args.output),
         "warnings": run_warnings,
         "history": history,
@@ -276,6 +380,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max-samples", type=int, default=0)
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        help="Dataset manifest containing frozen split protocols.",
+    )
+    parser.add_argument(
+        "--protocol",
+        default="unseen_layout_v1",
+        help="Protocol key inside --manifest (default: unseen_layout_v1).",
+    )
     parser.add_argument("--no-augmentation", action="store_true")
     parser.add_argument("--cpu", action="store_true")
     return parser.parse_args()

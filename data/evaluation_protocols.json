@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "dataset_version": "b1-candidate-v1",
+  "protocols": {
+    "tile_random_reference": {
+      "description": "B0-compatible tile-random reference after exact-content deduplication; not a direct reproduction of the paper.",
+      "seed": 42,
+      "fractions": {
+        "train": 0.80,
+        "validation": 0.15,
+        "test": 0.05
+      }
+    },
+    "unseen_layout_v1": {
+      "description": "Fixed layout-family split selected before B2 model results are observed.",
+      "train_families": [
+        "tt_um_8_bit_cpu",
+        "tt_um_analog_atenfyr1",
+        "tt_um_cmos_inverter",
+        "tt_um_irfantekin_analog",
+        "tt_um_fabulous_sky_26a",
+        "tt_um_essen",
+        "tt_um_jyblue1001_pll",
+        "tt_um_fft_adityaamehra"
+      ],
+      "validation_families": [
+        "tt_um_yen",
+        "tt_um_TSARKA_TinyQV",
+        "tt_um_aes_sbox"
+      ],
+      "test_families": [
+        "tt_um_c4m_spsram_direct",
+        "tt_um_Bingyao_FCOTA",
+        "tt_um_2048_vga_game"
+      ],
+      "duplicate_resolution_priority": ["test", "validation", "train"]
+    }
+  }
+}
