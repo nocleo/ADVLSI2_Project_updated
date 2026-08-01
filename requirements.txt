@@ -1,0 +1,11 @@
+numpy>=1.26,<3
+Pillow>=10,<13
+matplotlib>=3.8,<4
+torch>=2.2,<3
+torchvision>=0.17,<1
+onnx>=1.16,<2
+onnxruntime>=1.18,<2
+opencv-python-headless>=4.9,<5
+scikit-learn>=1.4,<2
+seaborn>=0.13,<1
+klayout>=0.29,<1

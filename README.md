@@ -8,7 +8,15 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 4. Trains a CNN (Google Colab)
 5. Runs fast ONNX inference on a PC with Grad-CAM localization and GDS output
 
-**Repository:** https://github.com/ohadzr1/ADVLSI2_Project_updated
+> **Project status:** **B0**, the first reproducible classifier benchmark, is
+> complete. The five-epoch baseline learns both classes and establishes the
+> comparison point for the controlled improvements in the model roadmap. Do not
+> treat the generated CNN report as a replacement for sign-off DRC.
+
+**Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
+
+See [MODEL_ROADMAP.md](MODEL_ROADMAP.md) for the benchmark acceptance criteria
+and the controlled improvement phases planned after B0.
 
 ---
 
@@ -16,6 +24,7 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
+- [Current Benchmark — B0](#current-benchmark--b0)
 - [Quick Start — Full Flows](#quick-start--full-flows)
 - [Part 1: Training Data Pipeline](#part-1-training-data-pipeline-generate_training_dataset_scripts)
 - [Part 2: Google Colab (Training & Basic Inference)](#part-2-google-colab-colab_code_backup)
@@ -31,12 +40,15 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 ## Project Structure
 
 ```
-code/
+ADVLSI2_Project_updated/
 ├── project_paths.py               # Portable path helpers (project root)
 ├── generate_training_dataset_scripts/      # Training dataset generation pipeline
 ├── run_inference_pc_optimized/    # Fast PC inference (ONNX + pipelined tiling)
 ├── run_inference_pc/              # Simpler PC inference (PyTorch, no ONNX)
 ├── Colab_Code_backup/             # Google Colab notebook cells (train + infer)
+├── notebooks/                     # Colab notebooks, including the U-Net experiment
+├── training/train_classifier.py   # Reproducible baseline CNN training CLI
+├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -65,10 +77,19 @@ All local scripts resolve paths from **`project_paths.py`**, which anchors every
 ### Install dependencies
 
 ```bash
-pip install numpy matplotlib klayout Pillow torch torchvision onnxruntime opencv-python scikit-learn seaborn
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-Generated outputs under `inference_results/` and `*.zip` archives are excluded from git (see `.gitignore`). Regenerate datasets locally after cloning.
+On Windows PowerShell, activate the environment with
+`.venv\Scripts\Activate.ps1`. Use `python -m pip` so packages are installed into
+the same interpreter that runs the scripts.
+
+Generated inference outputs and most local archives are excluded from git (see
+`.gitignore`). The combined dataset ZIP used by B0 is currently checked in so
+the baseline can be reproduced from a clone.
 
 ### KLayout (portable setup)
 
@@ -77,6 +98,11 @@ KLayout is auto-detected in this order:
 1. `KLAYOUT_CMD` or `KLAYOUT` environment variable
 2. `klayout` on your system `PATH`
 3. Common install locations (Windows / macOS / Linux)
+
+If the KLayout command-line application is unavailable, the data generator
+automatically falls back to the `klayout` Python package for the project's
+single `m1.2` spacing check. The external CLI is still required to run the
+complete Sky130 rule deck beyond `m1.2`.
 
 Example (Windows PowerShell):
 
@@ -92,6 +118,38 @@ export KLAYOUT_CMD=/usr/bin/klayout
 
 ---
 
+## Current Benchmark — B0
+
+B0 is a functional-baseline gate, not an accuracy claim. It uses the original
+`NCSU_DRCNN`, a deterministic seed, train-only Manhattan augmentation, and the
+lowest-validation-loss checkpoint. The run records accuracy, dirty-class
+precision/recall/F1, confusion matrices, and predicted-class counts.
+
+Run the current five-epoch validation benchmark with:
+
+```bash
+python training/train_classifier.py \
+  --dataset training_datasets/combined_training_dataset.zip \
+  --epochs 5 \
+  --learning-rate 0.001 \
+  --output /tmp/full_safe_aug.pth \
+  --metrics /tmp/full_safe_aug.json
+```
+
+B0 passes only if the run completes reproducibly, training loss falls by at
+least 5% from its first-epoch value, validation and test predictions contain
+both classes, and dirty-class recall is greater than zero.
+
+The accepted CPU run used seed 42 and 6,060 samples. Training loss fell from
+0.7123 to 0.4767 (33.1%). The best checkpoint was epoch 5, with validation
+accuracy 78.00% and dirty-class F1 0.761. On the held-out test split it achieved
+79.21% accuracy, 0.779 precision, 0.795 recall, and 0.786 F1, while predicting
+both classes (154 clean and 149 dirty). This is a functional baseline, not a
+final quality result; higher accuracy and layout-level generalization are the
+goals of the following phases.
+
+---
+
 ## Quick Start — Full Flows
 
 ### Flow A — Generate training data (local PC)
@@ -101,9 +159,29 @@ cd generate_training_dataset_scripts
 python run_flow.py --layout tt_um_yen
 ```
 
-### Flow B — Train CNN (Google Colab)
+### Flow B — Train CNN (Colab or local)
 
-1. Upload the zip produced by Flow A to Colab:
+Open `ADVLSI2_Project.ipynb` in Colab, or train from a clone:
+
+```bash
+python training/train_classifier.py
+```
+
+The CLI uses `training_datasets/combined_training_dataset.zip`, trains for 20
+epochs, and writes the lowest-validation-loss checkpoint to
+`ncsu_drcnn_weights.pth`. It records accuracy, dirty-class precision/recall/F1,
+confusion matrices, predicted-class counts, and the selected epoch in
+`training_metrics.json`. Manhattan rotations/reflections are applied only to
+the training split; validation and test tiles remain deterministic. Use
+`--help` to change the dataset, seed, epochs, or output path.
+
+For benchmark work, always pass explicit dataset, epoch, learning-rate, output,
+and metrics paths as shown in the B0 command. The defaults are convenient for
+interactive use but are not a complete experiment record.
+
+For Colab:
+
+1. Upload the zip produced by Flow A:
    - Single layout: `training_datasets/{layout}/training_dataset.zip`
    - All layouts (`--all`): `training_datasets/combined_training_dataset.zip`
 2. Run cells in order: `load_training_dataset.py` → `define_cnn_model.py` → `train_cnn_model.py` → `draw_conf_matrix.py`
@@ -120,7 +198,7 @@ python export_to_onnx.py
 
 ```bash
 cd run_inference_pc_optimized
-python run_end_to_end.py
+python run_end_to_end.py --layout tt_um_cmos_inverter
 ```
 
 This runs tile generation, ONNX inference, NMS, Grad-CAM, and writes `drc_report.txt` plus CNN mask GDS files — all in one command.
@@ -184,7 +262,32 @@ python build_cnn_violation_mask_gds.py --report inference_results/tt_um_yen_1err
 
 ---
 
-## Part 2: Google Colab (`Colab_Code_backup`)
+## Part 2: Training notebooks and CLI
+
+| Path | Purpose |
+|---|---|
+| `ADVLSI2_Project.ipynb` | Original paper-style CNN classifier notebook |
+| `notebooks/ADVLSI2_CNN_UNet_Training.ipynb` | Complete Drive notebook with CNN and experimental U-Net segmentation/localization |
+| `training/train_classifier.py` | Deterministic local/Colab-compatible classifier training entry point |
+
+The U-Net notebook is experimental: it expects a segmentation ZIP containing
+`images/` and `masks/`, while the checked-in combined classifier dataset has
+`clean/` and `dirty/`. It is retained separately so the validated classifier
+flow is not confused with the segmentation work that still needs integration.
+
+### Quick reproducibility check
+
+After installing the requirements, run:
+
+```bash
+python scripts/verify_classifier_flow.py
+```
+
+This validates the checked-in ZIP, trains a balanced 64-sample/one-epoch model,
+exports it to ONNX, and executes ONNX Runtime inference. It is a smoke test, not
+a model-quality benchmark.
+
+### Google Colab backup cells (`Colab_Code_backup`)
 
 Notebook-style cells for training and basic inference. Intended to run sequentially in Google Colab with GPU.
 
@@ -226,7 +329,8 @@ Notebook-style cells for training and basic inference. Intended to run sequentia
 
 ## Part 3: PC Inference — Optimized (`run_inference_pc_optimized`)
 
-Production inference path optimized for speed on a local PC.
+Optimized inference path for local-PC experiments. It is not yet a validated
+production or sign-off DRC flow.
 
 ### Key design
 
@@ -256,8 +360,8 @@ cd run_inference_pc_optimized
 # 1. Export ONNX (once, after training)
 python export_to_onnx.py
 
-# 2. Edit LAYOUT_NAME in run_end_to_end.py, then:
-python run_end_to_end.py
+# 2. Run inference for the desired layout:
+python run_end_to_end.py --layout tt_um_cmos_inverter
 ```
 
 ### `run_end_to_end.py` — two phases
@@ -582,7 +686,10 @@ Edit the `CONFIGURATION` block at the top of each script before running.
 |---|---|
 | `DRCDataset(root_dir, transform)` | PyTorch Dataset loading `.npy` tiles from `clean/` and `dirty/` folders |
 
-Data augmentation: horizontal/vertical flip, 90° rotation, random affine translate (10%).
+The reproducible CLI uses exact 90° rotations and horizontal/vertical
+reflections on training samples only. The historical backup shown here also
+contains a random affine translation and should not be used for baseline
+training.
 
 #### `train_cnn_model.py`
 
