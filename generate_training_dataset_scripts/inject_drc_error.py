@@ -28,7 +28,7 @@ MIN_VISIBLE_GAP = 40
 def snap_to_grid(value, grid=GRID_STEP):
     return int(round(value / grid) * grid)
 
-def inject_isolated_m1_2_errors(input_file, num_errors=500): 
+def inject_isolated_m1_2_errors(input_file, num_errors=500, seed=42):
     input_file = str(Path(input_file))
     if not os.path.exists(input_file):
         print(f"Error: {input_file} not found.")
@@ -52,21 +52,22 @@ def inject_isolated_m1_2_errors(input_file, num_errors=500):
     attempts = 0
     max_attempts = num_errors * 2000 
 
-    print(f"Processing: {input_file} - Injecting {num_errors} errors...")
+    rng = random.Random(seed)
+    print(f"Processing: {input_file} - Injecting {num_errors} errors (seed={seed})...")
 
     while errors_injected < num_errors and attempts < max_attempts:
         attempts += 1
         
-        w = snap_to_grid(random.randrange(140, 400)) 
+        w = snap_to_grid(rng.randrange(140, 400))
         min_l_required = math.ceil(MIN_AREA / w) 
         lower_bound = snap_to_grid(min_l_required) 
-        upper_bound = snap_to_grid(lower_bound + random.randrange(10, 200))
+        upper_bound = snap_to_grid(lower_bound + rng.randrange(10, 200))
         
-        l = snap_to_grid(random.randrange(lower_bound, max(lower_bound + GRID_STEP, upper_bound)))
-        rect_w, rect_l = (w, l) if random.choice([True, False]) else (l, w)
+        l = snap_to_grid(rng.randrange(lower_bound, max(lower_bound + GRID_STEP, upper_bound)))
+        rect_w, rect_l = (w, l) if rng.choice([True, False]) else (l, w)
 
-        x = snap_to_grid(random.randrange(bbox.left, bbox.right - rect_w))
-        y = snap_to_grid(random.randrange(bbox.bottom, bbox.top - rect_l))
+        x = snap_to_grid(rng.randrange(bbox.left, bbox.right - rect_w))
+        y = snap_to_grid(rng.randrange(bbox.bottom, bbox.top - rect_l))
         
         error_box = db.Box(x, y, x + rect_w, y + rect_l)
         error_region = db.Region(error_box)
@@ -84,7 +85,9 @@ def inject_isolated_m1_2_errors(input_file, num_errors=500):
         top_cell.shapes(marking_idx).insert(error_box)
         
         main_region.insert(error_box)
-        main_region.merge()
+        # The 40 nm non-overlap check above guarantees the new rectangle cannot
+        # merge with existing geometry. Re-merging the full region here made
+        # large layouts scale poorly (hundreds of full-region merges per run).
         
         errors_injected += 1
 

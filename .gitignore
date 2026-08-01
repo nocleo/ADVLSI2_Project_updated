@@ -11,6 +11,13 @@ __pycache__/
 
 # Archives produced by pipelines
 *.zip
+!training_datasets/combined_training_dataset.zip
+
+# Reproducible per-layout dataset intermediates
+training_datasets/combined_training_dataset/
+training_datasets/*/dataset_output/
+training_datasets/*/training_dataset/
+training_datasets/*/training_dataset.zip
 
 # Logs and local validation artifacts
 validation_*.log

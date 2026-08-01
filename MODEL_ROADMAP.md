@@ -85,7 +85,7 @@ dirty F1 0.786. Predictions included both classes. This result establishes
 functionality only; B1 replaces the tile-random evaluation with a leakage-free,
 layout-grouped benchmark before model optimization begins.
 
-### B1 — Layout collection, dataset integrity, and frozen evaluation
+### B1 — Layout collection, dataset integrity, and frozen evaluation (complete)
 
 **Hypothesis:** the current small set of related layouts, duplicated clean tiles,
 and tile-level random splitting do not support a trustworthy paper comparison
@@ -111,6 +111,17 @@ or a meaningful generalization claim.
 three splits; no family or content hash crosses splits; no unresolved
 contradictory labels remain; provenance/configuration is complete; and repeated
 runs with the same manifest and seed reproduce both protocols and metrics.
+
+**Accepted result:** seed 42 produced 14,348 samples from 14 independent layout
+families (7,784 clean and 6,564 dirty). The source audit verified every admitted
+layout hash and found no exact or Manhattan-equivalent label conflicts. The
+unseen-layout protocol retains 6,442 train / 2,627 validation / 2,682 test
+samples after removing 2,597 equivalent duplicates; its eight/three/three
+families are disjoint. The leakage-aware tile-random reference contains 11,478 /
+2,153 / 717 samples. Manifest `9deef1271a14...` passes the B1 gate, and a
+deterministic clean/dirty visual audit overlays the KLayout violation geometry.
+The admitted source set includes digital CPU, FPGA, RISC-V SoC, crypto, DSP,
+VGA, SRAM, and multiple analog layout families.
 
 ### B2 — Dual classification baselines
 
@@ -228,16 +239,14 @@ commands, and package weights plus metrics with provenance.
 predictions agree within tolerance; regression tests pass; limitations clearly
 state that the CNN assists analysis and does not replace sign-off DRC.
 
-## Immediate sequence after B0
+## Immediate sequence after B1
 
-1. Inventory current layout families and define objective acceptance criteria
-   for additional layouts.
-2. Collect the broad, diverse layout set in B1 and record provenance/licenses.
-3. Implement the manifest and duplicate/conflict report.
-4. Freeze paper-aligned and layout-family-grouped protocols before tuning.
-5. Run B2 with the unchanged model to establish both credible baselines.
-6. Start B3 optimization experiments one controlled change per PR.
-7. Collect additional layouts again only in B5 when error analysis identifies a
+1. Run B2 with the unchanged model on the leakage-aware tile-random reference
+   and the layout-family-disjoint protocol.
+2. Repeat the B2 runs across fixed seeds, report per-layout results, and freeze
+   the accepted classifier baselines without tuning on the test set.
+3. Start B3 optimization experiments one controlled change per PR.
+4. Collect additional layouts again only in B5 when error analysis identifies a
    missing geometry or circuit regime; never adapt the frozen test set.
 
 ## Experiment record template

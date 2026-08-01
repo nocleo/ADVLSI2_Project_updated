@@ -13,9 +13,11 @@ classifier in three measurable ways: preserve competitive classification,
 demonstrate generalization to unseen layout families, and progress from coarse
 tile localization to exact violation geometry and verified repair proposals.
 
-> **Project status:** **B0**, the first reproducible classifier sanity check, is
-> complete. **B1** now builds the dataset manifest, expands layout diversity,
-> audits duplicates/conflicts, and freezes leakage-free layout-family splits.
+> **Project status:** **B0** and **B1** are complete. B1 expanded the evaluated
+> source set from five to fourteen independent layout families, rebuilt the data
+> with deterministic injection seeds, audited exact and Manhattan-equivalent
+> duplicates/conflicts, and froze leakage-free layout-family splits. **B2** is
+> the next phase: rerun the unchanged classifier on both frozen protocols.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -54,6 +56,11 @@ ADVLSI2_Project_updated/
 ├── Colab_Code_backup/             # Google Colab notebook cells (train + infer)
 ├── notebooks/                     # Colab notebooks, including the U-Net experiment
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
+├── training/dataset_manifest.py   # B1 integrity audit and frozen split logic
+├── data/layout_registry.json      # Pinned source, family, license, and generation metadata
+├── data/evaluation_protocols.json # Frozen tile-random and unseen-layout protocols
+├── scripts/acquire_b1_layouts.py  # Acquire/verify the selected open layouts
+├── scripts/build_dataset_manifest.py # Produce versioned manifests and summaries
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
@@ -93,9 +100,10 @@ On Windows PowerShell, activate the environment with
 `.venv\Scripts\Activate.ps1`. Use `python -m pip` so packages are installed into
 the same interpreter that runs the scripts.
 
-Generated inference outputs and most local archives are excluded from git (see
-`.gitignore`). The combined dataset ZIP used by B0 is currently checked in so
-the baseline can be reproduced from a clone.
+Generated inference outputs and per-layout dataset intermediates are excluded
+from git (see `.gitignore`). The compact combined dataset ZIP, source layouts,
+registry, manifests, and benchmark metrics are versioned so a benchmark can be
+reproduced from a clone without reviewing thousands of generated `.npy` files.
 
 ### KLayout (portable setup)
 
@@ -183,6 +191,79 @@ coordinates. A later phase may propose an `m1.2` spacing repair, but a proposal
 is accepted only after KLayout DRC verification and a connectivity/LVS safety
 check. Grad-CAM and flagged tile coordinates remain diagnostic aids, not exact
 repair geometry.
+
+### B1 dataset and split workflow
+
+The B1 registry pins each selected TinyTapeout Sky130 layout to a repository
+revision, SHA-256 digest, and Apache-2.0 license. The acquisition command leaves
+existing layouts untouched and verifies every newly selected source before it
+is written:
+
+```bash
+python scripts/acquire_b1_layouts.py
+```
+
+Rebuild the combined dataset with stable, independent injection seeds per
+layout. The registry excludes the local `tt_um_yen_1err` derivative because it
+belongs to the same family as `tt_um_yen` and the flow already injects errors
+into the canonical source:
+
+```bash
+python generate_training_dataset_scripts/run_flow.py \
+  --all \
+  --registry data/layout_registry.json \
+  --seed 42
+```
+
+Then generate the content audit and both frozen evaluation protocols:
+
+```bash
+python scripts/build_dataset_manifest.py
+```
+
+The manifest rejects contradictory clean/dirty labels, keeps
+Manhattan-equivalent content out of multiple splits, verifies source hashes,
+and reports aggregate plus per-layout/family counts.
+
+**Accepted B1 result (seed 42):** 14,348 samples from 14 independent families
+(7,784 clean and 6,564 dirty). The audit found 2,383 extra exact-duplicate
+samples and 2,597 extra Manhattan-equivalent samples, with zero contradictory
+clean/dirty labels. All selected source hashes are verified. Manifest
+`9deef1271a14...` passes the B1 gate.
+
+The frozen unseen-layout protocol retains one representative per
+Manhattan-equivalent group and contains 6,442 training samples from eight
+families, 2,627 validation samples from three families, and 2,682 test samples
+from three families. The tile-random reference contains 11,478 / 2,153 / 717
+train/validation/test samples while keeping equivalent-content groups within a
+single split. It is a leakage-aware internal reference, not a direct
+reproduction of the paper.
+
+The deterministic visual audit overlays the verified KLayout DRC geometry in
+pink on representative dirty tiles:
+
+![B1 clean/dirty label audit](data/b1_current_audit/label_audit_grid.png)
+
+Nine additional layouts were acquired and source-verified. All nine were
+admitted to B1, including the large FPGA, RISC-V SoC, and FFT designs. The
+targeted tiler avoids rasterizing every empty grid window, making these larger
+layouts practical while preserving deterministic output.
+
+The unchanged B0 architecture can then be trained on either manifest protocol:
+
+```bash
+python training/train_classifier.py \
+  --dataset training_datasets/combined_training_dataset.zip \
+  --manifest data/b1_current_audit/manifest.json \
+  --protocol unseen_layout_v1 \
+  --epochs 20 \
+  --output /tmp/b2_unseen_layout.pth \
+  --metrics /tmp/b2_unseen_layout.json
+```
+
+Use `--protocol tile_random_reference` for the B0-compatible classification
+track. It is an internal reference with leakage-aware grouping, not a direct
+reproduction of the paper's incompletely documented evaluation protocol.
 
 ---
 

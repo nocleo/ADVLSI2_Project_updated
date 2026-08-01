@@ -1,0 +1,538 @@
+{
+  "schema_version": 1,
+  "manifest_id": "9deef1271a145198a60abccf291ec499d53226075b4ccfa2061a215afbd01472",
+  "dataset": {
+    "path": "training_datasets/combined_training_dataset.zip",
+    "archive_sha256": "73b3581225928e86d9d6742599ba0c4f737d180f8f7297a9461fbed72594e1c4",
+    "samples": 14348,
+    "classes": {
+      "clean": 7784,
+      "dirty": 6564
+    },
+    "layout_count": 14,
+    "family_count": 14,
+    "eligible_samples": 14348
+  },
+  "inventory": {
+    "tt_um_2048_vga_game": {
+      "family": "tt_um_2048_vga_game",
+      "circuit_type": "digital_vga_game",
+      "samples": 1166,
+      "classes": {
+        "clean": 633,
+        "dirty": 533
+      },
+      "density": {
+        "minimum": 0.03,
+        "mean": 0.3516107632933105,
+        "maximum": 0.5973
+      }
+    },
+    "tt_um_8_bit_cpu": {
+      "family": "tt_um_8_bit_cpu",
+      "circuit_type": "digital_cpu",
+      "samples": 1032,
+      "classes": {
+        "clean": 566,
+        "dirty": 466
+      },
+      "density": {
+        "minimum": 0.03,
+        "mean": 0.3128515988372093,
+        "maximum": 0.584925
+      }
+    },
+    "tt_um_Bingyao_FCOTA": {
+      "family": "tt_um_Bingyao_FCOTA",
+      "circuit_type": "analog_ota",
+      "samples": 966,
+      "classes": {
+        "clean": 533,
+        "dirty": 433
+      },
+      "density": {
+        "minimum": 0.032,
+        "mean": 0.3788741718426501,
+        "maximum": 0.8386
+      }
+    },
+    "tt_um_TSARKA_TinyQV": {
+      "family": "tt_um_TSARKA_TinyQV",
+      "circuit_type": "digital_riscv_soc",
+      "samples": 1132,
+      "classes": {
+        "clean": 616,
+        "dirty": 516
+      },
+      "density": {
+        "minimum": 0.0333,
+        "mean": 0.32845430653710245,
+        "maximum": 0.6091
+      }
+    },
+    "tt_um_aes_sbox": {
+      "family": "tt_um_aes_sbox",
+      "circuit_type": "digital_crypto",
+      "samples": 1112,
+      "classes": {
+        "clean": 606,
+        "dirty": 506
+      },
+      "density": {
+        "minimum": 0.030225,
+        "mean": 0.35947178507194244,
+        "maximum": 0.60655
+      }
+    },
+    "tt_um_analog_atenfyr1": {
+      "family": "tt_um_analog_atenfyr1",
+      "circuit_type": "analog_ota",
+      "samples": 1028,
+      "classes": {
+        "clean": 564,
+        "dirty": 464
+      },
+      "density": {
+        "minimum": 0.03,
+        "mean": 0.25690014591439686,
+        "maximum": 0.748175
+      }
+    },
+    "tt_um_c4m_spsram_direct": {
+      "family": "tt_um_c4m_spsram_direct",
+      "circuit_type": "full_custom_sram",
+      "samples": 1022,
+      "classes": {
+        "clean": 561,
+        "dirty": 461
+      },
+      "density": {
+        "minimum": 0.03185,
+        "mean": 0.3252005381604696,
+        "maximum": 0.825
+      }
+    },
+    "tt_um_cmos_inverter": {
+      "family": "tt_um_cmos_inverter",
+      "circuit_type": "digital_vga",
+      "samples": 1088,
+      "classes": {
+        "clean": 594,
+        "dirty": 494
+      },
+      "density": {
+        "minimum": 0.04,
+        "mean": 0.3723808363970588,
+        "maximum": 0.614875
+      }
+    },
+    "tt_um_essen": {
+      "family": "tt_um_essen",
+      "circuit_type": "analog_oscillator",
+      "samples": 644,
+      "classes": {
+        "clean": 282,
+        "dirty": 362
+      },
+      "density": {
+        "minimum": 0.030625,
+        "mean": 0.43986921583850935,
+        "maximum": 0.8493
+      }
+    },
+    "tt_um_fabulous_sky_26a": {
+      "family": "tt_um_fabulous_sky_26a",
+      "circuit_type": "digital_fpga",
+      "samples": 1140,
+      "classes": {
+        "clean": 620,
+        "dirty": 520
+      },
+      "density": {
+        "minimum": 0.034125,
+        "mean": 0.34994427631578945,
+        "maximum": 0.5963
+      }
+    },
+    "tt_um_fft_adityaamehra": {
+      "family": "tt_um_fft_adityaamehra",
+      "circuit_type": "digital_dsp",
+      "samples": 1138,
+      "classes": {
+        "clean": 619,
+        "dirty": 519
+      },
+      "density": {
+        "minimum": 0.03,
+        "mean": 0.3206945079086116,
+        "maximum": 0.5944
+      }
+    },
+    "tt_um_irfantekin_analog": {
+      "family": "tt_um_irfantekin_analog",
+      "circuit_type": "analog_readout",
+      "samples": 930,
+      "classes": {
+        "clean": 515,
+        "dirty": 415
+      },
+      "density": {
+        "minimum": 0.030525,
+        "mean": 0.23336069892473119,
+        "maximum": 0.8281
+      }
+    },
+    "tt_um_jyblue1001_pll": {
+      "family": "tt_um_jyblue1001_pll",
+      "circuit_type": "analog_pll",
+      "samples": 922,
+      "classes": {
+        "clean": 511,
+        "dirty": 411
+      },
+      "density": {
+        "minimum": 0.0301,
+        "mean": 0.2751875,
+        "maximum": 0.845
+      }
+    },
+    "tt_um_yen": {
+      "family": "tt_um_yen",
+      "circuit_type": "analog_mixed_test",
+      "samples": 1028,
+      "classes": {
+        "clean": 564,
+        "dirty": 464
+      },
+      "density": {
+        "minimum": 0.0301,
+        "mean": 0.44207288424124513,
+        "maximum": 0.842675
+      }
+    }
+  },
+  "audit": {
+    "exact_unique": 11965,
+    "exact_duplicate_groups": 675,
+    "exact_duplicate_samples": 2383,
+    "manhattan_unique": 11751,
+    "manhattan_duplicate_groups": 658,
+    "manhattan_duplicate_samples": 2597,
+    "exact_label_conflicts": 0,
+    "manhattan_label_conflicts": 0,
+    "unresolved_provenance": [],
+    "selected_layouts_not_acquired": [],
+    "b1_gate_ready": true
+  },
+  "provenance": {
+    "tt_um_2048_vga_game": {
+      "present": true,
+      "actual_sha256": "316764528c4512a50539623d8a740e2681fad0fe7dffb5711f26c597cc71cd7a",
+      "expected_sha256": "316764528c4512a50539623d8a740e2681fad0fe7dffb5711f26c597cc71cd7a",
+      "verified": true,
+      "status": "verified_source"
+    },
+    "tt_um_8_bit_cpu": {
+      "present": true,
+      "actual_sha256": "a08c19f7087f11d69f7bcb46d5e79e27757cd45ffbeb10aed574ba3eef94112d",
+      "expected_sha256": "a08c19f7087f11d69f7bcb46d5e79e27757cd45ffbeb10aed574ba3eef94112d",
+      "verified": true,
+      "status": "verified"
+    },
+    "tt_um_Bingyao_FCOTA": {
+      "present": true,
+      "actual_sha256": "8a0bdd0a2f193fd71be03df5cc2b49d802530f06f71c9bec4435ae16010d8e78",
+      "expected_sha256": "8a0bdd0a2f193fd71be03df5cc2b49d802530f06f71c9bec4435ae16010d8e78",
+      "verified": true,
+      "status": "verified_source"
+    },
+    "tt_um_TSARKA_TinyQV": {
+      "present": true,
+      "actual_sha256": "5c6ff16de09a2ea82620ffb732b8e4aeb75085d3222438b0f8f86d57ce05ff75",
+      "expected_sha256": "5c6ff16de09a2ea82620ffb732b8e4aeb75085d3222438b0f8f86d57ce05ff75",
+      "verified": true,
+      "status": "verified_source"
+    },
+    "tt_um_aes_sbox": {
+      "present": true,
+      "actual_sha256": "95d42457d8e69a7280998d725cc4bec7b40c9b85ee01879d9daf755eccb973fd",
+      "expected_sha256": "95d42457d8e69a7280998d725cc4bec7b40c9b85ee01879d9daf755eccb973fd",
+      "verified": true,
+      "status": "verified_source"
+    },
+    "tt_um_analog_atenfyr1": {
+      "present": true,
+      "actual_sha256": "49630ae4b98884eac9e5aaea12d0ba50b785b09d3e859d52b337a45f4a051486",
+      "expected_sha256": "49630ae4b98884eac9e5aaea12d0ba50b785b09d3e859d52b337a45f4a051486",
+      "verified": true,
+      "status": "verified"
+    },
+    "tt_um_c4m_spsram_direct": {
+      "present": true,
+      "actual_sha256": "ae3bbb820b1ad5620b6e08b34838d4384f95ecb12a559bc5e3e53658207faf25",
+      "expected_sha256": "ae3bbb820b1ad5620b6e08b34838d4384f95ecb12a559bc5e3e53658207faf25",
+      "verified": true,
+      "status": "verified_source"
+    },
+    "tt_um_cmos_inverter": {
+      "present": true,
+      "actual_sha256": "f28c09cb115ffba3951e7904238cfa6227e0ac935d91da3a7705b6e0bc1a1154",
+      "expected_sha256": "f28c09cb115ffba3951e7904238cfa6227e0ac935d91da3a7705b6e0bc1a1154",
+      "verified": true,
+      "status": "verified"
+    },
+    "tt_um_essen": {
+      "present": true,
+      "actual_sha256": "757ddb49430e262842aa1de7652aebd84b4fbbd6889e3907b8132f45c02625c4",
+      "expected_sha256": "757ddb49430e262842aa1de7652aebd84b4fbbd6889e3907b8132f45c02625c4",
+      "verified": true,
+      "status": "verified_source"
+    },
+    "tt_um_fabulous_sky_26a": {
+      "present": true,
+      "actual_sha256": "caa28359dfe597ab2a01535bdeffc310a105987475946d27e3b009396a3bcca4",
+      "expected_sha256": "caa28359dfe597ab2a01535bdeffc310a105987475946d27e3b009396a3bcca4",
+      "verified": true,
+      "status": "verified_source"
+    },
+    "tt_um_fft_adityaamehra": {
+      "present": true,
+      "actual_sha256": "1a7d117879e7924e85fb111e9aa46d3c46d812e4447f97c7b28a81b2f87ca6e3",
+      "expected_sha256": "1a7d117879e7924e85fb111e9aa46d3c46d812e4447f97c7b28a81b2f87ca6e3",
+      "verified": true,
+      "status": "verified_source"
+    },
+    "tt_um_irfantekin_analog": {
+      "present": true,
+      "actual_sha256": "b0bfe2d463c5ce6aeb0b585d97ac5f68494b46c9238d997dea4630dcb9d1ea15",
+      "expected_sha256": "b0bfe2d463c5ce6aeb0b585d97ac5f68494b46c9238d997dea4630dcb9d1ea15",
+      "verified": true,
+      "status": "verified"
+    },
+    "tt_um_jyblue1001_pll": {
+      "present": true,
+      "actual_sha256": "a056a925725ca4614ed578c0e545d697e0e4e17ca5f01aca5a8bff1e259a498e",
+      "expected_sha256": "a056a925725ca4614ed578c0e545d697e0e4e17ca5f01aca5a8bff1e259a498e",
+      "verified": true,
+      "status": "verified_source"
+    },
+    "tt_um_yen": {
+      "present": true,
+      "actual_sha256": "019e1c2be6b7641b957a572103364bbe9f858aeeef7b81c537f272df695ca056",
+      "expected_sha256": "019e1c2be6b7641b957a572103364bbe9f858aeeef7b81c537f272df695ca056",
+      "verified": true,
+      "status": "verified"
+    },
+    "tt_um_yen_1err": {
+      "present": true,
+      "actual_sha256": "efad1426961d95a7de8e1ab62ced29847201b09ee7b04d6f8d3eb3ac723cb86e",
+      "expected_sha256": null,
+      "verified": false,
+      "status": "local_error_derived"
+    }
+  },
+  "protocols": {
+    "tile_random_reference": {
+      "status": "candidate",
+      "description": "Stratified tile-level split with each Manhattan-equivalent group kept entirely in one split. This is a B0-compatible reference, not a direct reproduction of the paper.",
+      "seed": 42,
+      "ratios": {
+        "train": 0.8,
+        "validation": 0.15,
+        "test": 0.05
+      },
+      "deduplication": "Manhattan-equivalent groups remain intact within one split",
+      "removed_duplicate_samples": 0,
+      "summary": {
+        "train": {
+          "samples": 11478,
+          "classes": {
+            "clean": 6227,
+            "dirty": 5251
+          },
+          "layouts": {
+            "tt_um_2048_vga_game": 928,
+            "tt_um_8_bit_cpu": 838,
+            "tt_um_Bingyao_FCOTA": 737,
+            "tt_um_TSARKA_TinyQV": 903,
+            "tt_um_aes_sbox": 894,
+            "tt_um_analog_atenfyr1": 848,
+            "tt_um_c4m_spsram_direct": 781,
+            "tt_um_cmos_inverter": 858,
+            "tt_um_essen": 525,
+            "tt_um_fabulous_sky_26a": 912,
+            "tt_um_fft_adityaamehra": 903,
+            "tt_um_irfantekin_analog": 773,
+            "tt_um_jyblue1001_pll": 732,
+            "tt_um_yen": 846
+          },
+          "families": [
+            "tt_um_2048_vga_game",
+            "tt_um_8_bit_cpu",
+            "tt_um_Bingyao_FCOTA",
+            "tt_um_TSARKA_TinyQV",
+            "tt_um_aes_sbox",
+            "tt_um_analog_atenfyr1",
+            "tt_um_c4m_spsram_direct",
+            "tt_um_cmos_inverter",
+            "tt_um_essen",
+            "tt_um_fabulous_sky_26a",
+            "tt_um_fft_adityaamehra",
+            "tt_um_irfantekin_analog",
+            "tt_um_jyblue1001_pll",
+            "tt_um_yen"
+          ]
+        },
+        "validation": {
+          "samples": 2153,
+          "classes": {
+            "clean": 1168,
+            "dirty": 985
+          },
+          "layouts": {
+            "tt_um_2048_vga_game": 184,
+            "tt_um_8_bit_cpu": 148,
+            "tt_um_Bingyao_FCOTA": 164,
+            "tt_um_TSARKA_TinyQV": 163,
+            "tt_um_aes_sbox": 163,
+            "tt_um_analog_atenfyr1": 136,
+            "tt_um_c4m_spsram_direct": 179,
+            "tt_um_cmos_inverter": 174,
+            "tt_um_essen": 87,
+            "tt_um_fabulous_sky_26a": 157,
+            "tt_um_fft_adityaamehra": 180,
+            "tt_um_irfantekin_analog": 116,
+            "tt_um_jyblue1001_pll": 157,
+            "tt_um_yen": 145
+          },
+          "families": [
+            "tt_um_2048_vga_game",
+            "tt_um_8_bit_cpu",
+            "tt_um_Bingyao_FCOTA",
+            "tt_um_TSARKA_TinyQV",
+            "tt_um_aes_sbox",
+            "tt_um_analog_atenfyr1",
+            "tt_um_c4m_spsram_direct",
+            "tt_um_cmos_inverter",
+            "tt_um_essen",
+            "tt_um_fabulous_sky_26a",
+            "tt_um_fft_adityaamehra",
+            "tt_um_irfantekin_analog",
+            "tt_um_jyblue1001_pll",
+            "tt_um_yen"
+          ]
+        },
+        "test": {
+          "samples": 717,
+          "classes": {
+            "clean": 389,
+            "dirty": 328
+          },
+          "layouts": {
+            "tt_um_2048_vga_game": 54,
+            "tt_um_8_bit_cpu": 46,
+            "tt_um_Bingyao_FCOTA": 65,
+            "tt_um_TSARKA_TinyQV": 66,
+            "tt_um_aes_sbox": 55,
+            "tt_um_analog_atenfyr1": 44,
+            "tt_um_c4m_spsram_direct": 62,
+            "tt_um_cmos_inverter": 56,
+            "tt_um_essen": 32,
+            "tt_um_fabulous_sky_26a": 71,
+            "tt_um_fft_adityaamehra": 55,
+            "tt_um_irfantekin_analog": 41,
+            "tt_um_jyblue1001_pll": 33,
+            "tt_um_yen": 37
+          },
+          "families": [
+            "tt_um_2048_vga_game",
+            "tt_um_8_bit_cpu",
+            "tt_um_Bingyao_FCOTA",
+            "tt_um_TSARKA_TinyQV",
+            "tt_um_aes_sbox",
+            "tt_um_analog_atenfyr1",
+            "tt_um_c4m_spsram_direct",
+            "tt_um_cmos_inverter",
+            "tt_um_essen",
+            "tt_um_fabulous_sky_26a",
+            "tt_um_fft_adityaamehra",
+            "tt_um_irfantekin_analog",
+            "tt_um_jyblue1001_pll",
+            "tt_um_yen"
+          ]
+        }
+      }
+    },
+    "unseen_layout_v1": {
+      "status": "candidate",
+      "description": "Layout-family-disjoint split with one representative per Manhattan-equivalent content group.",
+      "seed": 42,
+      "deduplication": "test > validation > train for cross-split canonical groups; one deterministic representative is retained",
+      "removed_duplicate_samples": 2597,
+      "missing_splits": [],
+      "summary": {
+        "train": {
+          "samples": 6442,
+          "classes": {
+            "clean": 2792,
+            "dirty": 3650
+          },
+          "layouts": {
+            "tt_um_8_bit_cpu": 750,
+            "tt_um_analog_atenfyr1": 751,
+            "tt_um_cmos_inverter": 1024,
+            "tt_um_essen": 489,
+            "tt_um_fabulous_sky_26a": 1033,
+            "tt_um_fft_adityaamehra": 996,
+            "tt_um_irfantekin_analog": 720,
+            "tt_um_jyblue1001_pll": 679
+          },
+          "families": [
+            "tt_um_8_bit_cpu",
+            "tt_um_analog_atenfyr1",
+            "tt_um_cmos_inverter",
+            "tt_um_essen",
+            "tt_um_fabulous_sky_26a",
+            "tt_um_fft_adityaamehra",
+            "tt_um_irfantekin_analog",
+            "tt_um_jyblue1001_pll"
+          ]
+        },
+        "validation": {
+          "samples": 2627,
+          "classes": {
+            "clean": 1142,
+            "dirty": 1485
+          },
+          "layouts": {
+            "tt_um_TSARKA_TinyQV": 993,
+            "tt_um_aes_sbox": 983,
+            "tt_um_yen": 651
+          },
+          "families": [
+            "tt_um_TSARKA_TinyQV",
+            "tt_um_aes_sbox",
+            "tt_um_yen"
+          ]
+        },
+        "test": {
+          "samples": 2682,
+          "classes": {
+            "clean": 1255,
+            "dirty": 1427
+          },
+          "layouts": {
+            "tt_um_2048_vga_game": 1136,
+            "tt_um_Bingyao_FCOTA": 733,
+            "tt_um_c4m_spsram_direct": 813
+          },
+          "families": [
+            "tt_um_2048_vga_game",
+            "tt_um_Bingyao_FCOTA",
+            "tt_um_c4m_spsram_direct"
+          ]
+        }
+      }
+    }
+  }
+}
