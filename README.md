@@ -55,12 +55,14 @@ ADVLSI2_Project_updated/
 ├── run_inference_pc/              # Simpler PC inference (PyTorch, no ONNX)
 ├── Colab_Code_backup/             # Google Colab notebook cells (train + infer)
 ├── notebooks/                     # Colab notebooks, including the U-Net experiment
+├── notebooks/B2_Dual_Baselines.ipynb # Resume-safe Colab launcher for B2
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
 ├── training/dataset_manifest.py   # B1 integrity audit and frozen split logic
 ├── data/layout_registry.json      # Pinned source, family, license, and generation metadata
 ├── data/evaluation_protocols.json # Frozen tile-random and unseen-layout protocols
 ├── scripts/acquire_b1_layouts.py  # Acquire/verify the selected open layouts
 ├── scripts/build_dataset_manifest.py # Produce versioned manifests and summaries
+├── scripts/run_b2_benchmarks.py   # Run/aggregate both B2 protocols over fixed seeds
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
@@ -256,7 +258,7 @@ python training/train_classifier.py \
   --dataset training_datasets/combined_training_dataset.zip \
   --manifest data/b1_current_audit/manifest.json \
   --protocol unseen_layout_v1 \
-  --epochs 20 \
+  --epochs 30 \
   --output /tmp/b2_unseen_layout.pth \
   --metrics /tmp/b2_unseen_layout.json
 ```
@@ -264,6 +266,29 @@ python training/train_classifier.py \
 Use `--protocol tile_random_reference` for the B0-compatible classification
 track. It is an internal reference with leakage-aware grouping, not a direct
 reproduction of the paper's incompletely documented evaluation protocol.
+
+### B2 dual-baseline benchmark
+
+B2 fixes the original `NCSU_DRCNN`, RMSprop with learning rate `0.001`, batch
+size 32, 30 epochs, train-only Manhattan augmentation, and seeds 42/43/44. Run
+all six experiments and aggregate their mean/sample-standard-deviation metrics
+with:
+
+```bash
+python scripts/run_b2_benchmarks.py
+```
+
+Pass `--cpu` when a CUDA device is unavailable. Matching completed runs are
+verified and reused, including their source, dataset, manifest, configuration,
+and checkpoint hashes. The runner writes individual JSON metrics, a portable
+aggregate `summary.json`, and a Markdown report under `results/b2_baselines/`.
+Checkpoints remain local because they are reproducible and excluded from Git.
+
+For the much faster GPU path, open
+[`notebooks/B2_Dual_Baselines.ipynb`](notebooks/B2_Dual_Baselines.ipynb) in
+Google Colab. Its output directory is stored in Google Drive so interrupted
+runs can resume safely. Download the resulting ZIP and add the JSON/Markdown
+reports to this branch before B2 is accepted.
 
 ---
 

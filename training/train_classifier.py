@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import random
+import subprocess
 import sys
 import tempfile
 import warnings
@@ -26,6 +28,33 @@ sys.path.insert(0, str(PROJECT_ROOT / "run_inference_pc_optimized"))
 
 from define_cnn_model import NCSU_DRCNN
 from training.dataset_manifest import parse_sample_path, sha256_file
+
+
+MODEL_SOURCE = PROJECT_ROOT / "run_inference_pc_optimized" / "define_cnn_model.py"
+
+
+def portable_path(path: Path | None) -> str | None:
+    """Render project files without embedding a machine-specific checkout path."""
+
+    if path is None:
+        return None
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(PROJECT_ROOT).as_posix()
+    except ValueError:
+        return str(resolved)
+
+
+def repository_commit() -> str | None:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=PROJECT_ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return None
 
 
 class ManhattanAugmentation:
@@ -148,7 +177,11 @@ def evaluate(model: torch.nn.Module, loader: DataLoader, device: torch.device) -
             all_labels.extend(labels.cpu().tolist())
             all_predictions.extend(logits.argmax(dim=1).cpu().tolist())
             count += labels.size(0)
-    return {"loss": total_loss / count, **classification_metrics(all_labels, all_predictions)}
+    return {
+        "samples": count,
+        "loss": total_loss / count,
+        **classification_metrics(all_labels, all_predictions),
+    }
 
 
 def collapse_warning(metrics: dict[str, object], split: str, epoch: int | None = None) -> str | None:
@@ -212,6 +245,12 @@ def train(args: argparse.Namespace) -> dict[str, object]:
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
+    torch.use_deterministic_algorithms(True, warn_only=True)
+    if hasattr(torch.backends, "cudnn"):
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
 
     with tempfile.TemporaryDirectory(prefix="advlsi-training-") as temp_dir:
         data_root = Path(temp_dir)
@@ -250,7 +289,12 @@ def train(args: argparse.Namespace) -> dict[str, object]:
             val_set = Subset(evaluation_dataset, val_indices)
             test_set = Subset(evaluation_dataset, test_indices)
             selected_sample_count = len(selected_indices)
-        train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
+        train_loader = DataLoader(
+            train_set,
+            batch_size=args.batch_size,
+            shuffle=True,
+            generator=torch.Generator().manual_seed(args.seed),
+        )
         val_loader = DataLoader(val_set, batch_size=args.batch_size)
         test_loader = DataLoader(test_set, batch_size=args.batch_size)
 
@@ -335,9 +379,9 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         torch.save(best_state, args.output)
 
     result = {
-        "dataset": str(args.dataset),
+        "dataset": portable_path(args.dataset),
         "dataset_archive_sha256": sha256_file(args.dataset),
-        "manifest": str(args.manifest) if args.manifest else None,
+        "manifest": portable_path(args.manifest),
         "manifest_id": manifest.get("manifest_id") if manifest else None,
         "protocol": args.protocol if args.manifest else "b0-tile-random",
         "samples": selected_sample_count,
@@ -345,6 +389,13 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         "epochs": args.epochs,
         "seed": args.seed,
         "device": str(device),
+        "model": "NCSU_DRCNN",
+        "model_parameters": sum(parameter.numel() for parameter in model.parameters()),
+        "model_source_sha256": sha256_file(MODEL_SOURCE),
+        "trainer_source_sha256": sha256_file(Path(__file__)),
+        "optimizer": "RMSprop",
+        "learning_rate": args.learning_rate,
+        "batch_size": args.batch_size,
         "augmentation": "none" if args.no_augmentation else "Manhattan rotations and reflections (training only)",
         "best_epoch": best_epoch,
         "best_validation_loss": best_validation_loss,
@@ -356,7 +407,14 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         "test_predicted_class_counts": test_metrics["predicted_class_counts"],
         "test_confusion_matrix": test_metrics["confusion_matrix"],
         "test_per_layout": layout_metrics,
-        "weights": str(args.output),
+        "weights": portable_path(args.output),
+        "weights_sha256": sha256_file(args.output),
+        "runtime": {
+            "python": platform.python_version(),
+            "pytorch": torch.__version__,
+            "platform": platform.platform(),
+        },
+        "repository_commit": repository_commit(),
         "warnings": run_warnings,
         "history": history,
     }
