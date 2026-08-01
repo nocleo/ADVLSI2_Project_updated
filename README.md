@@ -8,10 +8,15 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 4. Trains a CNN (Google Colab)
 5. Runs fast ONNX inference on a PC with Grad-CAM localization and GDS output
 
-> **Project status:** **B0**, the first reproducible classifier benchmark, is
-> complete. The five-epoch baseline learns both classes and establishes the
-> comparison point for the controlled improvements in the model roadmap. Do not
-> treat the generated CNN report as a replacement for sign-off DRC.
+The research goal is to improve on the paper's tile-level clean/dirty
+classifier in three measurable ways: preserve competitive classification,
+demonstrate generalization to unseen layout families, and progress from coarse
+tile localization to exact violation geometry and verified repair proposals.
+
+> **Project status:** **B0**, the first reproducible classifier sanity check, is
+> complete. **B1** now builds the dataset manifest, expands layout diversity,
+> audits duplicates/conflicts, and freezes leakage-free layout-family splits.
+> Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
 
@@ -25,6 +30,7 @@ and the controlled improvement phases planned after B0.
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Current Benchmark — B0](#current-benchmark--b0)
+- [Evaluation Strategy](#evaluation-strategy)
 - [Quick Start — Full Flows](#quick-start--full-flows)
 - [Part 1: Training Data Pipeline](#part-1-training-data-pipeline-generate_training_dataset_scripts)
 - [Part 2: Google Colab (Training & Basic Inference)](#part-2-google-colab-colab_code_backup)
@@ -120,7 +126,8 @@ export KLAYOUT_CMD=/usr/bin/klayout
 
 ## Current Benchmark — B0
 
-B0 is a functional-baseline gate, not an accuracy claim. It uses the original
+B0 is a functional sanity gate, not the paper-comparison benchmark or an
+accuracy-improvement claim. It uses the original
 `NCSU_DRCNN`, a deterministic seed, train-only Manhattan augmentation, and the
 lowest-validation-loss checkpoint. The run records accuracy, dirty-class
 precision/recall/F1, confusion matrices, and predicted-class counts.
@@ -147,6 +154,35 @@ accuracy 78.00% and dirty-class F1 0.761. On the held-out test split it achieved
 both classes (154 clean and 149 dirty). This is a functional baseline, not a
 final quality result; higher accuracy and layout-level generalization are the
 goals of the following phases.
+
+## Evaluation Strategy
+
+The paper, [*Design Rule Checking with a CNN Based Feature
+Extractor*](https://arxiv.org/abs/2012.11510), reports up to 92% accuracy on
+artificial data derived from 50 SRAM designs. The current B0 dataset, split,
+and five-epoch training run are not equivalent, so 79.21% must not be compared
+directly with that number. Starting in B1/B2, the project maintains two frozen
+evaluation tracks:
+
+| Track | Purpose | Required reporting |
+|---|---|---|
+| **Paper-aligned classification** | Reproduce the published clean/dirty task as closely as available data and protocol allow | Accuracy, dirty precision/recall/F1, dataset/protocol differences |
+| **Unseen-layout generalization** | Measure transfer to layout families never observed during training | Aggregate and per-layout metrics, grouped split definition, confidence intervals across seeds |
+
+Layout diversity is expanded in **B1**, before optimizer or architecture
+tuning. B1 inventories candidate layouts, groups related variants such as an
+original design and its injected-error derivative, and admits a layout only if
+its provenance, license, geometry, labels, and generation configuration can be
+recorded. The split is then frozen by layout family. **B5** performs a second,
+targeted collection pass only for failure modes demonstrated by error analysis;
+the held-out test layouts remain frozen.
+
+Classification is only the first output. The primary extension beyond the
+paper is a pixel-level violation mask, transformed back into exact GDS/layout
+coordinates. A later phase may propose an `m1.2` spacing repair, but a proposal
+is accepted only after KLayout DRC verification and a connectivity/LVS safety
+check. Grad-CAM and flagged tile coordinates remain diagnostic aids, not exact
+repair geometry.
 
 ---
 
