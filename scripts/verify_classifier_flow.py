@@ -60,7 +60,6 @@ def main() -> None:
                 "--epochs", "1",
                 "--max-samples", str(args.samples),
                 "--batch-size", "16",
-                "--no-augmentation",
                 "--cpu",
             ],
             check=True,
@@ -86,6 +85,20 @@ def main() -> None:
             raise AssertionError(f"Unexpected inference output: {logits.shape}")
 
         result = json.loads(metrics.read_text(encoding="utf-8"))
+        required_metrics = {
+            "best_epoch",
+            "best_validation_loss",
+            "test_precision",
+            "test_recall",
+            "test_f1",
+            "test_predicted_class_counts",
+            "test_confusion_matrix",
+        }
+        missing = required_metrics - result.keys()
+        if missing:
+            raise AssertionError(f"Training metrics are missing fields: {sorted(missing)}")
+        if "training only" not in result["augmentation"]:
+            raise AssertionError(f"Unexpected augmentation mode: {result['augmentation']}")
         result.update({"onnx_output_shape": list(logits.shape), "status": "passed"})
         print(json.dumps(result, indent=2))
 
