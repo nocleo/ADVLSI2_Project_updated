@@ -118,9 +118,12 @@ python training/train_classifier.py
 ```
 
 The CLI uses `training_datasets/combined_training_dataset.zip`, trains for 20
-epochs, writes `ncsu_drcnn_weights.pth`, and records the split and metrics in
-`training_metrics.json`. Use `--help` to change the dataset, seed, epochs, or
-output path.
+epochs, and writes the lowest-validation-loss checkpoint to
+`ncsu_drcnn_weights.pth`. It records accuracy, dirty-class precision/recall/F1,
+confusion matrices, predicted-class counts, and the selected epoch in
+`training_metrics.json`. Manhattan rotations/reflections are applied only to
+the training split; validation and test tiles remain deterministic. Use
+`--help` to change the dataset, seed, epochs, or output path.
 
 For Colab:
 
@@ -628,7 +631,10 @@ Edit the `CONFIGURATION` block at the top of each script before running.
 |---|---|
 | `DRCDataset(root_dir, transform)` | PyTorch Dataset loading `.npy` tiles from `clean/` and `dirty/` folders |
 
-Data augmentation: horizontal/vertical flip, 90° rotation, random affine translate (10%).
+The reproducible CLI uses exact 90° rotations and horizontal/vertical
+reflections on training samples only. The historical backup shown here also
+contains a random affine translation and should not be used for baseline
+training.
 
 #### `train_cnn_model.py`
 
