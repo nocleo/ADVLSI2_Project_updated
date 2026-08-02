@@ -4,8 +4,8 @@
 
 Improve on the paper's Metal-1 DRC classifier with a reproducible system that:
 
-1. preserves competitive clean/dirty classification under a paper-aligned
-   evaluation where feasible;
+1. preserves competitive clean/dirty classification under a reproducible,
+   leakage-aware reference protocol;
 2. demonstrates generalization to unseen layout families under a stricter,
    leakage-free evaluation;
 3. localizes violations as pixel-level masks and exact layout coordinates; and
@@ -17,7 +17,7 @@ Extractor*](https://arxiv.org/abs/2012.11510) reports accuracy of up to 92%.
 That is an external reference, not the B0 acceptance threshold. Its artificial
 dataset was derived from 50 SRAM designs, while B0 used the project's current
 Sky130 tiles and a different split. Claims against the paper require a
-documented paper-aligned protocol.
+documented protocol that reproduces the paper's evaluation conditions.
 
 The roadmap follows one rule: **change one experimental factor at a time and
 compare it with the last accepted benchmark on the same frozen evaluation
@@ -49,9 +49,10 @@ rate, new-violation rate, and connectivity/LVS preservation.
 
 After B1 freezes the data, every accepted classifier is evaluated on both:
 
-- **Paper-aligned classification:** reproduce the paper's clean/dirty task and
-  protocol as closely as the obtainable layouts and labels allow. Record every
-  remaining difference; do not claim a direct accuracy comparison otherwise.
+- **Leakage-aware tile-random reference:** preserve the paper's clean/dirty
+  classification task while keeping exact and Manhattan-equivalent content in
+  one split. It is the project's internal classification reference, not a
+  direct reproduction of the paper's incompletely documented protocol.
 - **Unseen-layout generalization:** train, validate, and test on disjoint layout
   families. Original, clean, error-injected, and other derived variants of one
   design belong to the same group.
@@ -103,8 +104,9 @@ or a meaningful generalization claim.
    content hash, source/license, and data-generation configuration.
 4. Detect exact duplicates and contradictory labels before splitting.
 5. Deduplicate before split or keep duplicate groups in exactly one split.
-6. Freeze two versioned protocols: paper-aligned classification and a fixed
-   group split by source layout family for unseen-layout generalization.
+6. Freeze two versioned protocols: a leakage-aware tile-random classification
+   reference and a fixed group split by source layout family for unseen-layout
+   generalization.
 7. Report class balance and per-layout metrics; add visual label-audit samples.
 
 **Acceptance gate:** the dataset has enough independent layout families for all
@@ -123,17 +125,36 @@ deterministic clean/dirty visual audit overlays the KLayout violation geometry.
 The admitted source set includes digital CPU, FPGA, RISC-V SoC, crypto, DSP,
 VGA, SRAM, and multiple analog layout families.
 
-### B2 — Dual classification baselines
+### B2 — Dual classification baselines (complete)
 
 **Purpose:** establish the credible starting numbers that B0 could not provide.
 
 **Work:** rerun the unchanged `NCSU_DRCNN` separately on the frozen
-paper-aligned and unseen-layout protocols. Use a sufficient epoch budget, best
-validation checkpointing, multiple fixed seeds, and per-layout reporting.
+leakage-aware tile-random and unseen-layout protocols. Use a sufficient epoch
+budget, best-validation-loss checkpointing, multiple fixed seeds, and
+per-layout reporting.
 
 **Acceptance gate:** both baselines are reproducible, neither collapses to one
 class, protocol differences from the paper are documented, and metrics plus
 checkpoints are stored with dataset/split identifiers.
+
+**Accepted result:** all six CUDA runs completed for seeds 42, 43, and 44 using
+30 epochs, RMSprop at `0.001`, batch size 32, and train-only Manhattan
+augmentation. The tile-random reference reached **92.47% +/- 0.61% accuracy**
+and **91.89% +/- 0.75% dirty F1**. The layout-family-disjoint protocol reached
+**90.38% +/- 0.84% accuracy** and **90.94% +/- 0.72% dirty F1**. No selected
+checkpoint collapsed to one class, and the aggregate report records manifest
+`9deef1271a14...`, configuration `d7fa939a1212...`, source hashes, runtime,
+checkpoint hashes, pooled confusion matrices, and per-layout support.
+
+The generalization gap is 2.09 accuracy points and 0.95 dirty-F1 points. The
+three unseen test families reached 92.91% (`tt_um_Bingyao_FCOTA`), 89.76%
+(`tt_um_2048_vga_game`), and 88.97% (`tt_um_c4m_spsram_direct`) mean accuracy.
+The 92.47% internal reference is numerically close to the paper's “up to 92%”
+result, but the datasets and protocols differ, so B2 does not claim to
+outperform the paper. The accepted artifacts are stored under
+`results/b2_baselines/`; checkpoints remain reproducible local artifacts whose
+SHA-256 digests are recorded in the summary.
 
 ### B3 — Training and optimization improvements
 
@@ -239,13 +260,14 @@ commands, and package weights plus metrics with provenance.
 predictions agree within tolerance; regression tests pass; limitations clearly
 state that the CNN assists analysis and does not replace sign-off DRC.
 
-## Immediate sequence after B1
+## Immediate sequence after B2
 
-1. Run B2 with the unchanged model on the leakage-aware tile-random reference
-   and the layout-family-disjoint protocol.
-2. Repeat the B2 runs across fixed seeds, report per-layout results, and freeze
-   the accepted classifier baselines without tuning on the test set.
-3. Start B3 optimization experiments one controlled change per PR.
+1. Freeze the accepted B2 configuration and metrics as the comparison point for
+   both evaluation protocols.
+2. Start B3 optimizer and learning-rate experiments, changing one factor per
+   run and selecting configurations only from validation dirty F1.
+3. Require every B3 candidate to preserve dirty recall and avoid degrading the
+   unseen-layout baseline across the same fixed seeds.
 4. Collect additional layouts again only in B5 when error analysis identifies a
    missing geometry or circuit regime; never adapt the frozen test set.
 

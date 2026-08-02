@@ -13,11 +13,11 @@ classifier in three measurable ways: preserve competitive classification,
 demonstrate generalization to unseen layout families, and progress from coarse
 tile localization to exact violation geometry and verified repair proposals.
 
-> **Project status:** **B0** and **B1** are complete. B1 expanded the evaluated
-> source set from five to fourteen independent layout families, rebuilt the data
-> with deterministic injection seeds, audited exact and Manhattan-equivalent
-> duplicates/conflicts, and froze leakage-free layout-family splits. **B2** is
-> the next phase: rerun the unchanged classifier on both frozen protocols.
+> **Project status:** **B0**, **B1**, and **B2** are complete. B2 established
+> reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
+> +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
+> +/- 0.84%** on layout-family-disjoint test data. **B3** is next: improve the
+> training configuration one controlled variable at a time.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -55,13 +55,16 @@ ADVLSI2_Project_updated/
 ├── run_inference_pc/              # Simpler PC inference (PyTorch, no ONNX)
 ├── Colab_Code_backup/             # Google Colab notebook cells (train + infer)
 ├── notebooks/                     # Colab notebooks, including the U-Net experiment
+├── notebooks/B2_Dual_Baselines.ipynb # Resume-safe Colab launcher for B2
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
 ├── training/dataset_manifest.py   # B1 integrity audit and frozen split logic
 ├── data/layout_registry.json      # Pinned source, family, license, and generation metadata
 ├── data/evaluation_protocols.json # Frozen tile-random and unseen-layout protocols
 ├── scripts/acquire_b1_layouts.py  # Acquire/verify the selected open layouts
 ├── scripts/build_dataset_manifest.py # Produce versioned manifests and summaries
+├── scripts/run_b2_benchmarks.py   # Run/aggregate both B2 protocols over fixed seeds
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
+├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -174,7 +177,7 @@ evaluation tracks:
 
 | Track | Purpose | Required reporting |
 |---|---|---|
-| **Paper-aligned classification** | Reproduce the published clean/dirty task as closely as available data and protocol allow | Accuracy, dirty precision/recall/F1, dataset/protocol differences |
+| **Leakage-aware tile-random reference** | Preserve the published clean/dirty task while keeping equivalent content inside one split | Accuracy, dirty precision/recall/F1, dataset/protocol differences |
 | **Unseen-layout generalization** | Measure transfer to layout families never observed during training | Aggregate and per-layout metrics, grouped split definition, confidence intervals across seeds |
 
 Layout diversity is expanded in **B1**, before optimizer or architecture
@@ -256,7 +259,7 @@ python training/train_classifier.py \
   --dataset training_datasets/combined_training_dataset.zip \
   --manifest data/b1_current_audit/manifest.json \
   --protocol unseen_layout_v1 \
-  --epochs 20 \
+  --epochs 30 \
   --output /tmp/b2_unseen_layout.pth \
   --metrics /tmp/b2_unseen_layout.json
 ```
@@ -264,6 +267,46 @@ python training/train_classifier.py \
 Use `--protocol tile_random_reference` for the B0-compatible classification
 track. It is an internal reference with leakage-aware grouping, not a direct
 reproduction of the paper's incompletely documented evaluation protocol.
+
+### B2 dual-baseline benchmark (complete)
+
+B2 fixes the original `NCSU_DRCNN`, RMSprop with learning rate `0.001`, batch
+size 32, 30 epochs, train-only Manhattan augmentation, and seeds 42/43/44. Run
+all six experiments and aggregate their mean/sample-standard-deviation metrics
+with:
+
+```bash
+python scripts/run_b2_benchmarks.py
+```
+
+Pass `--cpu` when CUDA is unavailable. Matching completed runs are verified and
+reused only when their source, dataset, manifest, configuration, and checkpoint
+hashes match. The accepted reports are versioned under
+[`results/b2_baselines/`](results/b2_baselines/); reproducible checkpoints stay
+outside Git.
+
+| Protocol | Accuracy | Dirty precision | Dirty recall | Dirty F1 |
+|---|---:|---:|---:|---:|
+| `tile_random_reference` | **92.47% +/- 0.61%** | 90.46% +/- 0.71% | 93.39% +/- 1.98% | **91.89% +/- 0.75%** |
+| `unseen_layout_v1` | **90.38% +/- 0.84%** | 91.22% +/- 2.26% | 90.73% +/- 1.95% | **90.94% +/- 0.72%** |
+
+All six 30-epoch CUDA runs passed the acceptance gate without final checkpoint
+collapse. The unseen-layout accuracy is 2.09 percentage points below the
+tile-random reference, while dirty F1 differs by 0.95 points. On the three
+held-out families, mean accuracy ranged from 88.97% (`tt_um_c4m_spsram_direct`)
+to 92.91% (`tt_um_Bingyao_FCOTA`); the VGA family reached 89.76%.
+
+The 92.47% internal reference is close to the paper's reported “up to 92%,” but
+it is **not** a direct superiority claim because the datasets and evaluation
+protocols differ. The academically stronger B2 result is the 90.38% mean on
+three layout families never seen during training. B0's 79.21% remains a
+five-epoch functionality check and should not be presented as a like-for-like
+predecessor to B2.
+
+For the GPU path, open
+[`notebooks/B2_Dual_Baselines.ipynb`](notebooks/B2_Dual_Baselines.ipynb) in
+Google Colab. Its Drive output is resume-safe; copy the generated JSON/Markdown
+reports into `results/b2_baselines/` when reproducing the phase.
 
 ---
 
