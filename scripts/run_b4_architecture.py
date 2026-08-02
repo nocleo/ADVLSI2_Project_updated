@@ -113,13 +113,46 @@ def build_benchmark_command(args: argparse.Namespace) -> list[str]:
     ]
 
 
+def selected_validation_metrics(run: dict[str, Any]) -> dict[str, Any]:
+    """Return selected validation metrics from either trainer result schema.
+
+    B2 artifacts predate the top-level ``best_validation_metrics`` field and
+    store the selected metrics only in the history record for ``best_epoch``.
+    B4 artifacts contain the newer convenience field.  Supporting both keeps
+    the checked-in B2 baseline authoritative and resume-safe.
+    """
+    direct = run.get("best_validation_metrics")
+    if isinstance(direct, dict):
+        return direct
+
+    best_epoch = int(run["best_epoch"])
+    matches = [
+        record
+        for record in run.get("history", [])
+        if int(record.get("epoch", -1)) == best_epoch
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"Run does not contain exactly one selected validation epoch {best_epoch}"
+        )
+    record = matches[0]
+    return {
+        "loss": record["validation_loss"],
+        "accuracy": record["validation_accuracy"],
+        "precision": record["validation_precision"],
+        "recall": record["validation_recall"],
+        "f1": record["validation_f1"],
+        "predicted_class_counts": record["validation_predicted_class_counts"],
+        "confusion_matrix": record["validation_confusion_matrix"],
+    }
+
+
 def summarize_validation(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    selected = [selected_validation_metrics(run) for run in runs]
     return {
         "seeds": [int(run["seed"]) for run in runs],
         "metrics": {
-            name: metric_stats(
-                [float(run["best_validation_metrics"][name]) for run in runs]
-            )
+            name: metric_stats([float(metrics[name]) for metrics in selected])
             for name in VALIDATION_METRICS
         },
         "best_epochs": [int(run["best_epoch"]) for run in runs],
@@ -127,11 +160,11 @@ def summarize_validation(runs: list[dict[str, Any]]) -> dict[str, Any]:
             {
                 "seed": int(run["seed"]),
                 **{
-                    name: float(run["best_validation_metrics"][name])
+                    name: float(metrics[name])
                     for name in VALIDATION_METRICS
                 },
             }
-            for run in runs
+            for run, metrics in zip(runs, selected)
         ],
     }
 
