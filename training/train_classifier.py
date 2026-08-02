@@ -26,11 +26,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "run_inference_pc_optimized"))
 
-from define_cnn_model import NCSU_DRCNN
+from training.classifier_models import (
+    BASELINE_MODEL,
+    MODEL_NAMES,
+    build_classifier,
+    model_source_path,
+)
 from training.dataset_manifest import parse_sample_path, sha256_file
 
 
-MODEL_SOURCE = PROJECT_ROOT / "run_inference_pc_optimized" / "define_cnn_model.py"
+MODEL_SOURCE = model_source_path(BASELINE_MODEL)
 OPTIMIZER_LABELS = {"rmsprop": "RMSprop", "adam": "Adam"}
 
 
@@ -324,7 +329,7 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         test_loader = DataLoader(test_set, batch_size=args.batch_size)
 
         device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
-        model = NCSU_DRCNN().to(device)
+        model = build_classifier(args.model).to(device)
         optimizer = build_optimizer(
             model,
             args.optimizer,
@@ -452,9 +457,9 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         "epochs": args.epochs,
         "seed": args.seed,
         "device": str(device),
-        "model": "NCSU_DRCNN",
+        "model": args.model,
         "model_parameters": sum(parameter.numel() for parameter in model.parameters()),
-        "model_source_sha256": sha256_file(MODEL_SOURCE),
+        "model_source_sha256": sha256_file(model_source_path(args.model)),
         "trainer_source_sha256": sha256_file(Path(__file__)),
         "optimizer": OPTIMIZER_LABELS[args.optimizer],
         "learning_rate": args.learning_rate,
@@ -529,6 +534,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=0.001)
+    parser.add_argument(
+        "--model",
+        choices=MODEL_NAMES,
+        default=BASELINE_MODEL,
+        help="Classifier architecture (default preserves the B2 baseline).",
+    )
     parser.add_argument(
         "--optimizer",
         choices=("rmsprop", "adam"),

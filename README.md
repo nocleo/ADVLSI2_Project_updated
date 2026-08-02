@@ -19,7 +19,9 @@ tile localization to exact violation geometry and verified repair proposals.
 > +/- 0.84%** on layout-family-disjoint test data. B3 found no accepted
 > replacement: calibrated thresholds raised unseen-layout dirty recall to
 > **94.42%**, but accuracy fell to **89.71%**, beyond the predeclared tolerance.
-> B2 therefore remains the frozen classifier baseline and **B4 is next**.
+> B2 therefore remains the frozen classifier baseline. **B4 is active** with a
+> pre-registered compact batch-normalized/global-pooling architecture; frozen
+> tests stay locked until its unseen-layout validation gate passes.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -59,7 +61,9 @@ ADVLSI2_Project_updated/
 ├── notebooks/                     # Colab notebooks, including the U-Net experiment
 ├── notebooks/B2_Dual_Baselines.ipynb # Resume-safe Colab launcher for B2
 ├── notebooks/B3_Training_Optimization.ipynb # Resume-safe B3 Colab launcher
+├── notebooks/B4_Compact_Architecture.ipynb # Resume-safe B4 Colab launcher
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
+├── training/classifier_models.py  # Frozen baseline and B4 architecture registry
 ├── training/calibrate_classifier_threshold.py # Validation-only B3 threshold selection
 ├── training/evaluate_classifier.py # Test-only evaluation after B3 selection
 ├── training/dataset_manifest.py   # B1 integrity audit and frozen split logic
@@ -70,6 +74,8 @@ ADVLSI2_Project_updated/
 ├── scripts/run_b2_benchmarks.py   # Run/aggregate both B2 protocols over fixed seeds
 ├── scripts/run_b3_optimization.py # Validation-only B3 search and test confirmation
 ├── scripts/run_b3_extension.py    # Scheduler, early stopping, threshold calibration
+├── scripts/run_b4_architecture.py # Validation-gated compact architecture experiment
+├── scripts/benchmark_classifier_architectures.py # Paired CPU/ONNX cost benchmark
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
 ├── results/b3_optimization/       # B3 aggregate, calibration, and frozen-test evidence
@@ -374,6 +380,37 @@ For a GPU run, open
 in Colab. Persistent artifacts are written under
 `My Drive/ADVLSI2_B3/b3_optimization/`, while accepted B2 checkpoints are reused
 from `My Drive/ADVLSI2_B2/b2_baselines/checkpoints/`.
+
+### B4 compact architecture experiment (active)
+
+B4 changes only the classifier architecture. `CompactBNPool` uses four
+convolution/batch-normalization/ReLU/pooling blocks followed by concatenated
+global average and maximum pooling. The average branch represents global metal
+density; the maximum branch preserves a response to sparse local spacing
+defects without the baseline's large position-specific dense layer.
+
+The dataset manifest, unseen-layout and tile-random protocols, seeds 42/43/44,
+30-epoch budget, RMSprop at `0.001`, batch size 32, train-only Manhattan
+augmentation, best-validation-loss selection, and decision threshold `0.5`
+remain frozen from B2. Candidate search writes no test metrics. Frozen tests
+unlock only if mean validation dirty F1 improves, at least two paired seeds
+improve, validation accuracy/recall remain within 0.5 points of B2, and no seed
+collapses.
+
+Final acceptance additionally requires mean unseen-layout dirty F1 and recall
+to improve, paired improvement in at least two seeds for both metrics, accuracy
+within 0.5 points of B2, tile-random accuracy/recall/F1 within 0.5 points,
+fewer parameters and a smaller state dict, and paired PyTorch/ONNX CPU median
+latency no more than 1.5× the baseline. Run locally with:
+
+```bash
+python scripts/run_b4_architecture.py
+```
+
+For the official GPU run, open
+[`notebooks/B4_Compact_Architecture.ipynb`](notebooks/B4_Compact_Architecture.ipynb)
+in Colab. Resume-safe artifacts are written under
+`My Drive/ADVLSI2_B4/b4_architecture/`.
 
 ---
 

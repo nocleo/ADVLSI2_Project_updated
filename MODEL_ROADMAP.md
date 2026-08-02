@@ -211,7 +211,7 @@ precision/recall trade-off but accepts no new training configuration or
 threshold. B2 remains frozen for B4. Official evidence is stored under
 `results/b3_optimization/`.
 
-### B4 — Model architecture experiments
+### B4 — Model architecture experiments (active)
 
 **Hypothesis:** a compact modern CNN can outperform the original paper-style
 network while retaining inexpensive inference.
@@ -225,6 +225,23 @@ metrics.
 **Acceptance gate:** statistically consistent F1/recall improvement on held-out
 layouts with an acceptable inference-cost increase. Reject complexity that only
 improves the training layouts.
+
+**Pre-registered first experiment:** compare the accepted B2 `NCSU_DRCNN` with
+one `CompactBNPool` candidate containing four convolution/batch-normalization
+blocks and concatenated global average/max pooling. Keep the B1 manifest, both
+protocols, seeds 42/43/44, 30 epochs, RMSprop at `0.001`, batch size 32,
+train-only Manhattan augmentation, best-validation-loss checkpointing, and
+threshold `0.5` fixed. Select using only `unseen_layout_v1` validation data:
+mean dirty F1 must improve in at least two paired seeds, validation accuracy and
+recall must remain within 0.5 points of B2, and no seed may collapse.
+
+Only a validation-selected candidate may be evaluated on frozen tests. Final
+acceptance requires higher mean unseen-layout dirty F1 and recall, improvement
+in at least two paired seeds for each, accuracy within 0.5 points of B2, fewer
+parameters, a smaller state dict, tile-random accuracy/recall/F1 within 0.5
+points of B2, and paired batch-one PyTorch and ONNX CPU median latency no more
+than 1.5 times the baseline. If rejected, retain B2 and record the result before
+considering a capacity or residual candidate.
 
 ### B5 — Error analysis and targeted layout/data improvement
 
@@ -300,11 +317,11 @@ commands, and package weights plus metrics with provenance.
 predictions agree within tolerance; regression tests pass; limitations clearly
 state that the CNN assists analysis and does not replace sign-off DRC.
 
-## Immediate sequence after B3
+## Immediate sequence for B4
 
 1. Keep the accepted B2 recipe and default threshold as the B4 comparison point
    because B3 did not pass frozen unseen-layout confirmation.
-2. Start B4 with one compact architecture candidate while keeping the B1 data,
+2. Run the pre-registered compact architecture candidate while keeping the B1 data,
    frozen protocols, seeds, epoch budget, and B2 training recipe fixed.
 3. Measure quality together with parameter count, checkpoint size, and CPU/ONNX
    latency; reject complexity that improves only training layouts.

@@ -23,7 +23,6 @@ sys.path.insert(0, str(PROJECT_ROOT / "run_inference_pc_optimized"))
 
 from training.train_classifier import (
     DRCDataset,
-    MODEL_SOURCE,
     classification_metrics,
     load_protocol,
     parse_sample_path,
@@ -31,7 +30,12 @@ from training.train_classifier import (
     repository_commit,
     sha256_file,
 )
-from run_inference_pc_optimized.define_cnn_model import NCSU_DRCNN
+from training.classifier_models import (
+    BASELINE_MODEL,
+    MODEL_NAMES,
+    build_classifier,
+    model_source_path,
+)
 
 
 def evaluate_at_threshold(
@@ -90,7 +94,7 @@ def evaluate_checkpoint(args: argparse.Namespace) -> dict[str, object]:
         "cuda" if torch.cuda.is_available() and not args.cpu else "cpu"
     )
     state = torch.load(args.checkpoint, map_location=device, weights_only=True)
-    model = NCSU_DRCNN().to(device)
+    model = build_classifier(args.model).to(device)
     model.load_state_dict(state)
 
     with tempfile.TemporaryDirectory(prefix="advlsi-evaluation-") as temp_dir:
@@ -127,8 +131,8 @@ def evaluate_checkpoint(args: argparse.Namespace) -> dict[str, object]:
         "samples": metrics["samples"],
         "seed": args.seed,
         "device": str(device),
-        "model": "NCSU_DRCNN",
-        "model_source_sha256": sha256_file(MODEL_SOURCE),
+        "model": args.model,
+        "model_source_sha256": sha256_file(model_source_path(args.model)),
         "evaluation_source_sha256": sha256_file(Path(__file__)),
         "checkpoint": portable_path(args.checkpoint),
         "checkpoint_sha256": sha256_file(args.checkpoint),
@@ -168,6 +172,7 @@ def parse_args() -> argparse.Namespace:
         default=PROJECT_ROOT / "data" / "b1_current_audit" / "manifest.json",
     )
     parser.add_argument("--protocol", required=True)
+    parser.add_argument("--model", choices=MODEL_NAMES, default=BASELINE_MODEL)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--metrics", type=Path, required=True)
     parser.add_argument("--seed", type=int, required=True)
