@@ -401,11 +401,35 @@ Final acceptance additionally requires mean unseen-layout dirty F1 and recall
 to improve, paired improvement in at least two seeds for both metrics, accuracy
 within 0.5 points of B2, tile-random accuracy/recall/F1 within 0.5 points,
 fewer parameters and a smaller state dict, and paired PyTorch/ONNX CPU median
-latency no more than 1.5× the baseline. Run locally with:
+latency no more than 1.5× the baseline. Run locally on CUDA or CPU with:
 
 ```bash
 python scripts/run_b4_architecture.py
 ```
+
+### B4 on an Apple-silicon Mac
+
+An M4 Mac with 24 GB unified memory can run the official B4 protocol through
+PyTorch's Metal (`mps`) backend. From Terminal:
+
+```bash
+git clone --branch agent/b4-compact-architecture \
+  https://github.com/nocleo/ADVLSI2_Project_updated.git
+cd ADVLSI2_Project_updated
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-b4.txt
+python scripts/run_b4_macos.py
+```
+
+The launcher verifies that MPS is active and writes resume-safe artifacts to
+`results/b4_architecture_mps/`. Each epoch reports its elapsed time and an
+estimated remaining duration. If the process stops, rerun the final command;
+completed, hash-verified runs are reused. Keep the Mac awake and connected to
+power. The hardware/backend is recorded in every result JSON; a narrowly
+passing MPS result should later be confirmed on CUDA because backend-level
+floating-point differences are possible.
 
 For the official GPU run, open
 [`notebooks/B4_Compact_Architecture.ipynb`](notebooks/B4_Compact_Architecture.ipynb)

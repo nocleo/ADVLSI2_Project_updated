@@ -36,6 +36,7 @@ from training.classifier_models import (
     build_classifier,
     model_source_path,
 )
+from training.runtime_device import DEVICE_CHOICES, select_device
 
 
 def evaluate_at_threshold(
@@ -90,9 +91,7 @@ def per_layout_metrics_at_threshold(
 
 def evaluate_checkpoint(args: argparse.Namespace) -> dict[str, object]:
     manifest, splits = load_protocol(args.manifest, args.dataset, args.protocol)
-    device = torch.device(
-        "cuda" if torch.cuda.is_available() and not args.cpu else "cpu"
-    )
+    device = select_device(args.device, args.cpu)
     state = torch.load(args.checkpoint, map_location=device, weights_only=True)
     model = build_classifier(args.model).to(device)
     model.load_state_dict(state)
@@ -179,6 +178,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--cpu", action="store_true")
+    parser.add_argument(
+        "--device",
+        choices=DEVICE_CHOICES,
+        default="auto",
+        help="Execution backend; auto selects CUDA, then Apple MPS, then CPU.",
+    )
     args = parser.parse_args()
     if args.batch_size < 1:
         parser.error("batch size must be positive")

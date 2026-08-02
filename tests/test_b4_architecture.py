@@ -67,6 +67,32 @@ def test_summary(values: list[tuple[int, float, float, float]]) -> dict[str, obj
 
 
 class B4ArchitectureTest(unittest.TestCase):
+    def test_device_selection_prefers_mps_after_cuda(self) -> None:
+        try:
+            from unittest.mock import patch
+
+            import torch
+            from training.runtime_device import select_device
+        except ModuleNotFoundError:
+            self.skipTest("PyTorch is not installed in the lightweight test runtime")
+        with (
+            patch.object(torch.cuda, "is_available", return_value=False),
+            patch.object(torch.backends.mps, "is_available", return_value=True),
+        ):
+            self.assertEqual(str(select_device()), "mps")
+
+    def test_explicit_unavailable_mps_fails(self) -> None:
+        try:
+            from unittest.mock import patch
+
+            import torch
+            from training.runtime_device import select_device
+        except ModuleNotFoundError:
+            self.skipTest("PyTorch is not installed in the lightweight test runtime")
+        with patch.object(torch.backends.mps, "is_available", return_value=False):
+            with self.assertRaisesRegex(RuntimeError, "MPS was requested"):
+                select_device("mps")
+
     def test_compact_model_shape_and_parameter_reduction(self) -> None:
         try:
             import torch
