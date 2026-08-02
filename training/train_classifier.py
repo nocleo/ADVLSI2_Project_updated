@@ -331,6 +331,17 @@ def train(args: argparse.Namespace) -> dict[str, object]:
             args.learning_rate,
             args.weight_decay,
         )
+        scheduler = (
+            torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer,
+                mode="min",
+                factor=args.scheduler_factor,
+                patience=args.scheduler_patience,
+                min_lr=args.scheduler_min_lr,
+            )
+            if args.scheduler == "plateau"
+            else None
+        )
         loss_fn = torch.nn.CrossEntropyLoss()
 
         history: list[dict[str, object]] = []
@@ -338,6 +349,8 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         best_state: dict[str, torch.Tensor] | None = None
         best_epoch = 0
         best_validation_loss = float("inf")
+        epochs_without_improvement = 0
+        stopped_early = False
         for epoch in range(1, args.epochs + 1):
             model.train()
             running_loss = count = 0
@@ -356,6 +369,7 @@ def train(args: argparse.Namespace) -> dict[str, object]:
                 train_predictions.extend(logits.argmax(dim=1).detach().cpu().tolist())
             train_metrics = classification_metrics(train_labels, train_predictions)
             validation_metrics = evaluate(model, val_loader, device)
+            learning_rate = float(optimizer.param_groups[0]["lr"])
             epoch_result = {
                 "epoch": epoch,
                 "train_loss": running_loss / count,
@@ -371,6 +385,7 @@ def train(args: argparse.Namespace) -> dict[str, object]:
                 "validation_f1": validation_metrics["f1"],
                 "validation_predicted_class_counts": validation_metrics["predicted_class_counts"],
                 "validation_confusion_matrix": validation_metrics["confusion_matrix"],
+                "learning_rate": learning_rate,
             }
             history.append(epoch_result)
             print(json.dumps(epoch_result))
@@ -379,13 +394,24 @@ def train(args: argparse.Namespace) -> dict[str, object]:
             if warning:
                 run_warnings.append(warning)
             validation_loss = float(validation_metrics["loss"])
-            if validation_loss < best_validation_loss:
+            if validation_loss < best_validation_loss - args.early_stopping_min_delta:
                 best_validation_loss = validation_loss
                 best_epoch = epoch
+                epochs_without_improvement = 0
                 best_state = {
                     name: parameter.detach().cpu().clone()
                     for name, parameter in model.state_dict().items()
                 }
+            else:
+                epochs_without_improvement += 1
+            if scheduler is not None:
+                scheduler.step(validation_loss)
+            if (
+                args.early_stopping_patience > 0
+                and epochs_without_improvement >= args.early_stopping_patience
+            ):
+                stopped_early = True
+                break
 
         if best_state is None:
             raise RuntimeError("Training completed without producing a checkpoint")
@@ -433,6 +459,14 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         "optimizer": OPTIMIZER_LABELS[args.optimizer],
         "learning_rate": args.learning_rate,
         "weight_decay": args.weight_decay,
+        "scheduler": args.scheduler,
+        "scheduler_factor": args.scheduler_factor if scheduler is not None else None,
+        "scheduler_patience": args.scheduler_patience if scheduler is not None else None,
+        "scheduler_min_lr": args.scheduler_min_lr if scheduler is not None else None,
+        "early_stopping_patience": args.early_stopping_patience,
+        "early_stopping_min_delta": args.early_stopping_min_delta,
+        "epochs_completed": len(history),
+        "stopped_early": stopped_early,
         "batch_size": args.batch_size,
         "augmentation": "none" if args.no_augmentation else "Manhattan rotations and reflections (training only)",
         "best_epoch": best_epoch,
@@ -502,6 +536,22 @@ def parse_args() -> argparse.Namespace:
         help="Optimizer to use (default preserves the B2 RMSprop baseline).",
     )
     parser.add_argument("--weight-decay", type=float, default=0.0)
+    parser.add_argument(
+        "--scheduler",
+        choices=("none", "plateau"),
+        default="none",
+        help="Validation-loss learning-rate scheduler (default preserves B2).",
+    )
+    parser.add_argument("--scheduler-factor", type=float, default=0.5)
+    parser.add_argument("--scheduler-patience", type=int, default=3)
+    parser.add_argument("--scheduler-min-lr", type=float, default=1e-5)
+    parser.add_argument(
+        "--early-stopping-patience",
+        type=int,
+        default=0,
+        help="Stop after this many non-improving validation epochs; 0 disables it.",
+    )
+    parser.add_argument("--early-stopping-min-delta", type=float, default=0.0)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max-samples", type=int, default=0)
     parser.add_argument(
@@ -526,6 +576,12 @@ def parse_args() -> argparse.Namespace:
         parser.error("epochs, batch size, and learning rate must be positive")
     if args.weight_decay < 0:
         parser.error("weight decay cannot be negative")
+    if not 0 < args.scheduler_factor < 1:
+        parser.error("scheduler factor must be between zero and one")
+    if args.scheduler_patience < 0 or args.scheduler_min_lr <= 0:
+        parser.error("scheduler patience must be non-negative and min LR positive")
+    if args.early_stopping_patience < 0 or args.early_stopping_min_delta < 0:
+        parser.error("early-stopping values cannot be negative")
     return args
 
 

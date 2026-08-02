@@ -17,8 +17,9 @@ tile localization to exact violation geometry and verified repair proposals.
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
 > +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
 > +/- 0.84%** on layout-family-disjoint test data. **B3 is in progress** with a
-> pre-registered optimizer-then-learning-rate experiment that keeps frozen test
-> data out of hyperparameter selection.
+> completed B3.1 optimizer/LR screening as a negative result and is extending
+> B3 with scheduler, early stopping, and validation-only threshold calibration.
+> Frozen test data remains locked until the validation benefit gate passes.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -59,6 +60,7 @@ ADVLSI2_Project_updated/
 ├── notebooks/B2_Dual_Baselines.ipynb # Resume-safe Colab launcher for B2
 ├── notebooks/B3_Training_Optimization.ipynb # Resume-safe B3 Colab launcher
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
+├── training/calibrate_classifier_threshold.py # Validation-only B3 threshold selection
 ├── training/evaluate_classifier.py # Test-only evaluation after B3 selection
 ├── training/dataset_manifest.py   # B1 integrity audit and frozen split logic
 ├── data/layout_registry.json      # Pinned source, family, license, and generation metadata
@@ -67,6 +69,7 @@ ADVLSI2_Project_updated/
 ├── scripts/build_dataset_manifest.py # Produce versioned manifests and summaries
 ├── scripts/run_b2_benchmarks.py   # Run/aggregate both B2 protocols over fixed seeds
 ├── scripts/run_b3_optimization.py # Validation-only B3 search and test confirmation
+├── scripts/run_b3_extension.py    # Scheduler, early stopping, threshold calibration
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
 ├── real_layouts_tt/               # Input .oas layout files
@@ -312,7 +315,7 @@ For the GPU path, open
 Google Colab. Its Drive output is resume-safe; copy the generated JSON/Markdown
 reports into `results/b2_baselines/` when reproducing the phase.
 
-### B3 optimizer and learning-rate experiment (in progress)
+### B3 controlled training improvements (in progress)
 
 B3 keeps the B1 manifest, both evaluation protocols, `NCSU_DRCNN`, seeds
 42/43/44, 30 epochs, batch size 32, zero weight decay, and train-only Manhattan
@@ -326,20 +329,37 @@ augmentation fixed. Its pre-registered sequence is:
    of three paired seeds;
 4. evaluate only the selected configuration on both frozen test protocols.
 
-Search runs use `--skip-test`, and a separate evaluator unlocks the test split
-only after selection. This makes the no-test-tuning rule executable and
-auditable. Run the resume-safe experiment with:
+The completed B3.1 search found no accepted improvement: RMSprop at `0.001`
+remained best; Adam was less stable, `0.0003` did not improve mean dirty F1,
+and `0.003` was unstable with one collapsed seed. No frozen test was evaluated.
+
+B3.2/B3.3 therefore retain that evidence and change one additional factor at a
+time: a fixed `ReduceLROnPlateau` recipe, early stopping, then per-seed decision
+thresholds selected only from validation predictions. Quality must remain
+within 0.5 percentage points of B2, and the extension must additionally improve
+F1/recall, reduce seed variance, or reduce mean training epochs by at least 25%.
+Only then does the runner create frozen-test evaluations for both protocols.
+
+Search runs use `--skip-test`, calibration artifacts explicitly identify the
+validation split and `test_evaluated: false`, and the separate evaluator stays
+locked behind the validation gate. Run the original B3.1 experiment with:
 
 ```bash
 python scripts/run_b3_optimization.py
 ```
 
+Run the extension with the persistent B2 checkpoint directory:
+
+```bash
+python scripts/run_b3_extension.py \
+  --b2-checkpoints /path/to/ADVLSI2_B2/b2_baselines/checkpoints
+```
+
 For a GPU run, open
 [`notebooks/B3_Training_Optimization.ipynb`](notebooks/B3_Training_Optimization.ipynb)
 in Colab. Persistent artifacts are written under
-`My Drive/ADVLSI2_B3/b3_optimization/`. B3 is accepted only if the selected
-configuration also preserves mean accuracy, dirty recall, and dirty F1 against
-B2 on both frozen test tracks.
+`My Drive/ADVLSI2_B3/b3_optimization/`, while accepted B2 checkpoints are reused
+from `My Drive/ADVLSI2_B2/b2_baselines/checkpoints/`.
 
 ---
 

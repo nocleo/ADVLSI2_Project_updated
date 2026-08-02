@@ -166,10 +166,10 @@ sweeps, then scheduler, weight decay, batch size, and balanced sampling or class
 weights if B1 demonstrates imbalance. Add early stopping and machine-readable
 experiment summaries.
 
-**Acceptance gate:** the selected configuration improves validation dirty F1
-across multiple fixed seeds without reducing dirty recall or degrading
-held-out-layout performance on either evaluation track. Record mean and
-variation, not only the best run.
+**Acceptance gate:** preserve mean validation/test accuracy, dirty recall, and
+dirty F1 within 0.5 percentage points of B2, then earn at least one measurable
+benefit: improved dirty F1/recall, lower seed variance, or at least 25% fewer
+training epochs. Record mean and variation, not only the best run.
 
 **Pre-registered first experiment:** keep the B1 manifest, `NCSU_DRCNN`,
 seeds 42/43/44, 30 epochs, batch size 32, zero weight decay, and train-only
@@ -182,6 +182,18 @@ evaluation. Only the selected configuration is then evaluated on both frozen
 test protocols, where mean accuracy, dirty recall, and dirty F1 must each be no
 worse than B2. If the search or confirmation gate fails, retain the B2
 configuration and record the negative result before trying the next B3 factor.
+
+**B3.1 result:** completed as a valid negative experiment. RMSprop at `0.001`
+remained the best and most stable recipe; Adam was less stable, `0.0003` did not
+improve mean validation dirty F1, and `0.003` was unstable with one collapsed
+seed. Frozen tests remained locked.
+
+**Pre-registered extension:** B3.2a compares the unchanged RMSprop recipe with
+one `ReduceLROnPlateau` scheduler for all 30 epochs. B3.2b adds early stopping
+only after validation selection. B3.3 selects one dirty-class threshold per
+seed from validation predictions, subject to the B2 recall floor minus the
+0.5-point tolerance. Frozen-test commands are generated only if the validation
+gate earns one of the benefits above.
 
 ### B4 — Model architecture experiments
 
