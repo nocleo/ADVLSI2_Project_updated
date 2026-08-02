@@ -13,13 +13,13 @@ classifier in three measurable ways: preserve competitive classification,
 demonstrate generalization to unseen layout families, and progress from coarse
 tile localization to exact violation geometry and verified repair proposals.
 
-> **Project status:** **B0**, **B1**, and **B2** are complete. B2 established
+> **Project status:** **B0** through **B3** are complete. B2 established
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
 > +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
-> +/- 0.84%** on layout-family-disjoint test data. **B3 is in progress** with a
-> completed B3.1 optimizer/LR screening as a negative result and is extending
-> B3 with scheduler, early stopping, and validation-only threshold calibration.
-> Frozen test data remains locked until the validation benefit gate passes.
+> +/- 0.84%** on layout-family-disjoint test data. B3 found no accepted
+> replacement: calibrated thresholds raised unseen-layout dirty recall to
+> **94.42%**, but accuracy fell to **89.71%**, beyond the predeclared tolerance.
+> B2 therefore remains the frozen classifier baseline and **B4 is next**.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -72,6 +72,7 @@ ADVLSI2_Project_updated/
 ├── scripts/run_b3_extension.py    # Scheduler, early stopping, threshold calibration
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
+├── results/b3_optimization/       # B3 aggregate, calibration, and frozen-test evidence
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -315,7 +316,7 @@ For the GPU path, open
 Google Colab. Its Drive output is resume-safe; copy the generated JSON/Markdown
 reports into `results/b2_baselines/` when reproducing the phase.
 
-### B3 controlled training improvements (in progress)
+### B3 controlled training improvements (complete; no replacement accepted)
 
 B3 keeps the B1 manifest, both evaluation protocols, `NCSU_DRCNN`, seeds
 42/43/44, 30 epochs, batch size 32, zero weight decay, and train-only Manhattan
@@ -333,16 +334,29 @@ The completed B3.1 search found no accepted improvement: RMSprop at `0.001`
 remained best; Adam was less stable, `0.0003` did not improve mean dirty F1,
 and `0.003` was unstable with one collapsed seed. No frozen test was evaluated.
 
-B3.2/B3.3 therefore retain that evidence and change one additional factor at a
-time: a fixed `ReduceLROnPlateau` recipe, early stopping, then per-seed decision
-thresholds selected only from validation predictions. Quality must remain
-within 0.5 percentage points of B2, and the extension must additionally improve
-F1/recall, reduce seed variance, or reduce mean training epochs by at least 25%.
-Only then does the runner create frozen-test evaluations for both protocols.
+B3.2/B3.3 retained that evidence and changed one additional factor at a time: a
+fixed `ReduceLROnPlateau` recipe, early stopping, then per-seed decision
+thresholds selected only from validation predictions. The validation gate
+passed without inspecting frozen tests: the scheduler raised dirty F1 from
+91.36% to 91.78% and dirty recall from 88.60% to 89.81%. Early stopping
+preserved those metrics but reduced mean training from 30 to 26 epochs (13.3%),
+short of the predeclared 25% efficiency target. Validation-selected thresholds
+raised dirty F1 further to 92.08% and recall to 93.00%.
+
+Frozen-test confirmation rejected the candidate. On `unseen_layout_v1`, dirty
+recall increased by 3.69 points to 94.42% and dirty F1 remained close at 90.72%,
+but accuracy fell 0.67 points to 89.71%, exceeding the allowed 0.5-point
+regression. The tile-random reference was preserved at 92.52% accuracy, 93.70%
+recall, and 91.97% F1. Because the stricter unseen-layout gate failed, B3 does
+not replace B2; B4 must keep the accepted B2 recipe and default threshold so an
+architecture change remains the only experimental factor.
+
+The official aggregate, six calibration files, and six frozen-test files are
+versioned under [`results/b3_optimization/`](results/b3_optimization/).
 
 Search runs use `--skip-test`, calibration artifacts explicitly identify the
 validation split and `test_evaluated: false`, and the separate evaluator stays
-locked behind the validation gate. Run the original B3.1 experiment with:
+locked behind the validation gate. Reproduce the original B3.1 experiment with:
 
 ```bash
 python scripts/run_b3_optimization.py

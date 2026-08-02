@@ -156,7 +156,7 @@ outperform the paper. The accepted artifacts are stored under
 `results/b2_baselines/`; checkpoints remain reproducible local artifacts whose
 SHA-256 digests are recorded in the summary.
 
-### B3 — Training and optimization improvements (in progress)
+### B3 — Training and optimization improvements (complete; no replacement accepted)
 
 **Hypothesis:** optimizer, learning rate, regularization, and class sampling can
 improve learning stability once the evaluation protocol is trustworthy.
@@ -194,6 +194,22 @@ only after validation selection. B3.3 selects one dirty-class threshold per
 seed from validation predictions, subject to the B2 recall floor minus the
 0.5-point tolerance. Frozen-test commands are generated only if the validation
 gate earns one of the benefits above.
+
+**B3.2/B3.3 result:** the validation gate passed without test inspection. The
+plateau scheduler improved mean validation dirty F1 from 91.36% to 91.78% and
+dirty recall from 88.60% to 89.81%. Early stopping preserved those validation
+metrics while averaging 26 epochs, a 13.3% reduction that did not meet the 25%
+efficiency target. Per-seed validation thresholds (approximately 0.359–0.373)
+raised mean validation dirty F1 to 92.08% and recall to 93.00%.
+
+Frozen-test confirmation then failed the predeclared quality tolerance. On the
+unseen-layout protocol, calibrated dirty recall rose to **94.42% +/- 0.93%**,
+but accuracy fell from 90.38% to **89.71% +/- 0.89%**, a 0.67-point regression;
+dirty F1 was **90.72% +/- 0.67%**. The tile-random reference remained comparable
+at 92.52% accuracy and 91.97% dirty F1. B3 therefore records a useful
+precision/recall trade-off but accepts no new training configuration or
+threshold. B2 remains frozen for B4. Official evidence is stored under
+`results/b3_optimization/`.
 
 ### B4 — Model architecture experiments
 
@@ -284,15 +300,15 @@ commands, and package weights plus metrics with provenance.
 predictions agree within tolerance; regression tests pass; limitations clearly
 state that the CNN assists analysis and does not replace sign-off DRC.
 
-## Immediate sequence after B2
+## Immediate sequence after B3
 
-1. Freeze the accepted B2 configuration and metrics as the comparison point for
-   both evaluation protocols.
-2. Start B3 optimizer and learning-rate experiments, changing one factor per
-   run and selecting configurations only from validation dirty F1.
-3. Require every B3 candidate to preserve dirty recall and avoid degrading the
-   unseen-layout baseline across the same fixed seeds.
-4. Collect additional layouts again only in B5 when error analysis identifies a
+1. Keep the accepted B2 recipe and default threshold as the B4 comparison point
+   because B3 did not pass frozen unseen-layout confirmation.
+2. Start B4 with one compact architecture candidate while keeping the B1 data,
+   frozen protocols, seeds, epoch budget, and B2 training recipe fixed.
+3. Measure quality together with parameter count, checkpoint size, and CPU/ONNX
+   latency; reject complexity that improves only training layouts.
+4. Collect additional layouts only in B5 when error analysis identifies a
    missing geometry or circuit regime; never adapt the frozen test set.
 
 ## Experiment record template
