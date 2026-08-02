@@ -156,7 +156,7 @@ outperform the paper. The accepted artifacts are stored under
 `results/b2_baselines/`; checkpoints remain reproducible local artifacts whose
 SHA-256 digests are recorded in the summary.
 
-### B3 — Training and optimization improvements
+### B3 — Training and optimization improvements (in progress)
 
 **Hypothesis:** optimizer, learning rate, regularization, and class sampling can
 improve learning stability once the evaluation protocol is trustworthy.
@@ -170,6 +170,18 @@ experiment summaries.
 across multiple fixed seeds without reducing dirty recall or degrading
 held-out-layout performance on either evaluation track. Record mean and
 variation, not only the best run.
+
+**Pre-registered first experiment:** keep the B1 manifest, `NCSU_DRCNN`,
+seeds 42/43/44, 30 epochs, batch size 32, zero weight decay, and train-only
+Manhattan augmentation fixed. First compare RMSprop and Adam at `0.001`; then
+compare `0.0003`, `0.001`, and `0.003` for the validation-selected optimizer.
+Selection uses only mean dirty F1 on the `unseen_layout_v1` validation split,
+requires validation dirty recall at least equal to B2, and requires paired F1
+improvement on at least two seeds. Candidate training explicitly skips test
+evaluation. Only the selected configuration is then evaluated on both frozen
+test protocols, where mean accuracy, dirty recall, and dirty F1 must each be no
+worse than B2. If the search or confirmation gate fails, retain the B2
+configuration and record the negative result before trying the next B3 factor.
 
 ### B4 — Model architecture experiments
 

@@ -16,8 +16,9 @@ tile localization to exact violation geometry and verified repair proposals.
 > **Project status:** **B0**, **B1**, and **B2** are complete. B2 established
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
 > +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
-> +/- 0.84%** on layout-family-disjoint test data. **B3** is next: improve the
-> training configuration one controlled variable at a time.
+> +/- 0.84%** on layout-family-disjoint test data. **B3 is in progress** with a
+> pre-registered optimizer-then-learning-rate experiment that keeps frozen test
+> data out of hyperparameter selection.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -56,13 +57,16 @@ ADVLSI2_Project_updated/
 ├── Colab_Code_backup/             # Google Colab notebook cells (train + infer)
 ├── notebooks/                     # Colab notebooks, including the U-Net experiment
 ├── notebooks/B2_Dual_Baselines.ipynb # Resume-safe Colab launcher for B2
+├── notebooks/B3_Training_Optimization.ipynb # Resume-safe B3 Colab launcher
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
+├── training/evaluate_classifier.py # Test-only evaluation after B3 selection
 ├── training/dataset_manifest.py   # B1 integrity audit and frozen split logic
 ├── data/layout_registry.json      # Pinned source, family, license, and generation metadata
 ├── data/evaluation_protocols.json # Frozen tile-random and unseen-layout protocols
 ├── scripts/acquire_b1_layouts.py  # Acquire/verify the selected open layouts
 ├── scripts/build_dataset_manifest.py # Produce versioned manifests and summaries
 ├── scripts/run_b2_benchmarks.py   # Run/aggregate both B2 protocols over fixed seeds
+├── scripts/run_b3_optimization.py # Validation-only B3 search and test confirmation
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
 ├── real_layouts_tt/               # Input .oas layout files
@@ -307,6 +311,35 @@ For the GPU path, open
 [`notebooks/B2_Dual_Baselines.ipynb`](notebooks/B2_Dual_Baselines.ipynb) in
 Google Colab. Its Drive output is resume-safe; copy the generated JSON/Markdown
 reports into `results/b2_baselines/` when reproducing the phase.
+
+### B3 optimizer and learning-rate experiment (in progress)
+
+B3 keeps the B1 manifest, both evaluation protocols, `NCSU_DRCNN`, seeds
+42/43/44, 30 epochs, batch size 32, zero weight decay, and train-only Manhattan
+augmentation fixed. Its pre-registered sequence is:
+
+1. compare RMSprop and Adam at learning rate `0.001`;
+2. for the validation-selected optimizer, compare learning rates `0.0003`,
+   `0.001`, and `0.003`;
+3. select by mean unseen-layout **validation** dirty F1 only, while requiring
+   validation dirty recall not to fall below B2 and improvement on at least two
+   of three paired seeds;
+4. evaluate only the selected configuration on both frozen test protocols.
+
+Search runs use `--skip-test`, and a separate evaluator unlocks the test split
+only after selection. This makes the no-test-tuning rule executable and
+auditable. Run the resume-safe experiment with:
+
+```bash
+python scripts/run_b3_optimization.py
+```
+
+For a GPU run, open
+[`notebooks/B3_Training_Optimization.ipynb`](notebooks/B3_Training_Optimization.ipynb)
+in Colab. Persistent artifacts are written under
+`My Drive/ADVLSI2_B3/b3_optimization/`. B3 is accepted only if the selected
+configuration also preserves mean accuracy, dirty recall, and dirty F1 against
+B2 on both frozen test tracks.
 
 ---
 

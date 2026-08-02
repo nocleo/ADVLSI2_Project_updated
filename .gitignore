@@ -27,6 +27,9 @@ training_metrics.json
 # Commit the aggregate/run JSON and Markdown reports after a phase run.
 results/b2_baselines/checkpoints/
 
+# B3 search/confirmation checkpoints are saved in Drive and identified by hash.
+results/b3_optimization/**/checkpoints/
+
 # OS / editor
 .DS_Store
 Thumbs.db

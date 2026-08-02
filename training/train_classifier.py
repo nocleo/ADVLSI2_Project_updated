@@ -31,6 +31,7 @@ from training.dataset_manifest import parse_sample_path, sha256_file
 
 
 MODEL_SOURCE = PROJECT_ROOT / "run_inference_pc_optimized" / "define_cnn_model.py"
+OPTIMIZER_LABELS = {"rmsprop": "RMSprop", "adam": "Adam"}
 
 
 def portable_path(path: Path | None) -> str | None:
@@ -184,6 +185,30 @@ def evaluate(model: torch.nn.Module, loader: DataLoader, device: torch.device) -
     }
 
 
+def build_optimizer(
+    model: torch.nn.Module,
+    name: str,
+    learning_rate: float,
+    weight_decay: float,
+) -> torch.optim.Optimizer:
+    """Build a supported optimizer without changing any other training factor."""
+
+    parameters = model.parameters()
+    if name == "rmsprop":
+        return torch.optim.RMSprop(
+            parameters,
+            lr=learning_rate,
+            weight_decay=weight_decay,
+        )
+    if name == "adam":
+        return torch.optim.Adam(
+            parameters,
+            lr=learning_rate,
+            weight_decay=weight_decay,
+        )
+    raise ValueError(f"Unsupported optimizer: {name}")
+
+
 def collapse_warning(metrics: dict[str, object], split: str, epoch: int | None = None) -> str | None:
     counts = metrics["predicted_class_counts"]
     if not isinstance(counts, dict) or all(counts.get(name, 0) > 0 for name in DRCDataset.CLASSES):
@@ -300,7 +325,12 @@ def train(args: argparse.Namespace) -> dict[str, object]:
 
         device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
         model = NCSU_DRCNN().to(device)
-        optimizer = torch.optim.RMSprop(model.parameters(), lr=args.learning_rate)
+        optimizer = build_optimizer(
+            model,
+            args.optimizer,
+            args.learning_rate,
+            args.weight_decay,
+        )
         loss_fn = torch.nn.CrossEntropyLoss()
 
         history: list[dict[str, object]] = []
@@ -360,23 +390,30 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         if best_state is None:
             raise RuntimeError("Training completed without producing a checkpoint")
         model.load_state_dict(best_state)
-        test_metrics = evaluate(model, test_loader, device)
-        layout_metrics = (
-            per_layout_test_metrics(
-                model,
-                data_root,
-                protocol_splits["test"],
-                args.batch_size,
-                device,
+        test_metrics: dict[str, object] | None = None
+        layout_metrics: dict[str, dict[str, object]] = {}
+        if not args.skip_test:
+            test_metrics = evaluate(model, test_loader, device)
+            layout_metrics = (
+                per_layout_test_metrics(
+                    model,
+                    data_root,
+                    protocol_splits["test"],
+                    args.batch_size,
+                    device,
+                )
+                if protocol_splits is not None
+                else {}
             )
-            if protocol_splits is not None
-            else {}
-        )
-        warning = collapse_warning(test_metrics, "test")
-        if warning:
-            run_warnings.append(warning)
+            warning = collapse_warning(test_metrics, "test")
+            if warning:
+                run_warnings.append(warning)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         torch.save(best_state, args.output)
+
+    best_validation_metrics = next(
+        record for record in history if int(record["epoch"]) == best_epoch
+    )
 
     result = {
         "dataset": portable_path(args.dataset),
@@ -393,20 +430,27 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         "model_parameters": sum(parameter.numel() for parameter in model.parameters()),
         "model_source_sha256": sha256_file(MODEL_SOURCE),
         "trainer_source_sha256": sha256_file(Path(__file__)),
-        "optimizer": "RMSprop",
+        "optimizer": OPTIMIZER_LABELS[args.optimizer],
         "learning_rate": args.learning_rate,
+        "weight_decay": args.weight_decay,
         "batch_size": args.batch_size,
         "augmentation": "none" if args.no_augmentation else "Manhattan rotations and reflections (training only)",
         "best_epoch": best_epoch,
         "best_validation_loss": best_validation_loss,
-        "test_loss": test_metrics["loss"],
-        "test_accuracy": test_metrics["accuracy"],
-        "test_precision": test_metrics["precision"],
-        "test_recall": test_metrics["recall"],
-        "test_f1": test_metrics["f1"],
-        "test_predicted_class_counts": test_metrics["predicted_class_counts"],
-        "test_confusion_matrix": test_metrics["confusion_matrix"],
-        "test_per_layout": layout_metrics,
+        "best_validation_metrics": {
+            "loss": best_validation_metrics["validation_loss"],
+            "accuracy": best_validation_metrics["validation_accuracy"],
+            "precision": best_validation_metrics["validation_precision"],
+            "recall": best_validation_metrics["validation_recall"],
+            "f1": best_validation_metrics["validation_f1"],
+            "predicted_class_counts": best_validation_metrics[
+                "validation_predicted_class_counts"
+            ],
+            "confusion_matrix": best_validation_metrics[
+                "validation_confusion_matrix"
+            ],
+        },
+        "test_evaluated": test_metrics is not None,
         "weights": portable_path(args.output),
         "weights_sha256": sha256_file(args.output),
         "runtime": {
@@ -418,6 +462,21 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         "warnings": run_warnings,
         "history": history,
     }
+    if test_metrics is not None:
+        result.update(
+            {
+                "test_loss": test_metrics["loss"],
+                "test_accuracy": test_metrics["accuracy"],
+                "test_precision": test_metrics["precision"],
+                "test_recall": test_metrics["recall"],
+                "test_f1": test_metrics["f1"],
+                "test_predicted_class_counts": test_metrics[
+                    "predicted_class_counts"
+                ],
+                "test_confusion_matrix": test_metrics["confusion_matrix"],
+                "test_per_layout": layout_metrics,
+            }
+        )
     args.metrics.parent.mkdir(parents=True, exist_ok=True)
     args.metrics.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(result, indent=2))
@@ -436,6 +495,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=0.001)
+    parser.add_argument(
+        "--optimizer",
+        choices=("rmsprop", "adam"),
+        default="rmsprop",
+        help="Optimizer to use (default preserves the B2 RMSprop baseline).",
+    )
+    parser.add_argument("--weight-decay", type=float, default=0.0)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max-samples", type=int, default=0)
     parser.add_argument(
@@ -449,8 +515,18 @@ def parse_args() -> argparse.Namespace:
         help="Protocol key inside --manifest (default: unseen_layout_v1).",
     )
     parser.add_argument("--no-augmentation", action="store_true")
+    parser.add_argument(
+        "--skip-test",
+        action="store_true",
+        help="Train/select a checkpoint without evaluating the frozen test split.",
+    )
     parser.add_argument("--cpu", action="store_true")
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.epochs < 1 or args.batch_size < 1 or args.learning_rate <= 0:
+        parser.error("epochs, batch size, and learning rate must be positive")
+    if args.weight_decay < 0:
+        parser.error("weight decay cannot be negative")
+    return args
 
 
 if __name__ == "__main__":
