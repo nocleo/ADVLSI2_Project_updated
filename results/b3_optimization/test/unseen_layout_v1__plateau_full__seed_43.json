@@ -1,0 +1,111 @@
+{
+  "dataset": "training_datasets/combined_training_dataset.zip",
+  "dataset_archive_sha256": "73b3581225928e86d9d6742599ba0c4f737d180f8f7297a9461fbed72594e1c4",
+  "manifest": "data/b1_current_audit/manifest.json",
+  "manifest_id": "9deef1271a145198a60abccf291ec499d53226075b4ccfa2061a215afbd01472",
+  "protocol": "unseen_layout_v1",
+  "split": "test",
+  "samples": 2682,
+  "seed": 43,
+  "device": "cuda",
+  "model": "NCSU_DRCNN",
+  "model_source_sha256": "6c88c97f49e9df92a66cb310c397d0ac2a68fef662ea28777b3826d0c9f7352c",
+  "evaluation_source_sha256": "f7ad73ebced8533bf3475c56f29b548e01322ccd95206082faa5f62d610abc03",
+  "checkpoint": "/content/drive/MyDrive/ADVLSI2_B3/b3_optimization/extension/checkpoints/unseen_layout_v1__plateau_full__seed_43.pth",
+  "checkpoint_sha256": "3334bbfafbe8cdcbbdf8db78de25f35374ae252e78f4d3c9e21cdd84e6abdbd8",
+  "batch_size": 32,
+  "decision_threshold": 0.3681531250476837,
+  "test_loss": 0.20480599220478204,
+  "test_accuracy": 0.9038031319910514,
+  "test_precision": 0.8909698996655518,
+  "test_recall": 0.933426769446391,
+  "test_f1": 0.9117043121149897,
+  "test_predicted_class_counts": {
+    "clean": 1187,
+    "dirty": 1495
+  },
+  "test_confusion_matrix": [
+    [
+      1092,
+      163
+    ],
+    [
+      95,
+      1332
+    ]
+  ],
+  "test_per_layout": {
+    "tt_um_2048_vga_game": {
+      "samples": 1136,
+      "loss": 0.2387269293023667,
+      "accuracy": 0.8873239436619719,
+      "precision": 0.8827977315689981,
+      "recall": 0.8761726078799249,
+      "f1": 0.879472693032015,
+      "predicted_class_counts": {
+        "clean": 607,
+        "dirty": 529
+      },
+      "confusion_matrix": [
+        [
+          541,
+          62
+        ],
+        [
+          66,
+          467
+        ]
+      ]
+    },
+    "tt_um_Bingyao_FCOTA": {
+      "samples": 733,
+      "loss": 0.15920126794343167,
+      "accuracy": 0.9249658935879945,
+      "precision": 0.9126637554585153,
+      "recall": 0.9653579676674365,
+      "f1": 0.9382716049382716,
+      "predicted_class_counts": {
+        "clean": 275,
+        "dirty": 458
+      },
+      "confusion_matrix": [
+        [
+          260,
+          40
+        ],
+        [
+          15,
+          418
+        ]
+      ]
+    },
+    "tt_um_c4m_spsram_direct": {
+      "samples": 813,
+      "loss": 0.19852565206028291,
+      "accuracy": 0.9077490774907749,
+      "precision": 0.8799212598425197,
+      "recall": 0.9696312364425163,
+      "f1": 0.9226006191950464,
+      "predicted_class_counts": {
+        "clean": 305,
+        "dirty": 508
+      },
+      "confusion_matrix": [
+        [
+          291,
+          61
+        ],
+        [
+          14,
+          447
+        ]
+      ]
+    }
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "pytorch": "2.11.0+cu128",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.35"
+  },
+  "repository_commit": "1596edbbb0caf349cae32197662db7ec17ea8cb4"
+}

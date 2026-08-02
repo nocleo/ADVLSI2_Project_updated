@@ -1,0 +1,65 @@
+{
+  "dataset": "training_datasets/combined_training_dataset.zip",
+  "dataset_archive_sha256": "73b3581225928e86d9d6742599ba0c4f737d180f8f7297a9461fbed72594e1c4",
+  "manifest": "data/b1_current_audit/manifest.json",
+  "manifest_id": "9deef1271a145198a60abccf291ec499d53226075b4ccfa2061a215afbd01472",
+  "protocol": "tile_random_reference",
+  "split": "validation",
+  "test_evaluated": false,
+  "samples": 2153,
+  "seed": 44,
+  "model": "NCSU_DRCNN",
+  "model_source_sha256": "6c88c97f49e9df92a66cb310c397d0ac2a68fef662ea28777b3826d0c9f7352c",
+  "calibration_source_sha256": "9726a132d5071de8bcfb4df4bbaff350f9cdff09a473aca3252df1cfc4aa1c12",
+  "checkpoint": "/content/drive/MyDrive/ADVLSI2_B3/b3_optimization/extension/checkpoints/tile_random_reference__plateau_full__seed_44.pth",
+  "checkpoint_sha256": "d79dc541b5346aa8e224c8f23dba09638768eb9c13efad3b5871456395da62c8",
+  "recall_floor": 0.9164890016920473,
+  "default_threshold": 0.5,
+  "default_metrics": {
+    "accuracy": 0.9261495587552253,
+    "precision": 0.9197154471544715,
+    "recall": 0.9187817258883249,
+    "f1": 0.9192483494159472,
+    "predicted_class_counts": {
+      "clean": 1169,
+      "dirty": 984
+    },
+    "confusion_matrix": [
+      [
+        1089,
+        79
+      ],
+      [
+        80,
+        905
+      ]
+    ]
+  },
+  "selected_threshold": 0.42718061804771423,
+  "selected_metrics": {
+    "accuracy": 0.9312587087784486,
+    "precision": 0.9131293188548865,
+    "recall": 0.9390862944162437,
+    "f1": 0.9259259259259259,
+    "predicted_class_counts": {
+      "clean": 1140,
+      "dirty": 1013
+    },
+    "confusion_matrix": [
+      [
+        1080,
+        88
+      ],
+      [
+        60,
+        925
+      ]
+    ]
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "pytorch": "2.11.0+cu128",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.35"
+  },
+  "repository_commit": "1596edbbb0caf349cae32197662db7ec17ea8cb4"
+}
