@@ -122,6 +122,28 @@ class B4ArchitectureTest(unittest.TestCase):
         candidate = with_runs(summarize_validation(candidate_runs), candidate_runs)
         self.assertTrue(validation_gate(candidate, baseline)["passed"])
 
+    def test_summary_supports_legacy_b2_history_schema(self) -> None:
+        run = {
+            "seed": 42,
+            "best_epoch": 7,
+            "history": [
+                {
+                    "epoch": 7,
+                    "validation_loss": 0.2,
+                    "validation_accuracy": 0.91,
+                    "validation_precision": 0.92,
+                    "validation_recall": 0.89,
+                    "validation_f1": 0.904,
+                    "validation_predicted_class_counts": {"clean": 51, "dirty": 49},
+                    "validation_confusion_matrix": [[45, 5], [4, 46]],
+                }
+            ],
+        }
+        summary = summarize_validation([run])
+        self.assertEqual(summary["best_epochs"], [7])
+        self.assertAlmostEqual(summary["metrics"]["f1"]["mean"], 0.904)
+        self.assertAlmostEqual(summary["per_seed"][0]["recall"], 0.89)
+
     def test_validation_gate_rejects_collapsed_seed(self) -> None:
         baseline_runs = [validation_run(seed, 0.90, 0.90, 0.90) for seed in (42, 43, 44)]
         candidate_runs = [validation_run(seed, 0.92, 0.92, 0.92) for seed in (42, 43, 44)]
