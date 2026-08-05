@@ -426,6 +426,30 @@ B2 remains the accepted classifier for B5 and localization. The authoritative
 aggregate and decision are versioned under
 [`results/b4_architecture/`](results/b4_architecture/).
 
+### B5 validation-selected ensemble (pre-registered; results pending)
+
+B5 tests whether B2 and B4's complementary errors can improve classification
+without retraining either model. For each seed, the runner exports path-aligned
+dirty-class probabilities from the authoritative B2 and B4 checkpoints on the
+unseen-layout validation split. It evaluates exactly three fixed blends with
+B2 weights `0.25`, `0.50`, and `0.75` (and complementary B4 weights) at the
+unchanged decision threshold `0.5`. Mean validation dirty F1 selects one blend;
+accuracy and then proximity to an equal blend are deterministic tie-breakers.
+
+Frozen predictions do not exist before the validation gate. The selected blend
+must beat the stronger single model's mean validation F1, win paired F1 in at
+least two seeds, preserve validation accuracy and recall within 0.5 points,
+and avoid class collapse. Only then may it run on the unseen-layout and
+tile-random frozen test splits. Final acceptance requires unseen-layout mean
+accuracy and dirty F1 to improve over B2, paired wins in at least two seeds,
+recall preservation, and no greater than 0.5-point regression in tile-reference
+accuracy, recall, or F1. The test data never selects a weight or threshold.
+
+The experiment reuses checkpoints already saved by B2 and B4. Open
+[`notebooks/B5_Ensemble.ipynb`](notebooks/B5_Ensemble.ipynb) in Colab; it reads
+the checkpoints from Drive and writes resume-safe prediction artifacts and the
+final decision under `My Drive/ADVLSI2_B5/b5_ensemble/`.
+
 ### B4 on an Apple-silicon Mac
 
 An M4 Mac with 24 GB unified memory can run the official B4 protocol through
