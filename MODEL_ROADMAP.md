@@ -283,6 +283,23 @@ tile-reference regression, and introduce no leakage. Record rejected
 experiments; proceed to localization only after the justified classifier
 experiments are accepted or exhausted.
 
+**B5.1 result:** completed as a valid negative experiment. Validation selected
+the 25% B2 / 75% B4 probability blend, which improved mean validation dirty F1
+to 93.87% and passed the predeclared unlock gate. Frozen unseen-layout
+confirmation improved B2 accuracy/F1 from 90.38%/90.94% to 90.47%/91.25%.
+Tile-reference accuracy/F1 also improved to 94.70%/94.08%, but dirty recall
+fell from 93.39% to 92.07%, a 1.32-point regression beyond the 0.5-point
+tolerance. The ensemble is rejected and B2 remains accepted.
+
+The paired tile-reference disagreement evidence motivates B5.2 rather than
+another blind sweep: B4 uniquely corrected 110 predictions versus B2's 68,
+but B2 uniquely corrected 51 dirty samples versus B4's 31. B5.2 will stratify
+these false-negative and false-positive slices by source layout, geometry,
+density, and boundary distance using validation/training evidence only. A
+targeted data, context, loss, or multiscale experiment will be pre-registered
+only if that audit identifies a reproducible failure slice; frozen test layouts
+remain unchanged and unavailable for selection.
+
 ### B6 — Pixel-level violation localization
 
 **Hypothesis:** a segmentation model trained from exact KLayout violation
@@ -340,13 +357,13 @@ commands, and package weights plus metrics with provenance.
 predictions agree within tolerance; regression tests pass; limitations clearly
 state that the CNN assists analysis and does not replace sign-off DRC.
 
-## Immediate sequence after B4
+## Immediate sequence after B5.1
 
 1. Keep B2 as the accepted classifier because B4 improved validation and cost
    but failed frozen unseen-layout and tile-recall gates.
-2. In B5.1, test a validation-selected B2+B4 probability blend or agreement
-   gate because their unseen-layout precision/recall errors are complementary.
-3. Use the paired error-overlap audit to justify targeted hard negatives,
+2. Record B5.1 as rejected: its 25% B2 / 75% B4 blend improved unseen-layout
+   accuracy/F1 but failed the tile-reference recall-preservation gate.
+3. Use the paired B5.1 error-overlap audit to justify targeted hard negatives,
    boundary context, loss changes, or one additional multi-scale/residual model;
    never adapt the frozen test set. Freeze a revised manifest only if needed.
 4. Start B6 from exact KLayout `m1.2` violation geometry only after the justified
