@@ -13,15 +13,18 @@ classifier in three measurable ways: preserve competitive classification,
 demonstrate generalization to unseen layout families, and progress from coarse
 tile localization to exact violation geometry and verified repair proposals.
 
-> **Project status:** **B0** through **B3** are complete. B2 established
+> **Project status:** **B0** through **B4** are complete. B2 established
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
 > +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
 > +/- 0.84%** on layout-family-disjoint test data. B3 found no accepted
 > replacement: calibrated thresholds raised unseen-layout dirty recall to
 > **94.42%**, but accuracy fell to **89.71%**, beyond the predeclared tolerance.
-> B2 therefore remains the frozen classifier baseline. **B4 is active** with a
-> pre-registered compact batch-normalized/global-pooling architecture; frozen
-> tests stay locked until its unseen-layout validation gate passes.
+> B4's compact model then raised validation dirty F1 to **93.61%** and used
+> **14.3x fewer parameters**, but frozen unseen-layout accuracy/F1 fell to
+> **89.36% / 90.36%**. B2 therefore remains the frozen classifier baseline.
+> **B5 is next:** first test whether B2+B4's complementary errors support a
+> validation-selected ensemble, then run failure-slice-driven data or model
+> experiments before pixel-level localization, exact coordinates, and repairs.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -79,6 +82,7 @@ ADVLSI2_Project_updated/
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
 ├── results/b3_optimization/       # B3 aggregate, calibration, and frozen-test evidence
+├── results/b4_architecture/       # B4 aggregate, paired cost evidence, and decision
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -381,7 +385,7 @@ in Colab. Persistent artifacts are written under
 `My Drive/ADVLSI2_B3/b3_optimization/`, while accepted B2 checkpoints are reused
 from `My Drive/ADVLSI2_B2/b2_baselines/checkpoints/`.
 
-### B4 compact architecture experiment (active)
+### B4 compact architecture experiment (complete; no replacement accepted)
 
 B4 changes only the classifier architecture. `CompactBNPool` uses four
 convolution/batch-normalization/ReLU/pooling blocks followed by concatenated
@@ -397,7 +401,7 @@ unlock only if mean validation dirty F1 improves, at least two paired seeds
 improve, validation accuracy/recall remain within 0.5 points of B2, and no seed
 collapses.
 
-Final acceptance additionally requires mean unseen-layout dirty F1 and recall
+Final acceptance additionally required mean unseen-layout dirty F1 and recall
 to improve, paired improvement in at least two seeds for both metrics, accuracy
 within 0.5 points of B2, tile-random accuracy/recall/F1 within 0.5 points,
 fewer parameters and a smaller state dict, and paired PyTorch/ONNX CPU median
@@ -406,6 +410,21 @@ latency no more than 1.5× the baseline. Run locally on CUDA or CPU with:
 ```bash
 python scripts/run_b4_architecture.py
 ```
+
+The official CUDA run passed validation selection: dirty F1 improved from
+91.36% to 93.61%, dirty recall improved from 88.60% to 92.37%, and all three
+paired seeds improved. Frozen confirmation rejected the replacement. On unseen
+layouts, accuracy fell from 90.38% to 89.36% and dirty F1 fell from 90.94% to
+90.36%, with zero paired F1 wins. On the tile reference, accuracy/F1 improved
+to 94.42%/93.74%, but dirty recall fell from 93.39% to 91.36%.
+
+The deployment result remains useful: `CompactBNPool` has 42,178 parameters
+versus 602,114 (14.3x fewer), a 179 KB versus 2.41 MB state dict, and 8.63 ms
+versus 14.06 ms paired PyTorch CPU latency. ONNX latency was 2.19 ms versus
+1.92 ms, within the predeclared cost limit. Quality gates take precedence, so
+B2 remains the accepted classifier for B5 and localization. The authoritative
+aggregate and decision are versioned under
+[`results/b4_architecture/`](results/b4_architecture/).
 
 ### B4 on an Apple-silicon Mac
 

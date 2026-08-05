@@ -13,11 +13,16 @@ At the end of every project phase:
 3. Update this PPTX path and refresh the convenience Slides copy when needed.
 4. Commit the presentation together with the phase results.
 
-The current 22-slide deck includes the completed B2 three-seed baselines:
+The current 24-slide deck includes the completed B2 three-seed baselines:
 92.47% +/- 0.61% tile-random reference accuracy and 90.38% +/- 0.84%
 accuracy on unseen layout families. The paper's reported result remains an
 external reference because the datasets and protocols differ. It also records
 B3's validation gains and failed frozen-test confirmation: calibrated dirty
 recall reached 94.42%, but unseen-layout accuracy regressed to 89.71%. B2
-therefore remains the accepted baseline and B4 architecture experiments are
-next.
+therefore remained the accepted baseline. It also records B4's completed
+compact-architecture experiment: validation dirty F1 reached 93.61% and the
+model used 14.3x fewer parameters, but unseen-layout accuracy/F1 regressed to
+89.36%/90.36% and tile-reference recall fell to 91.36%. B2 remains accepted;
+B5 begins with a controlled B2+B4 ensemble/error-overlap experiment, followed
+by any failure-driven classifier improvements that earn validation support.
+Exact localization and verified repair follow after those experiments.
