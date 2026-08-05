@@ -14,6 +14,7 @@ import random
 import subprocess
 import sys
 import tempfile
+import time
 import warnings
 import zipfile
 from pathlib import Path, PurePosixPath
@@ -26,11 +27,17 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "run_inference_pc_optimized"))
 
-from define_cnn_model import NCSU_DRCNN
+from training.classifier_models import (
+    BASELINE_MODEL,
+    MODEL_NAMES,
+    build_classifier,
+    model_source_path,
+)
 from training.dataset_manifest import parse_sample_path, sha256_file
+from training.runtime_device import DEVICE_CHOICES, select_device
 
 
-MODEL_SOURCE = PROJECT_ROOT / "run_inference_pc_optimized" / "define_cnn_model.py"
+MODEL_SOURCE = model_source_path(BASELINE_MODEL)
 OPTIMIZER_LABELS = {"rmsprop": "RMSprop", "adam": "Adam"}
 
 
@@ -323,8 +330,9 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         val_loader = DataLoader(val_set, batch_size=args.batch_size)
         test_loader = DataLoader(test_set, batch_size=args.batch_size)
 
-        device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
-        model = NCSU_DRCNN().to(device)
+        device = select_device(args.device, args.cpu)
+        print(json.dumps({"event": "device_selected", "device": str(device)}), flush=True)
+        model = build_classifier(args.model).to(device)
         optimizer = build_optimizer(
             model,
             args.optimizer,
@@ -351,7 +359,9 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         best_validation_loss = float("inf")
         epochs_without_improvement = 0
         stopped_early = False
+        training_started = time.perf_counter()
         for epoch in range(1, args.epochs + 1):
+            epoch_started = time.perf_counter()
             model.train()
             running_loss = count = 0
             train_labels: list[int] = []
@@ -386,9 +396,14 @@ def train(args: argparse.Namespace) -> dict[str, object]:
                 "validation_predicted_class_counts": validation_metrics["predicted_class_counts"],
                 "validation_confusion_matrix": validation_metrics["confusion_matrix"],
                 "learning_rate": learning_rate,
+                "epoch_seconds": time.perf_counter() - epoch_started,
             }
+            mean_epoch_seconds = (time.perf_counter() - training_started) / epoch
+            epoch_result["estimated_remaining_seconds"] = mean_epoch_seconds * (
+                args.epochs - epoch
+            )
             history.append(epoch_result)
-            print(json.dumps(epoch_result))
+            print(json.dumps(epoch_result), flush=True)
 
             warning = collapse_warning(validation_metrics, "validation", epoch)
             if warning:
@@ -452,9 +467,9 @@ def train(args: argparse.Namespace) -> dict[str, object]:
         "epochs": args.epochs,
         "seed": args.seed,
         "device": str(device),
-        "model": "NCSU_DRCNN",
+        "model": args.model,
         "model_parameters": sum(parameter.numel() for parameter in model.parameters()),
-        "model_source_sha256": sha256_file(MODEL_SOURCE),
+        "model_source_sha256": sha256_file(model_source_path(args.model)),
         "trainer_source_sha256": sha256_file(Path(__file__)),
         "optimizer": OPTIMIZER_LABELS[args.optimizer],
         "learning_rate": args.learning_rate,
@@ -530,6 +545,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument(
+        "--model",
+        choices=MODEL_NAMES,
+        default=BASELINE_MODEL,
+        help="Classifier architecture (default preserves the B2 baseline).",
+    )
+    parser.add_argument(
         "--optimizer",
         choices=("rmsprop", "adam"),
         default="rmsprop",
@@ -571,6 +592,12 @@ def parse_args() -> argparse.Namespace:
         help="Train/select a checkpoint without evaluating the frozen test split.",
     )
     parser.add_argument("--cpu", action="store_true")
+    parser.add_argument(
+        "--device",
+        choices=DEVICE_CHOICES,
+        default="auto",
+        help="Execution backend; auto selects CUDA, then Apple MPS, then CPU.",
+    )
     args = parser.parse_args()
     if args.epochs < 1 or args.batch_size < 1 or args.learning_rate <= 0:
         parser.error("epochs, batch size, and learning rate must be positive")

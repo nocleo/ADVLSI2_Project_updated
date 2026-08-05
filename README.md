@@ -13,13 +13,18 @@ classifier in three measurable ways: preserve competitive classification,
 demonstrate generalization to unseen layout families, and progress from coarse
 tile localization to exact violation geometry and verified repair proposals.
 
-> **Project status:** **B0** through **B3** are complete. B2 established
+> **Project status:** **B0** through **B4** are complete. B2 established
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
 > +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
 > +/- 0.84%** on layout-family-disjoint test data. B3 found no accepted
 > replacement: calibrated thresholds raised unseen-layout dirty recall to
 > **94.42%**, but accuracy fell to **89.71%**, beyond the predeclared tolerance.
-> B2 therefore remains the frozen classifier baseline and **B4 is next**.
+> B4's compact model then raised validation dirty F1 to **93.61%** and used
+> **14.3x fewer parameters**, but frozen unseen-layout accuracy/F1 fell to
+> **89.36% / 90.36%**. B2 therefore remains the frozen classifier baseline.
+> **B5 is next:** first test whether B2+B4's complementary errors support a
+> validation-selected ensemble, then run failure-slice-driven data or model
+> experiments before pixel-level localization, exact coordinates, and repairs.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -59,7 +64,9 @@ ADVLSI2_Project_updated/
 ├── notebooks/                     # Colab notebooks, including the U-Net experiment
 ├── notebooks/B2_Dual_Baselines.ipynb # Resume-safe Colab launcher for B2
 ├── notebooks/B3_Training_Optimization.ipynb # Resume-safe B3 Colab launcher
+├── notebooks/B4_Compact_Architecture.ipynb # Resume-safe B4 Colab launcher
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
+├── training/classifier_models.py  # Frozen baseline and B4 architecture registry
 ├── training/calibrate_classifier_threshold.py # Validation-only B3 threshold selection
 ├── training/evaluate_classifier.py # Test-only evaluation after B3 selection
 ├── training/dataset_manifest.py   # B1 integrity audit and frozen split logic
@@ -70,9 +77,12 @@ ADVLSI2_Project_updated/
 ├── scripts/run_b2_benchmarks.py   # Run/aggregate both B2 protocols over fixed seeds
 ├── scripts/run_b3_optimization.py # Validation-only B3 search and test confirmation
 ├── scripts/run_b3_extension.py    # Scheduler, early stopping, threshold calibration
+├── scripts/run_b4_architecture.py # Validation-gated compact architecture experiment
+├── scripts/benchmark_classifier_architectures.py # Paired CPU/ONNX cost benchmark
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
 ├── results/b3_optimization/       # B3 aggregate, calibration, and frozen-test evidence
+├── results/b4_architecture/       # B4 aggregate, paired cost evidence, and decision
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -374,6 +384,76 @@ For a GPU run, open
 in Colab. Persistent artifacts are written under
 `My Drive/ADVLSI2_B3/b3_optimization/`, while accepted B2 checkpoints are reused
 from `My Drive/ADVLSI2_B2/b2_baselines/checkpoints/`.
+
+### B4 compact architecture experiment (complete; no replacement accepted)
+
+B4 changes only the classifier architecture. `CompactBNPool` uses four
+convolution/batch-normalization/ReLU/pooling blocks followed by concatenated
+global average and maximum pooling. The average branch represents global metal
+density; the maximum branch preserves a response to sparse local spacing
+defects without the baseline's large position-specific dense layer.
+
+The dataset manifest, unseen-layout and tile-random protocols, seeds 42/43/44,
+30-epoch budget, RMSprop at `0.001`, batch size 32, train-only Manhattan
+augmentation, best-validation-loss selection, and decision threshold `0.5`
+remain frozen from B2. Candidate search writes no test metrics. Frozen tests
+unlock only if mean validation dirty F1 improves, at least two paired seeds
+improve, validation accuracy/recall remain within 0.5 points of B2, and no seed
+collapses.
+
+Final acceptance additionally required mean unseen-layout dirty F1 and recall
+to improve, paired improvement in at least two seeds for both metrics, accuracy
+within 0.5 points of B2, tile-random accuracy/recall/F1 within 0.5 points,
+fewer parameters and a smaller state dict, and paired PyTorch/ONNX CPU median
+latency no more than 1.5× the baseline. Run locally on CUDA or CPU with:
+
+```bash
+python scripts/run_b4_architecture.py
+```
+
+The official CUDA run passed validation selection: dirty F1 improved from
+91.36% to 93.61%, dirty recall improved from 88.60% to 92.37%, and all three
+paired seeds improved. Frozen confirmation rejected the replacement. On unseen
+layouts, accuracy fell from 90.38% to 89.36% and dirty F1 fell from 90.94% to
+90.36%, with zero paired F1 wins. On the tile reference, accuracy/F1 improved
+to 94.42%/93.74%, but dirty recall fell from 93.39% to 91.36%.
+
+The deployment result remains useful: `CompactBNPool` has 42,178 parameters
+versus 602,114 (14.3x fewer), a 179 KB versus 2.41 MB state dict, and 8.63 ms
+versus 14.06 ms paired PyTorch CPU latency. ONNX latency was 2.19 ms versus
+1.92 ms, within the predeclared cost limit. Quality gates take precedence, so
+B2 remains the accepted classifier for B5 and localization. The authoritative
+aggregate and decision are versioned under
+[`results/b4_architecture/`](results/b4_architecture/).
+
+### B4 on an Apple-silicon Mac
+
+An M4 Mac with 24 GB unified memory can run the official B4 protocol through
+PyTorch's Metal (`mps`) backend. From Terminal:
+
+```bash
+git clone --branch agent/b4-compact-architecture \
+  https://github.com/nocleo/ADVLSI2_Project_updated.git
+cd ADVLSI2_Project_updated
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-b4.txt
+python scripts/run_b4_macos.py
+```
+
+The launcher verifies that MPS is active and writes resume-safe artifacts to
+`results/b4_architecture_mps/`. Each epoch reports its elapsed time and an
+estimated remaining duration. If the process stops, rerun the final command;
+completed, hash-verified runs are reused. Keep the Mac awake and connected to
+power. The hardware/backend is recorded in every result JSON; a narrowly
+passing MPS result should later be confirmed on CUDA because backend-level
+floating-point differences are possible.
+
+For the official GPU run, open
+[`notebooks/B4_Compact_Architecture.ipynb`](notebooks/B4_Compact_Architecture.ipynb)
+in Colab. Resume-safe artifacts are written under
+`My Drive/ADVLSI2_B4/b4_architecture/`.
 
 ---
 

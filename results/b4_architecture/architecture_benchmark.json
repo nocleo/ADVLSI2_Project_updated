@@ -1,0 +1,61 @@
+{
+  "phase": "B4",
+  "input_shape": [
+    1,
+    1,
+    200,
+    200
+  ],
+  "threads": 1,
+  "models": {
+    "NCSU_DRCNN": {
+      "model": "NCSU_DRCNN",
+      "parameters": 602114,
+      "trainable_parameters": 602114,
+      "state_dict_bytes": 2413493,
+      "onnx_bytes": 2411869,
+      "model_source_sha256": "6c88c97f49e9df92a66cb310c397d0ac2a68fef662ea28777b3826d0c9f7352c",
+      "pytorch_cpu_batch1": {
+        "warmup": 10,
+        "repeats": 50,
+        "median_ms": 14.057146499993678,
+        "p95_ms": 15.62298499999315
+      },
+      "onnx_cpu_batch1": {
+        "warmup": 10,
+        "repeats": 50,
+        "median_ms": 1.9150469999829056,
+        "p95_ms": 2.3070130000064637
+      }
+    },
+    "CompactBNPool": {
+      "model": "CompactBNPool",
+      "parameters": 42178,
+      "trainable_parameters": 42178,
+      "state_dict_bytes": 179029,
+      "onnx_bytes": 171889,
+      "model_source_sha256": "5fea5fbb7e1183bb185ba21a549d7346f8cee3d2e30923ba6c4ce04ff6362050",
+      "pytorch_cpu_batch1": {
+        "warmup": 10,
+        "repeats": 50,
+        "median_ms": 8.630828999997675,
+        "p95_ms": 9.185053000010157
+      },
+      "onnx_cpu_batch1": {
+        "warmup": 10,
+        "repeats": 50,
+        "median_ms": 2.1908345000269946,
+        "p95_ms": 2.3997360000294066
+      }
+    }
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "pytorch": "2.11.0+cu128",
+    "onnxruntime": "1.28.0",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.35"
+  },
+  "repository_commit": "cf2ffc32b998a55a9d4fb2cae86e7553e63eb85c",
+  "benchmark_source": "scripts/benchmark_classifier_architectures.py",
+  "benchmark_source_sha256": "03598b744728d12d6427b57089a50fb95b4bcada93d01df857a53aadfcb33d61"
+}

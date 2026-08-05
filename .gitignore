@@ -30,6 +30,9 @@ results/b2_baselines/checkpoints/
 # B3 search/confirmation checkpoints are saved in Drive and identified by hash.
 results/b3_optimization/**/checkpoints/
 
+# B4 candidate checkpoints remain resume-safe in Drive and are hash-identified.
+results/b4_architecture/checkpoints/
+
 # OS / editor
 .DS_Store
 Thumbs.db

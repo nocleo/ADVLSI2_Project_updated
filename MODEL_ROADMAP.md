@@ -211,7 +211,7 @@ precision/recall trade-off but accepts no new training configuration or
 threshold. B2 remains frozen for B4. Official evidence is stored under
 `results/b3_optimization/`.
 
-### B4 — Model architecture experiments
+### B4 — Model architecture experiments (complete; no replacement accepted)
 
 **Hypothesis:** a compact modern CNN can outperform the original paper-style
 network while retaining inexpensive inference.
@@ -226,22 +226,62 @@ metrics.
 layouts with an acceptable inference-cost increase. Reject complexity that only
 improves the training layouts.
 
-### B5 — Error analysis and targeted layout/data improvement
+**Pre-registered first experiment:** compare the accepted B2 `NCSU_DRCNN` with
+one `CompactBNPool` candidate containing four convolution/batch-normalization
+blocks and concatenated global average/max pooling. Keep the B1 manifest, both
+protocols, seeds 42/43/44, 30 epochs, RMSprop at `0.001`, batch size 32,
+train-only Manhattan augmentation, best-validation-loss checkpointing, and
+threshold `0.5` fixed. Select using only `unseen_layout_v1` validation data:
+mean dirty F1 must improve in at least two paired seeds, validation accuracy and
+recall must remain within 0.5 points of B2, and no seed may collapse.
+
+Only a validation-selected candidate may be evaluated on frozen tests. Final
+acceptance requires higher mean unseen-layout dirty F1 and recall, improvement
+in at least two paired seeds for each, accuracy within 0.5 points of B2, fewer
+parameters, a smaller state dict, tile-random accuracy/recall/F1 within 0.5
+points of B2, and paired batch-one PyTorch and ONNX CPU median latency no more
+than 1.5 times the baseline. If rejected, retain B2 and record the result before
+considering a capacity or residual candidate.
+
+**Result:** `CompactBNPool` passed validation selection, raising mean dirty F1
+from 91.36% to 93.61% and improving all three paired seeds. It also reduced the
+model from 602,114 to 42,178 parameters (14.3x fewer), reduced the state dict
+from 2.41 MB to 179 KB, and passed the paired CPU/ONNX cost gate.
+
+Frozen confirmation rejected the candidate. On unseen layouts, accuracy fell
+from 90.38% to 89.36% and dirty F1 fell from 90.94% to 90.36%; no paired seed
+improved unseen-layout F1. On the tile reference, accuracy and F1 improved, but
+dirty recall fell from 93.39% to 91.36%, beyond tolerance. B2 therefore remains
+the accepted classifier. The compact model is retained only as a possible
+post-localization compression candidate. Official evidence is stored under
+`results/b4_architecture/`.
+
+### B5 — Evidence-driven classifier improvement
 
 **Hypothesis:** performance is limited by identifiable layout patterns, boundary
-labels, metal-density regimes, or synthetic-error coverage rather than model
-capacity alone.
+labels, metal-density regimes, synthetic-error coverage, or complementary model
+errors rather than one universally superior architecture.
 
-**Work:** review false positives/negatives by source layout, density, geometry,
-and distance from tile boundaries. Correct label-generation defects and add
-targeted layouts, examples, or hard-negative mining only where the analysis
-supports it. Additions may expand training/validation data, but the frozen test
-layouts must not be selected or modified in response to test results. Version
-the resulting dataset and manifest.
+**Work:** begin with a validation-only error-overlap audit between B2 and B4.
+Because B4 improved unseen-layout recall while B2 retained higher precision and
+F1, pre-register one probability-blending or agreement-gating experiment using
+only validation predictions; unlock frozen tests only if the paired validation
+gate passes. Then review false positives/negatives by source layout, density,
+geometry, and distance from tile boundaries. Correct label-generation defects
+and add targeted layouts, context, examples, or hard-negative mining only where
+the analysis supports it. A multi-scale, residual, or other architecture
+experiment remains in scope only when a measured failure slice motivates it.
+Additions may expand training/validation data, but frozen test layouts must not
+be selected or modified in response to test results. Version every resulting
+dataset and manifest.
 
-**Acceptance gate:** the targeted dataset change improves its intended error
-slice and overall held-out-layout metrics without introducing leakage or a
-material regression elsewhere.
+**Acceptance gate:** any ensemble, data, loss, or architecture change must
+improve its intended validation error slice and paired mean dirty F1/recall
+without collapse. Frozen confirmation must then improve or preserve
+unseen-layout accuracy, recall, and F1 within the declared tolerance, avoid
+tile-reference regression, and introduce no leakage. Record rejected
+experiments; proceed to localization only after the justified classifier
+experiments are accepted or exhausted.
 
 ### B6 — Pixel-level violation localization
 
@@ -300,16 +340,20 @@ commands, and package weights plus metrics with provenance.
 predictions agree within tolerance; regression tests pass; limitations clearly
 state that the CNN assists analysis and does not replace sign-off DRC.
 
-## Immediate sequence after B3
+## Immediate sequence after B4
 
-1. Keep the accepted B2 recipe and default threshold as the B4 comparison point
-   because B3 did not pass frozen unseen-layout confirmation.
-2. Start B4 with one compact architecture candidate while keeping the B1 data,
-   frozen protocols, seeds, epoch budget, and B2 training recipe fixed.
-3. Measure quality together with parameter count, checkpoint size, and CPU/ONNX
-   latency; reject complexity that improves only training layouts.
-4. Collect additional layouts only in B5 when error analysis identifies a
-   missing geometry or circuit regime; never adapt the frozen test set.
+1. Keep B2 as the accepted classifier because B4 improved validation and cost
+   but failed frozen unseen-layout and tile-recall gates.
+2. In B5.1, test a validation-selected B2+B4 probability blend or agreement
+   gate because their unseen-layout precision/recall errors are complementary.
+3. Use the paired error-overlap audit to justify targeted hard negatives,
+   boundary context, loss changes, or one additional multi-scale/residual model;
+   never adapt the frozen test set. Freeze a revised manifest only if needed.
+4. Start B6 from exact KLayout `m1.2` violation geometry only after the justified
+   B5 classifier experiments are accepted or rejected with recorded evidence.
+5. Treat the final contribution as an end-to-end chain: competitive classifier
+   -> pixel mask -> exact GDS coordinates -> constrained repair proposal ->
+   DRC plus connectivity/LVS acceptance. Classification alone is not completion.
 
 ## Experiment record template
 
