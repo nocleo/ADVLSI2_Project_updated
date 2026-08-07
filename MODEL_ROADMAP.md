@@ -4,20 +4,31 @@
 
 Improve on the paper's Metal-1 DRC classifier with a reproducible system that:
 
-1. preserves competitive clean/dirty classification under a reproducible,
-   leakage-aware reference protocol;
-2. demonstrates generalization to unseen layout families under a stricter,
-   leakage-free evaluation;
-3. localizes violations as pixel-level masks and exact layout coordinates; and
-4. proposes repairs that are accepted only after DRC and connectivity/LVS
+1. exceeds the paper's reported 92% accuracy on a clearly documented,
+   paper-style clean/dirty benchmark without sacrificing dirty recall;
+2. demonstrates generalization to layout families and violation geometries that
+   were not used for model or threshold selection;
+3. localizes violations as pixel-level masks and exact layout coordinates;
+4. reports realistic full-layout false-alarm rate, violation recall, and
+   end-to-end runtime; and
+5. proposes repairs that are accepted only after DRC and connectivity/LVS
    verification.
 
 [*Design Rule Checking with a CNN Based Feature
-Extractor*](https://arxiv.org/abs/2012.11510) reports accuracy of up to 92%.
-That is an external reference, not the B0 acceptance threshold. Its artificial
-dataset was derived from 50 SRAM designs, while B0 used the project's current
-Sky130 tiles and a different split. Claims against the paper require a
-documented protocol that reproduces the paper's evaluation conditions.
+Extractor*](https://arxiv.org/abs/2012.11510) reports accuracy of up to 92% on
+artificial data derived from 50 SRAM designs. The authors' exact dataset and
+split are not available in this repository, so the project must distinguish two
+claims:
+
+- **Numerically better than the paper:** mean accuracy above 92% across the
+  fixed seeds on a pre-registered paper-style SRAM benchmark, with dirty recall
+  preserved.
+- **A stronger DRC system:** unseen-layout generalization, exact localization,
+  realistic full-layout metrics, and verified repair in addition to tile
+  classification.
+
+Do not call the first claim a direct reproduction unless the original data and
+protocol are obtained. Report the protocol differences beside every comparison.
 
 The roadmap follows one rule: **change one experimental factor at a time and
 compare it with the last accepted benchmark on the same frozen evaluation
@@ -47,15 +58,29 @@ rate, new-violation rate, and connectivity/LVS preservation.
 
 ## Evaluation tracks
 
-After B1 freezes the data, every accepted classifier is evaluated on both:
+B1 froze two useful development tracks:
 
-- **Leakage-aware tile-random reference:** preserve the paper's clean/dirty
+- **Leakage-aware tile-random reference:** preserves the paper's clean/dirty
   classification task while keeping exact and Manhattan-equivalent content in
-  one split. It is the project's internal classification reference, not a
-  direct reproduction of the paper's incompletely documented protocol.
-- **Unseen-layout generalization:** train, validate, and test on disjoint layout
-  families. Original, clean, error-injected, and other derived variants of one
-  design belong to the same group.
+  one split. It is an internal reference, not a direct reproduction.
+- **Unseen-layout development benchmark:** uses disjoint layout families.
+  Original, clean, error-injected, and other derived variants of one design
+  belong to the same group.
+
+B3, B4, and B5.1 all inspected the existing test results and those observations
+now influence later hypotheses. This is adaptive test reuse, even though no
+sample leaked into training. From B5.2 onward, treat both existing test splits
+as development-confirmation benchmarks rather than untouched final evidence.
+
+Before the final model is selected, freeze two additional tracks:
+
+- **Paper-style SRAM benchmark:** obtain the original data/protocol if possible;
+  otherwise generate and document a 50-SRAM-style benchmark with macro-level
+  grouping and report it only as a numerical comparison.
+- **Untouched final holdout:** at least three to five new layout families,
+  including generator-disjoint and near-threshold spacing cases. No result from
+  this holdout may influence data collection, architecture, loss, threshold, or
+  post-processing. Open it once for the release candidate.
 
 ## Phase plan
 
@@ -256,121 +281,200 @@ the accepted classifier. The compact model is retained only as a possible
 post-localization compression candidate. Official evidence is stored under
 `results/b4_architecture/`.
 
-### B5 — Evidence-driven classifier improvement
+### B5 — Evidence-driven classifier closeout
 
-**Hypothesis:** performance is limited by identifiable layout patterns, boundary
-labels, metal-density regimes, synthetic-error coverage, or complementary model
-errors rather than one universally superior architecture.
+**Status:** B5.1 is complete and rejected. B2 remains the accepted classifier.
 
-**Work:** begin with a validation-only error-overlap audit between B2 and B4.
-Because B4 improved unseen-layout recall while B2 retained higher precision and
-F1, pre-register one probability-blending or agreement-gating experiment using
-only validation predictions; unlock frozen tests only if the paired validation
-gate passes. Then review false positives/negatives by source layout, density,
-geometry, and distance from tile boundaries. Correct label-generation defects
-and add targeted layouts, context, examples, or hard-negative mining only where
-the analysis supports it. A multi-scale, residual, or other architecture
-experiment remains in scope only when a measured failure slice motivates it.
-Additions may expand training/validation data, but frozen test layouts must not
-be selected or modified in response to test results. Version every resulting
-dataset and manifest.
+**B5.1 result:** validation selected the 25% B2 / 75% B4 probability blend and
+raised mean validation dirty F1 to 93.87%. Frozen unseen-layout accuracy/F1
+improved from 90.38%/90.94% to 90.47%/91.25%, and tile-reference accuracy/F1
+improved to 94.70%/94.08%. Tile-reference dirty recall nevertheless fell from
+93.39% to 92.07%, a 1.32-point regression beyond the 0.5-point tolerance. The
+ensemble is correctly rejected.
 
-**Acceptance gate:** any ensemble, data, loss, or architecture change must
-improve its intended validation error slice and paired mean dirty F1/recall
-without collapse. Frozen confirmation must then improve or preserve
-unseen-layout accuracy, recall, and F1 within the declared tolerance, avoid
-tile-reference regression, and introduce no leakage. Record rejected
-experiments; proceed to localization only after the justified classifier
-experiments are accepted or exhausted.
+The result is still useful: B4 uniquely corrected more tile-reference samples
+than B2 (110 versus 68), but that advantage was concentrated on clean samples;
+B2 uniquely corrected more dirty samples (51 versus 31).
 
-**B5.1 result:** completed as a valid negative experiment. Validation selected
-the 25% B2 / 75% B4 probability blend, which improved mean validation dirty F1
-to 93.87% and passed the predeclared unlock gate. Frozen unseen-layout
-confirmation improved B2 accuracy/F1 from 90.38%/90.94% to 90.47%/91.25%.
-Tile-reference accuracy/F1 also improved to 94.70%/94.08%, but dirty recall
-fell from 93.39% to 92.07%, a 1.32-point regression beyond the 0.5-point
-tolerance. The ensemble is rejected and B2 remains accepted.
+#### B5.2 — Validation/training failure-slice audit
 
-The paired tile-reference disagreement evidence motivates B5.2 rather than
-another blind sweep: B4 uniquely corrected 110 predictions versus B2's 68,
-but B2 uniquely corrected 51 dirty samples versus B4's 31. B5.2 will stratify
-these false-negative and false-positive slices by source layout, geometry,
-density, and boundary distance using validation/training evidence only. A
-targeted data, context, loss, or multiscale experiment will be pre-registered
-only if that audit identifies a reproducible failure slice; frozen test layouts
-remain unchanged and unavailable for selection.
+**Purpose:** identify one reproducible failure mechanism before spending another
+GPU run.
 
-### B6 — Pixel-level violation localization
+**Work:** export one aligned record per training/validation sample containing
+the true label, B2/B4 probabilities and predictions, layout family, metal
+density, violation count, edge orientation and length, measured spacing
+deficit, number of nearby shapes, and distance from the violation to the
+supervised-center and tile boundaries. Report false negatives, false positives,
+model disagreements, calibration, and per-family support. Do not inspect the
+new final holdout.
 
-**Hypothesis:** a segmentation model trained from exact KLayout violation
-geometry can localize `m1.2` violations precisely enough for coordinate-level
-verification, unlike Grad-CAM or tile boxes.
+**Gate:** a slice may motivate an experiment only when it has adequate support,
+repeats across at least two layout families, and shows a meaningful error-rate
+difference with uncertainty intervals. Otherwise close classifier tuning and
+retain B2.
 
-**Work:** generate aligned image/mask pairs from the DRC report geometry, audit
-mask registration, and train a U-Net-style segmentation baseline. Evaluate on
-unseen layout families and separate classification quality from localization
-quality.
+#### B5.3 — One evidence-selected classifier experiment
 
-**Acceptance gate:** the model improves over a declared localization baseline
-using mask IoU/Dice and coordinate-level precision/recall; mask overlays pass a
-visual registration audit; and no test-layout information enters training.
+Pre-register exactly one intervention from the B5.2 audit:
 
-### B7 — Layout coordinates and end-to-end detection calibration
+- **Boundary/context failures:** rebuild training/validation tiles with the B6
+  halo/stride geometry and targeted boundary positives.
+- **Small-versus-dense geometry failures:** test one compact multi-scale
+  residual classifier with 1x1 bottlenecks plus local and dilated 3x3 branches.
+- **Calibration/model-disagreement failures:** select one recall-constrained
+  ensemble threshold or uncertainty gate jointly on both validation tracks.
+- **Class/severity imbalance:** use targeted hard-positive/hard-negative
+  sampling or a severity-aware loss without changing the architecture.
 
-**Hypothesis:** a threshold selected on validation layouts plus spatial merging
-can turn tile probabilities into useful layout-level detections.
+Selection uses validation only and must preserve dirty recall within 0.5 points
+on both validation tracks while improving mean dirty F1 in at least two of three
+seeds. Existing test splits may be reported as development confirmation but
+cannot restore their status as untouched evidence. If the single experiment is
+rejected, stop classifier-only work and keep B2.
 
-**Work:** map predicted masks through tile origins and raster scale into exact
-layout/GDS coordinates. Calibrate thresholds on validation layouts, merge
-overlapping predictions, and compare them with KLayout ground truth using
-spatial matching rather than only tile labels. Measure layout-level recall,
-false detections, coordinate error, and latency.
+### B6 — Coverage-correct dataset and multi-task localization
 
-**Acceptance gate:** coordinate transforms pass synthetic round-trip tests; a
-frozen threshold meets an explicitly chosen recall target on unseen layouts;
-and false-positive rate, localization tolerance, and runtime are documented.
+**Hypothesis:** exact mask supervision and a shared localization/classification
+encoder can improve violation reasoning more effectively than additional blind
+classifier sweeps.
 
-### B8 — Verified automatic-fix prototype
+#### B6.1 — Fix tiling and mask generation
 
-**Hypothesis:** exact `m1.2` violation geometry can support a constrained repair
-proposal without silently changing circuit intent.
+The current 1600 nm input, 100 nm margin, and 1500 nm stride leave a 100 nm band
+that is never inside a supervised center. Replace it with:
 
-**Work:** implement one conservative spacing-repair strategy, preserve an audit
-trail of proposed geometry edits, rerun KLayout DRC, and perform a
-connectivity/LVS comparison. Never accept a repair based only on the model's
-confidence.
+- 1600 nm input window;
+- 160 nm halo on every side, greater than the 140 nm `m1.2` rule;
+- 1280 nm central output region;
+- 1280 nm stride, so valid output regions tile without gaps;
+- deterministic padding and coverage at layout boundaries.
 
-**Acceptance gate:** report attempted fixes, original violations removed, new
-violations introduced, verified-fix rate, and connectivity/LVS result. Any
-failed safety gate leaves the source layout unchanged and marks the proposal as
-rejected.
+Generate aligned raster inputs and masks from the exact KLayout report geometry.
+Preserve the original vector edge-pair annotation beside every raster mask.
+Slight mask dilation may be used for the training loss, but coordinate
+evaluation must use the undilated vector ground truth.
 
-### B9 — Reproducible release candidate
+**Gate:** unit tests prove complete central-region coverage, no duplicate
+ownership of output pixels, correct nm/pixel round trips, and mask registration.
+A visual audit covers clean, dense, sparse, horizontal, vertical, boundary, and
+near-threshold examples.
 
-**Purpose:** make the selected model easy to reproduce and safe to evaluate.
+#### B6.2 — Multi-task U-Net baseline
 
-**Work:** freeze dataset/model versions, export and numerically compare PyTorch
-and ONNX outputs, add automated smoke/regression tests, document hardware and
-commands, and package weights plus metrics with provenance.
+Train a small U-Net-style fully convolutional model with:
 
-**Acceptance gate:** a clean clone can reproduce inference; PyTorch and ONNX
-predictions agree within tolerance; regression tests pass; limitations clearly
-state that the CNN assists analysis and does not replace sign-off DRC.
+- a segmentation head for the central 1280 nm violation mask;
+- an auxiliary clean/dirty classification head from the shared encoder;
+- Dice plus weighted BCE/focal loss for sparse masks;
+- classification cross-entropy with a pre-registered loss weight;
+- train-only Manhattan transformations applied identically to image and mask.
+
+Start with the simple baseline. Add a multi-scale/residual block only if B5.2
+or B6.2 errors justify it. Grad-CAM and tile boxes are diagnostic baselines, not
+acceptable exact-localization outputs.
+
+**Gate:** compare classification accuracy/dirty precision/recall/F1 with B2 and
+localization with a declared box/Grad-CAM baseline. Report mask Dice/IoU,
+object-level precision/recall/F1, centroid distance, edge-pair distance, spacing
+severity, boundary distance, and per-layout-family metrics. No final-holdout
+result is used for tuning.
+
+### B7 — Exact coordinates and realistic full-layout evaluation
+
+**Hypothesis:** central-region stitching plus deterministic geometry recovery
+can convert model masks into sign-off-checkable candidate violations.
+
+**Work:**
+
+1. stitch only the non-overlapping central outputs from B6;
+2. map connected mask components through tile origins and raster scale into
+   layout coordinates;
+3. query KLayout geometry near each component to recover the exact pair of M1
+   edges and measured spacing;
+4. choose mask, object-matching, and classification thresholds on validation
+   layouts only;
+5. evaluate complete layouts at their natural, mostly-clean prevalence.
+
+Do not keep the current unexplained split between a 0.5 benchmark threshold and
+a 0.80 inference default. Freeze one deployment policy from validation and use
+it everywhere.
+
+**Gate:** coordinate transforms pass synthetic round-trip tests. Report unique
+violations detected/total violations, false detections per mm2, false-positive
+tiles per million scanned tiles, clean layouts incorrectly flagged, recall by
+spacing deficit and boundary distance, detections before/after merging, peak
+memory, and end-to-end layout runtime. Compare tiled and fully convolutional
+execution where practical; prefer the path that avoids recomputing overlapping
+features without changing model outputs.
+
+### B8 — Constrained, verified repair proposals
+
+**Hypothesis:** a localized `m1.2` edge pair can support a small set of safe,
+ranked repair candidates.
+
+**Work:** begin only with isolated synthetic spacing violations. For each exact
+edge pair, enumerate minimal grid-snapped translations or trims that add the
+spacing deficit plus a declared guard band. Rank proposals by displacement,
+area change, and collateral geometry impact. Write candidates to copies and
+retain a complete audit trail; never edit the source layout in place and never
+accept a repair from model confidence alone.
+
+For every candidate:
+
+1. rerun the exact `m1.2` check;
+2. rerun the complete available Sky130 DRC deck;
+3. reject any proposal that creates a new violation;
+4. compare polygon/net connectivity with the original;
+5. run true LVS only when a reference netlist and reproducible LVS flow exist.
+
+**Gate:** report attempted proposals, original violations removed, new
+violations introduced, verified-fix rate, displacement/area cost, and
+connectivity or LVS result. Without a reference netlist, call the safety check
+a connectivity-equivalence check rather than LVS.
+
+### B9 — Final claim and reproducible release
+
+**Purpose:** freeze the end-to-end result and state only claims supported by the
+evaluation design.
+
+**Work:** select the release candidate without the untouched final holdout,
+then open that holdout once. Evaluate the paper-style SRAM benchmark, final
+unseen/generator-disjoint layouts, full-layout detection, localization, and
+repair. Export PyTorch and ONNX models, verify numerical agreement, record
+hardware and commands, and add automated smoke/regression tests. INT8
+post-training quantization is optional and is accepted only if it preserves the
+quality gates while improving measured latency or memory.
+
+**Gate:** a clean clone reproduces inference; PyTorch and ONNX agree within
+tolerance; the final holdout is still untouched at evaluation time; and the
+report separates:
+
+- numerical accuracy relative to the paper;
+- unseen-layout generalization;
+- localization quality;
+- full-layout false-alarm/throughput results; and
+- verified repair quality.
+
+The release must state that the CNN proposes candidates and does not replace
+sign-off DRC.
 
 ## Immediate sequence after B5.1
 
-1. Keep B2 as the accepted classifier because B4 improved validation and cost
-   but failed frozen unseen-layout and tile-recall gates.
-2. Record B5.1 as rejected: its 25% B2 / 75% B4 blend improved unseen-layout
-   accuracy/F1 but failed the tile-reference recall-preservation gate.
-3. Use the paired B5.1 error-overlap audit to justify targeted hard negatives,
-   boundary context, loss changes, or one additional multi-scale/residual model;
-   never adapt the frozen test set. Freeze a revised manifest only if needed.
-4. Start B6 from exact KLayout `m1.2` violation geometry only after the justified
-   B5 classifier experiments are accepted or rejected with recorded evidence.
-5. Treat the final contribution as an end-to-end chain: competitive classifier
-   -> pixel mask -> exact GDS coordinates -> constrained repair proposal ->
-   DRC plus connectivity/LVS acceptance. Classification alone is not completion.
+1. Keep B2 as the accepted classifier and record B5.1 as a useful rejection.
+2. Implement B5.2 as an analysis-only PR using training/validation predictions.
+3. Pre-register and run at most one B5.3 classifier intervention selected by
+   that audit; stop classifier-only tuning if it fails.
+4. Acquire and lock the paper-style SRAM benchmark and a new untouched final
+   holdout before the release candidate is chosen.
+5. Implement B6.1 first: correct the tiling coverage gap and generate
+   vector-backed masks.
+6. Train the B6.2 multi-task U-Net, then recover exact geometry and full-layout
+   metrics in B7.
+7. Implement one conservative `m1.2` repair family in B8 and accept proposals
+   only after DRC plus connectivity/LVS verification.
+8. Open the final holdout once in B9 and make the strongest claim the evidence
+   supports.
 
 ## Experiment record template
 
