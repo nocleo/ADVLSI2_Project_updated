@@ -474,7 +474,7 @@ continues with failure-slice analysis by label, layout, density, geometry, and
 tile-boundary distance before any targeted hard-negative, context, loss, or
 multiscale experiment is pre-registered.
 
-### B5.2 failure-slice audit (implementation ready; results pending)
+### B5.2 failure-slice audit (complete; classifier tuning closed)
 
 Open
 [`notebooks/B5_2_Failure_Slice_Audit.ipynb`](notebooks/B5_2_Failure_Slice_Audit.ipynb)
@@ -483,15 +483,21 @@ checkpoints, exports non-augmented training and validation probabilities for
 both development protocols, and writes resume-safe artifacts under
 `My Drive/ADVLSI2_B5_2/`. It never reads either test split.
 
-The report includes per-seed classification and calibration metrics,
-layout-family and fixed metal-density slices, Wilson intervals, and a
-class-conditional disagreement gate. The B1 manifest does not contain exact
-edge-pair geometry, so violation count, orientation, edge length, spacing
-deficit, nearby-shape count, and boundary-distance fields are marked
-unavailable unless an exact-geometry annotation JSONL is supplied. Raster
-pixels are not used to invent those physical measurements. After the Colab
-run, its validation-only evidence decides whether to pre-register one B5.3
-intervention or retain B2 and proceed directly to coverage-correct B6.1.
+The completed validation-only audit found that B2/B4 class-conditional
+complementarity repeats on the tile-random protocol but not on unseen layouts.
+After enforcing both the two-family and two-seed evidence requirements, the
+remaining density effects concern clean samples and point to different density
+bins in the two protocols. This is not a sufficiently specific mechanism for
+another classifier-only experiment. B5.3 is therefore closed without a
+training run, B2 remains the accepted classifier, and the project proceeds to
+coverage-correct B6.1 localization.
+
+The B1 manifest does not contain exact edge-pair geometry, so violation count,
+orientation, edge length, spacing deficit, nearby-shape count, and
+boundary-distance fields remain unavailable. Raster pixels are not used to
+invent those physical measurements; B6.1 will generate them from vector DRC
+annotations. The versioned report and compact machine-readable summary are in
+[`results/b5_failure_audit/`](results/b5_failure_audit/).
 
 ### B4 on an Apple-silicon Mac
 
