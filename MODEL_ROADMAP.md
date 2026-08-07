@@ -314,7 +314,7 @@ repeats across at least two layout families, and shows a meaningful error-rate
 difference with uncertainty intervals. Otherwise close classifier tuning and
 retain B2.
 
-**Implementation status:** the audit runner and Colab notebook are available in
+**Result:** complete. The audit runner and Colab notebook are available in
 `scripts/run_b5_failure_audit.py` and
 `notebooks/B5_2_Failure_Slice_Audit.ipynb`. They export and inspect only train
 and validation predictions from the authoritative B2/B4 checkpoints. The B1
@@ -322,8 +322,18 @@ manifest supports layout-family and metal-density slices; exact violation
 count, edge orientation/length, spacing deficit, nearby-shape count, and
 boundary-distance slices require a separate exact-geometry annotation JSONL.
 Absent geometry is marked unavailable and must not be inferred from raster
-pixels. Results and the B5.3 decision remain pending until the notebook run is
-complete.
+pixels.
+
+B4 exceeded B2 on mean validation accuracy/F1 and calibration on both protocols,
+but this does not reverse its frozen-confirmation rejection. The B2/B4
+class-conditional disagreement mechanism passed only the tile-random protocol,
+not unseen layouts. After correcting the audit to enforce its declared
+two-family and two-seed requirements, 10 seed-level density candidates remain
+across four repeated signatures. Every repeated signature concerns clean
+samples; the affected density bin is `0.15-0.30` for unseen-layout validation
+but `0.03-0.15` for tile-random validation. Coarse density is therefore a useful
+diagnostic but not a protocol-stable mechanism for another classifier-only
+experiment. The official report is in `results/b5_failure_audit/`.
 
 #### B5.3 — One evidence-selected classifier experiment
 
@@ -343,6 +353,11 @@ on both validation tracks while improving mean dirty F1 in at least two of three
 seeds. Existing test splits may be reported as development confirmation but
 cannot restore their status as untouched evidence. If the single experiment is
 rejected, stop classifier-only work and keep B2.
+
+**Decision:** close B5.3 without a training run. Neither the ensemble mechanism
+nor the available density evidence selects a sufficiently specific intervention
+that should generalize across both protocols. Retain B2 and generate exact
+edge-pair, boundary, orientation, and severity annotations as part of B6.1.
 
 ### B6 — Coverage-correct dataset and multi-task localization
 
@@ -473,18 +488,16 @@ sign-off DRC.
 ## Immediate sequence after B5.1
 
 1. Keep B2 as the accepted classifier and record B5.1 as a useful rejection.
-2. Implement B5.2 as an analysis-only PR using training/validation predictions.
-3. Pre-register and run at most one B5.3 classifier intervention selected by
-   that audit; stop classifier-only tuning if it fails.
-4. Acquire and lock the paper-style SRAM benchmark and a new untouched final
+2. Close B5.2 with its validation-only report and B5.3 no-run decision.
+3. Acquire and lock the paper-style SRAM benchmark and a new untouched final
    holdout before the release candidate is chosen.
-5. Implement B6.1 first: correct the tiling coverage gap and generate
+4. Implement B6.1 first: correct the tiling coverage gap and generate
    vector-backed masks.
-6. Train the B6.2 multi-task U-Net, then recover exact geometry and full-layout
+5. Train the B6.2 multi-task U-Net, then recover exact geometry and full-layout
    metrics in B7.
-7. Implement one conservative `m1.2` repair family in B8 and accept proposals
+6. Implement one conservative `m1.2` repair family in B8 and accept proposals
    only after DRC plus connectivity/LVS verification.
-8. Open the final holdout once in B9 and make the strongest claim the evidence
+7. Open the final holdout once in B9 and make the strongest claim the evidence
    supports.
 
 ## Experiment record template
