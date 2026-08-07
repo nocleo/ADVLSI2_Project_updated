@@ -32,6 +32,8 @@ DEFAULT_SEEDS = (42, 43, 44)
 THRESHOLD = 0.5
 MIN_SLICE_SUPPORT = 50
 MIN_FAMILY_SUPPORT = 20
+MIN_REPEATING_FAMILIES = 2
+MIN_REPEATING_SEEDS = 2
 MEANINGFUL_ERROR_GAP = 0.05
 EPSILON = 1e-12
 
@@ -462,12 +464,55 @@ def density_candidates(run_records: list[dict[str, Any]], model: str) -> list[di
                     "intervals_separated": selected_ci[0] > complement_ci[1],
                     "repeating_families": repeating_families,
                     "family_gate_passed": (
-                        len(repeating_families) >= 2
+                        len(repeating_families) >= MIN_REPEATING_FAMILIES
                         and selected_ci[0] > complement_ci[1]
                     ),
                 }
             )
     return candidates
+
+
+def replicated_density_evidence(
+    validation_runs: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Keep family-supported density mechanisms that repeat across seeds."""
+    provisional = [
+        {
+            "protocol": run["protocol"],
+            "split": run["split"],
+            "seed": run["seed"],
+            "candidate": candidate,
+        }
+        for run in validation_runs
+        for candidate in run["density_candidates"]
+        if candidate["family_gate_passed"]
+    ]
+    seeds_by_signature: dict[tuple[str, str, str, str], set[int]] = defaultdict(set)
+    for item in provisional:
+        candidate = item["candidate"]
+        signature = (
+            str(item["protocol"]),
+            str(candidate["model"]),
+            str(candidate["label"]),
+            str(candidate["density_bin"]),
+        )
+        seeds_by_signature[signature].add(int(item["seed"]))
+    eligible_signatures = {
+        signature
+        for signature, seeds in seeds_by_signature.items()
+        if len(seeds) >= MIN_REPEATING_SEEDS
+    }
+    return [
+        item
+        for item in provisional
+        if (
+            str(item["protocol"]),
+            str(item["candidate"]["model"]),
+            str(item["candidate"]["label"]),
+            str(item["candidate"]["density_bin"]),
+        )
+        in eligible_signatures
+    ]
 
 
 def disagreement_gate(validation_runs: list[dict[str, Any]]) -> dict[str, Any]:
@@ -553,17 +598,7 @@ def build_summary(
                         },
                     }
                 )
-    density_evidence = [
-        {
-            "protocol": run["protocol"],
-            "split": run["split"],
-            "seed": run["seed"],
-            "candidate": candidate,
-        }
-        for run in validation_runs
-        for candidate in run["density_candidates"]
-        if candidate["family_gate_passed"]
-    ]
+    density_evidence = replicated_density_evidence(validation_runs)
     disagreement_by_protocol = {
         protocol: disagreement_gate(
             [run for run in validation_runs if run["protocol"] == protocol]
@@ -605,8 +640,8 @@ def build_summary(
             "minimum_slice_support": MIN_SLICE_SUPPORT,
             "minimum_per_family_support": MIN_FAMILY_SUPPORT,
             "meaningful_error_rate_gap": MEANINGFUL_ERROR_GAP,
-            "minimum_repeating_families": 2,
-            "minimum_repeating_seeds": 2,
+            "minimum_repeating_families": MIN_REPEATING_FAMILIES,
+            "minimum_repeating_seeds": MIN_REPEATING_SEEDS,
         },
         "feature_availability": feature_availability(all_records, annotations_supplied),
         "runs": run_summaries,
