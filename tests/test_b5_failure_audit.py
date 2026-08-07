@@ -13,6 +13,7 @@ from scripts.run_b5_failure_audit import (
     disagreement_gate,
     join_records,
     model_metrics,
+    replicated_density_evidence,
     run,
     wilson_interval,
 )
@@ -86,6 +87,33 @@ class B5FailureAuditTest(unittest.TestCase):
                 }
             )
         self.assertTrue(disagreement_gate(runs)["passed"])
+
+    def test_density_evidence_requires_repetition_across_seeds(self) -> None:
+        def candidate(label: str = "clean") -> dict:
+            return {
+                "model": B2_MODEL,
+                "label": label,
+                "density_bin": "0.15-0.30",
+                "family_gate_passed": True,
+            }
+
+        runs = [
+            {
+                "protocol": "unseen_layout_v1",
+                "split": "validation",
+                "seed": 42,
+                "density_candidates": [candidate(), candidate("dirty")],
+            },
+            {
+                "protocol": "unseen_layout_v1",
+                "split": "validation",
+                "seed": 43,
+                "density_candidates": [candidate()],
+            },
+        ]
+        evidence = replicated_density_evidence(runs)
+        self.assertEqual(len(evidence), 2)
+        self.assertTrue(all(item["candidate"]["label"] == "clean" for item in evidence))
 
     def test_end_to_end_writes_report_without_geometry_claims(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
