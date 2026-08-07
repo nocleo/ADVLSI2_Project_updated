@@ -2,7 +2,8 @@
 
 The B5 ensemble runner keeps validation selection separate from frozen-test
 evaluation.  This command performs inference only; it never selects an
-ensemble weight or reads another model's predictions.
+ensemble weight or reads another model's predictions. B5.2 also uses it for
+non-augmented training predictions during failure analysis.
 """
 
 from __future__ import annotations
@@ -35,8 +36,8 @@ from training.train_classifier import (
 
 def export_predictions(args: argparse.Namespace) -> dict[str, object]:
     manifest, splits = load_protocol(args.manifest, args.dataset, args.protocol)
-    if args.split not in {"validation", "test"}:
-        raise ValueError("B5 prediction export is restricted to validation or test")
+    if args.split not in {"train", "validation", "test"}:
+        raise ValueError("Prediction split must be train, validation, or test")
 
     device = select_device(args.device, args.cpu)
     state = torch.load(args.checkpoint, map_location=device, weights_only=True)
@@ -124,7 +125,12 @@ def parse_args() -> argparse.Namespace:
         default=PROJECT_ROOT / "data" / "b1_current_audit" / "manifest.json",
     )
     parser.add_argument("--protocol", required=True)
-    parser.add_argument("--split", choices=("validation", "test"), required=True)
+    parser.add_argument(
+        "--split",
+        choices=("train", "validation", "test"),
+        required=True,
+        help="Manifest split to export. B5.2 uses train/validation only.",
+    )
     parser.add_argument("--model", choices=MODEL_NAMES, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)

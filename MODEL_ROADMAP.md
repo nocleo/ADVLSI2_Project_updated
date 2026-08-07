@@ -314,6 +314,17 @@ repeats across at least two layout families, and shows a meaningful error-rate
 difference with uncertainty intervals. Otherwise close classifier tuning and
 retain B2.
 
+**Implementation status:** the audit runner and Colab notebook are available in
+`scripts/run_b5_failure_audit.py` and
+`notebooks/B5_2_Failure_Slice_Audit.ipynb`. They export and inspect only train
+and validation predictions from the authoritative B2/B4 checkpoints. The B1
+manifest supports layout-family and metal-density slices; exact violation
+count, edge orientation/length, spacing deficit, nearby-shape count, and
+boundary-distance slices require a separate exact-geometry annotation JSONL.
+Absent geometry is marked unavailable and must not be inferred from raster
+pixels. Results and the B5.3 decision remain pending until the notebook run is
+complete.
+
 #### B5.3 — One evidence-selected classifier experiment
 
 Pre-register exactly one intervention from the B5.2 audit:
