@@ -13,7 +13,7 @@ classifier in three measurable ways: preserve competitive classification,
 demonstrate generalization to unseen layout families, and progress from coarse
 tile localization to exact violation geometry and verified repair proposals.
 
-> **Project status:** **B0** through **B4** are complete. B2 established
+> **Project status:** **B0** through **B4** and the first **B5** experiment are complete. B2 established
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
 > +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
 > +/- 0.84%** on layout-family-disjoint test data. B3 found no accepted
@@ -22,9 +22,11 @@ tile localization to exact violation geometry and verified repair proposals.
 > B4's compact model then raised validation dirty F1 to **93.61%** and used
 > **14.3x fewer parameters**, but frozen unseen-layout accuracy/F1 fell to
 > **89.36% / 90.36%**. B2 therefore remains the frozen classifier baseline.
-> **B5 is next:** first test whether B2+B4's complementary errors support a
-> validation-selected ensemble, then run failure-slice-driven data or model
-> experiments before pixel-level localization, exact coordinates, and repairs.
+> B5's validation-selected 25% B2 / 75% B4 ensemble improved unseen-layout
+> dirty F1 to **91.25%**, but tile-reference recall fell from **93.39%** to
+> **92.07%**, beyond the frozen tolerance. B2 remains accepted. B5 now moves
+> to paired failure-slice analysis before any targeted data or model experiment;
+> localization, exact coordinates, and verified repairs remain the end goal.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -83,6 +85,7 @@ ADVLSI2_Project_updated/
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
 ├── results/b3_optimization/       # B3 aggregate, calibration, and frozen-test evidence
 ├── results/b4_architecture/       # B4 aggregate, paired cost evidence, and decision
+├── results/b5_ensemble/           # B5 probability blend evidence and rejection decision
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -425,6 +428,48 @@ versus 14.06 ms paired PyTorch CPU latency. ONNX latency was 2.19 ms versus
 B2 remains the accepted classifier for B5 and localization. The authoritative
 aggregate and decision are versioned under
 [`results/b4_architecture/`](results/b4_architecture/).
+
+### B5 validation-selected ensemble (complete; no replacement accepted)
+
+B5 tests whether B2 and B4's complementary errors can improve classification
+without retraining either model. For each seed, the runner exports path-aligned
+dirty-class probabilities from the authoritative B2 and B4 checkpoints on the
+unseen-layout validation split. It evaluates exactly three fixed blends with
+B2 weights `0.25`, `0.50`, and `0.75` (and complementary B4 weights) at the
+unchanged decision threshold `0.5`. Mean validation dirty F1 selects one blend;
+accuracy and then proximity to an equal blend are deterministic tie-breakers.
+
+Frozen predictions do not exist before the validation gate. The selected blend
+must beat the stronger single model's mean validation F1, win paired F1 in at
+least two seeds, preserve validation accuracy and recall within 0.5 points,
+and avoid class collapse. Only then may it run on the unseen-layout and
+tile-random frozen test splits. Final acceptance requires unseen-layout mean
+accuracy and dirty F1 to improve over B2, paired wins in at least two seeds,
+recall preservation, and no greater than 0.5-point regression in tile-reference
+accuracy, recall, or F1. The test data never selects a weight or threshold.
+
+The experiment reuses checkpoints already saved by B2 and B4. Open
+[`notebooks/B5_Ensemble.ipynb`](notebooks/B5_Ensemble.ipynb) in Colab; it reads
+the checkpoints from Drive and writes resume-safe prediction artifacts and the
+final decision under `My Drive/ADVLSI2_B5/b5_ensemble/`.
+
+The selected 25% B2 / 75% B4 blend passed the validation gate, raising mean
+dirty F1 from B4's 93.61% to **93.87%**, so frozen tests were legitimately
+unlocked. On unseen layouts it improved B2's accuracy/F1 from 90.38%/90.94%
+to **90.47%/91.25%**, with dirty recall of **93.39%**. On the tile-random
+reference, accuracy/F1 also improved to **94.70%/94.08%**, but recall fell
+from 93.39% to **92.07%**. That 1.32-point regression exceeded the declared
+0.5-point tolerance, so the ensemble is rejected and B2 remains the accepted
+classifier. The authoritative summary and report are versioned under
+[`results/b5_ensemble/`](results/b5_ensemble/).
+
+The paired disagreement audit still provides a concrete next step: across
+tile-reference predictions the compact model uniquely corrected more cases
+than B2 (110 versus 68), but this advantage was concentrated on clean samples,
+while B2 uniquely corrected more dirty samples (51 versus 31). B5 therefore
+continues with failure-slice analysis by label, layout, density, geometry, and
+tile-boundary distance before any targeted hard-negative, context, loss, or
+multiscale experiment is pre-registered.
 
 ### B4 on an Apple-silicon Mac
 

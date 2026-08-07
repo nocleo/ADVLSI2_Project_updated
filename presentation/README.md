@@ -22,7 +22,10 @@ recall reached 94.42%, but unseen-layout accuracy regressed to 89.71%. B2
 therefore remained the accepted baseline. It also records B4's completed
 compact-architecture experiment: validation dirty F1 reached 93.61% and the
 model used 14.3x fewer parameters, but unseen-layout accuracy/F1 regressed to
-89.36%/90.36% and tile-reference recall fell to 91.36%. B2 remains accepted;
-B5 begins with a controlled B2+B4 ensemble/error-overlap experiment, followed
-by any failure-driven classifier improvements that earn validation support.
+89.36%/90.36% and tile-reference recall fell to 91.36%. B2 remains accepted.
+It also records B5.1's completed ensemble experiment: the 25% B2 / 75% B4
+blend improved unseen-layout accuracy/F1 to 90.47%/91.25%, but tile-reference
+recall fell to 92.07%, beyond tolerance. The ensemble was rejected; B5
+continues with validation/training failure-slice analysis before any targeted
+data, loss, context, or multiscale experiment.
 Exact localization and verified repair follow after those experiments.
