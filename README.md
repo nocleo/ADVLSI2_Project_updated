@@ -67,6 +67,8 @@ ADVLSI2_Project_updated/
 ├── notebooks/B2_Dual_Baselines.ipynb # Resume-safe Colab launcher for B2
 ├── notebooks/B3_Training_Optimization.ipynb # Resume-safe B3 Colab launcher
 ├── notebooks/B4_Compact_Architecture.ipynb # Resume-safe B4 Colab launcher
+├── notebooks/B5_Ensemble.ipynb    # Validation-gated B2/B4 ensemble launcher
+├── notebooks/B5_2_Failure_Slice_Audit.ipynb # Train/validation error audit
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
 ├── training/classifier_models.py  # Frozen baseline and B4 architecture registry
 ├── training/calibrate_classifier_threshold.py # Validation-only B3 threshold selection
@@ -80,6 +82,7 @@ ADVLSI2_Project_updated/
 ├── scripts/run_b3_optimization.py # Validation-only B3 search and test confirmation
 ├── scripts/run_b3_extension.py    # Scheduler, early stopping, threshold calibration
 ├── scripts/run_b4_architecture.py # Validation-gated compact architecture experiment
+├── scripts/run_b5_failure_audit.py # Path-aligned B2/B4 failure-slice analysis
 ├── scripts/benchmark_classifier_architectures.py # Paired CPU/ONNX cost benchmark
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
@@ -471,6 +474,31 @@ continues with failure-slice analysis by label, layout, density, geometry, and
 tile-boundary distance before any targeted hard-negative, context, loss, or
 multiscale experiment is pre-registered.
 
+### B5.2 failure-slice audit (complete; classifier tuning closed)
+
+Open
+[`notebooks/B5_2_Failure_Slice_Audit.ipynb`](notebooks/B5_2_Failure_Slice_Audit.ipynb)
+in a GPU Colab runtime. It verifies and reuses the authoritative B2/B4
+checkpoints, exports non-augmented training and validation probabilities for
+both development protocols, and writes resume-safe artifacts under
+`My Drive/ADVLSI2_B5_2/`. It never reads either test split.
+
+The completed validation-only audit found that B2/B4 class-conditional
+complementarity repeats on the tile-random protocol but not on unseen layouts.
+After enforcing both the two-family and two-seed evidence requirements, the
+remaining density effects concern clean samples and point to different density
+bins in the two protocols. This is not a sufficiently specific mechanism for
+another classifier-only experiment. B5.3 is therefore closed without a
+training run, B2 remains the accepted classifier, and the project proceeds to
+coverage-correct B6.1 localization.
+
+The B1 manifest does not contain exact edge-pair geometry, so violation count,
+orientation, edge length, spacing deficit, nearby-shape count, and
+boundary-distance fields remain unavailable. Raster pixels are not used to
+invent those physical measurements; B6.1 will generate them from vector DRC
+annotations. The versioned report and compact machine-readable summary are in
+[`results/b5_failure_audit/`](results/b5_failure_audit/).
+
 ### B4 on an Apple-silicon Mac
 
 An M4 Mac with 24 GB unified memory can run the official B4 protocol through
@@ -620,6 +648,7 @@ python build_cnn_violation_mask_gds.py --report inference_results/tt_um_yen_1err
 |---|---|
 | `ADVLSI2_Project.ipynb` | Original paper-style CNN classifier notebook |
 | `notebooks/ADVLSI2_CNN_UNet_Training.ipynb` | Complete Drive notebook with CNN and experimental U-Net segmentation/localization |
+| `notebooks/B5_2_Failure_Slice_Audit.ipynb` | Resume-safe B5.2 train/validation audit; no training or test reads |
 | `training/train_classifier.py` | Deterministic local/Colab-compatible classifier training entry point |
 
 The U-Net notebook is experimental: it expects a segmentation ZIP containing

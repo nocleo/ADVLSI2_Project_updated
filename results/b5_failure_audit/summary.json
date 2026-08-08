@@ -1,0 +1,2241 @@
+{
+  "phase": "B5.2",
+  "status": "complete_measured_features_geometry_unavailable",
+  "manifest_id": "9deef1271a145198a60abccf291ec499d53226075b4ccfa2061a215afbd01472",
+  "protocols": [
+    "unseen_layout_v1",
+    "tile_random_reference"
+  ],
+  "splits": [
+    "train",
+    "validation"
+  ],
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "decision_threshold": 0.5,
+  "evidence_gate": {
+    "meaningful_error_rate_gap": 0.05,
+    "minimum_per_family_support": 20,
+    "minimum_repeating_families": 2,
+    "minimum_repeating_seeds": 2,
+    "minimum_slice_support": 50
+  },
+  "feature_availability": {
+    "distance_to_supervised_boundary_nm": {
+      "available_records": 0,
+      "source": null,
+      "status": "unavailable"
+    },
+    "distance_to_tile_boundary_nm": {
+      "available_records": 0,
+      "source": null,
+      "status": "unavailable"
+    },
+    "edge_length_nm": {
+      "available_records": 0,
+      "source": null,
+      "status": "unavailable"
+    },
+    "edge_orientation": {
+      "available_records": 0,
+      "source": null,
+      "status": "unavailable"
+    },
+    "geometry_annotations_supplied": false,
+    "layout_family": {
+      "available_records": 68100,
+      "source": "B1 manifest"
+    },
+    "metal_density": {
+      "available_records": 68100,
+      "source": "B1 manifest"
+    },
+    "nearby_shape_count": {
+      "available_records": 0,
+      "source": null,
+      "status": "unavailable"
+    },
+    "spacing_deficit_nm": {
+      "available_records": 0,
+      "source": null,
+      "status": "unavailable"
+    },
+    "violation_count": {
+      "available_records": 0,
+      "source": null,
+      "status": "unavailable"
+    }
+  },
+  "validation_runs": [
+    {
+      "protocol": "unseen_layout_v1",
+      "split": "validation",
+      "seed": 42,
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.922344880091359,
+          "accuracy_ci95": [
+            0.9114827706892534,
+            0.9319735590266824
+          ],
+          "brier_score": 0.052497740313638665,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.02204928664072633,
+              "mean_probability": 0.02413220916089998,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 771
+            },
+            {
+              "dirty_fraction": 0.0963855421686747,
+              "mean_probability": 0.14689652742930207,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 166
+            },
+            {
+              "dirty_fraction": 0.3177570093457944,
+              "mean_probability": 0.24866661875047416,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 107
+            },
+            {
+              "dirty_fraction": 0.358974358974359,
+              "mean_probability": 0.347183713164085,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 78
+            },
+            {
+              "dirty_fraction": 0.453125,
+              "mean_probability": 0.44600473577156663,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 64
+            },
+            {
+              "dirty_fraction": 0.4827586206896552,
+              "mean_probability": 0.548618712301912,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 58
+            },
+            {
+              "dirty_fraction": 0.6333333333333333,
+              "mean_probability": 0.6448660403490066,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 60
+            },
+            {
+              "dirty_fraction": 0.6666666666666666,
+              "mean_probability": 0.7503721503650441,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 51
+            },
+            {
+              "dirty_fraction": 0.8571428571428571,
+              "mean_probability": 0.8591598503443659,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 49
+            },
+            {
+              "dirty_fraction": 0.9967293540474244,
+              "mean_probability": 0.9956180832469843,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 1223
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1062,
+              80
+            ],
+            [
+              124,
+              1361
+            ]
+          ],
+          "error_rate": 0.07765511990864103,
+          "error_rate_ci95": [
+            0.06802644097331756,
+            0.08851722931074665
+          ],
+          "expected_calibration_error_10bin": 0.011038271851054072,
+          "f1": 0.9302802460697197,
+          "negative_log_likelihood": 0.1655108245703588,
+          "precision": 0.9444829979181124,
+          "recall": 0.9164983164983165,
+          "recall_ci95": [
+            0.9013303771761765,
+            0.9295169070480149
+          ],
+          "samples": 2627,
+          "specificity": 0.9299474605954466,
+          "specificity_ci95": [
+            0.9136572126223225,
+            0.9433547862438386
+          ]
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.9071183859916254,
+          "accuracy_ci95": [
+            0.8954160945212464,
+            0.9176317149705908
+          ],
+          "brier_score": 0.06313280020342178,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.04756756756756757,
+              "mean_probability": 0.018757407062948178,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 925
+            },
+            {
+              "dirty_fraction": 0.23684210526315788,
+              "mean_probability": 0.14685886124508424,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 114
+            },
+            {
+              "dirty_fraction": 0.3939393939393939,
+              "mean_probability": 0.2471051524684887,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 99
+            },
+            {
+              "dirty_fraction": 0.5384615384615384,
+              "mean_probability": 0.347529893502211,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 78
+            },
+            {
+              "dirty_fraction": 0.6166666666666667,
+              "mean_probability": 0.4474215472737948,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 60
+            },
+            {
+              "dirty_fraction": 0.6078431372549019,
+              "mean_probability": 0.5456173560198616,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 51
+            },
+            {
+              "dirty_fraction": 0.7818181818181819,
+              "mean_probability": 0.6440759203650734,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 55
+            },
+            {
+              "dirty_fraction": 0.7608695652173914,
+              "mean_probability": 0.7448713027912638,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 46
+            },
+            {
+              "dirty_fraction": 0.7906976744186046,
+              "mean_probability": 0.8504217059113258,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 43
+            },
+            {
+              "dirty_fraction": 0.9974048442906575,
+              "mean_probability": 0.9979125471160486,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 1156
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1087,
+              55
+            ],
+            [
+              189,
+              1296
+            ]
+          ],
+          "error_rate": 0.09288161400837457,
+          "error_rate_ci95": [
+            0.08236828502940916,
+            0.10458390547875368
+          ],
+          "expected_calibration_error_10bin": 0.03469042663711529,
+          "f1": 0.9139633286318759,
+          "negative_log_likelihood": 0.20137328345654584,
+          "precision": 0.9592894152479645,
+          "recall": 0.8727272727272727,
+          "recall_ci95": [
+            0.8548089524591077,
+            0.8887221256622989
+          ],
+          "samples": 2627,
+          "specificity": 0.9518388791593695,
+          "specificity_ci95": [
+            0.9378346089388538,
+            0.9628134387494129
+          ]
+        }
+      },
+      "disagreement": {
+        "overall": {
+          "b2_only_correct": 83,
+          "b4_only_correct": 123,
+          "both_correct": 2300,
+          "both_wrong": 121
+        },
+        "by_label": {
+          "clean": {
+            "b2_only_correct": 53,
+            "b4_only_correct": 28,
+            "both_correct": 1034,
+            "both_wrong": 27
+          },
+          "dirty": {
+            "b2_only_correct": 30,
+            "b4_only_correct": 95,
+            "both_correct": 1266,
+            "both_wrong": 94
+          }
+        }
+      }
+    },
+    {
+      "protocol": "unseen_layout_v1",
+      "split": "validation",
+      "seed": 43,
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.9307194518462124,
+          "accuracy_ci95": [
+            0.9203667497758277,
+            0.9398142660633624
+          ],
+          "brier_score": 0.0466241049772657,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.008253094910591471,
+              "mean_probability": 0.030450970988606642,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 727
+            },
+            {
+              "dirty_fraction": 0.08241758241758242,
+              "mean_probability": 0.14348765229294588,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 182
+            },
+            {
+              "dirty_fraction": 0.16,
+              "mean_probability": 0.24181073069572448,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 100
+            },
+            {
+              "dirty_fraction": 0.410958904109589,
+              "mean_probability": 0.3487218308122191,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 73
+            },
+            {
+              "dirty_fraction": 0.4142857142857143,
+              "mean_probability": 0.4394197970628738,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 70
+            },
+            {
+              "dirty_fraction": 0.4,
+              "mean_probability": 0.5520182172457377,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 60
+            },
+            {
+              "dirty_fraction": 0.6666666666666666,
+              "mean_probability": 0.6486669230082679,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 63
+            },
+            {
+              "dirty_fraction": 0.7580645161290323,
+              "mean_probability": 0.7518487937988774,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 62
+            },
+            {
+              "dirty_fraction": 0.8615384615384616,
+              "mean_probability": 0.8547926325064439,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 65
+            },
+            {
+              "dirty_fraction": 0.9959183673469387,
+              "mean_probability": 0.9953647797934863,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 1225
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1056,
+              86
+            ],
+            [
+              96,
+              1389
+            ]
+          ],
+          "error_rate": 0.06928054815378759,
+          "error_rate_ci95": [
+            0.06018573393663769,
+            0.0796332502241723
+          ],
+          "expected_calibration_error_10bin": 0.020362942196600006,
+          "f1": 0.9385135135135135,
+          "negative_log_likelihood": 0.15133470878673444,
+          "precision": 0.9416949152542373,
+          "recall": 0.9353535353535354,
+          "recall_ci95": [
+            0.9216889465554157,
+            0.9467714726053602
+          ],
+          "samples": 2627,
+          "specificity": 0.9246935201401051,
+          "specificity_ci95": [
+            0.9079239851017429,
+            0.9386153620471127
+          ]
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.9101636848115722,
+          "accuracy_ci95": [
+            0.8986215183565298,
+            0.9205079951801272
+          ],
+          "brier_score": 0.06389781050933127,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.04262672811059908,
+              "mean_probability": 0.021215467342950885,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 868
+            },
+            {
+              "dirty_fraction": 0.2014388489208633,
+              "mean_probability": 0.14235188281364577,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 139
+            },
+            {
+              "dirty_fraction": 0.4,
+              "mean_probability": 0.2497120503584544,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 75
+            },
+            {
+              "dirty_fraction": 0.42696629213483145,
+              "mean_probability": 0.3497305760222874,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 89
+            },
+            {
+              "dirty_fraction": 0.49206349206349204,
+              "mean_probability": 0.4459491121390509,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 63
+            },
+            {
+              "dirty_fraction": 0.5833333333333334,
+              "mean_probability": 0.5491668743391832,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 48
+            },
+            {
+              "dirty_fraction": 0.7407407407407407,
+              "mean_probability": 0.6504893082159536,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 54
+            },
+            {
+              "dirty_fraction": 0.7719298245614035,
+              "mean_probability": 0.7545893924278125,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 57
+            },
+            {
+              "dirty_fraction": 0.7291666666666666,
+              "mean_probability": 0.8410396588345369,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 48
+            },
+            {
+              "dirty_fraction": 0.9898819561551433,
+              "mean_probability": 0.9965930482589375,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 1186
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1070,
+              72
+            ],
+            [
+              164,
+              1321
+            ]
+          ],
+          "error_rate": 0.08983631518842787,
+          "error_rate_ci95": [
+            0.07949200481987291,
+            0.10137848164347023
+          ],
+          "expected_calibration_error_10bin": 0.0261439186929669,
+          "f1": 0.9179986101459348,
+          "negative_log_likelihood": 0.20662775138075376,
+          "precision": 0.9483129935391242,
+          "recall": 0.8895622895622896,
+          "recall_ci95": [
+            0.8726041120401888,
+            0.9045101222745966
+          ],
+          "samples": 2627,
+          "specificity": 0.9369527145359019,
+          "specificity_ci95": [
+            0.9213387531177438,
+            0.9496367813714909
+          ]
+        }
+      },
+      "disagreement": {
+        "overall": {
+          "b2_only_correct": 92,
+          "b4_only_correct": 146,
+          "both_correct": 2299,
+          "both_wrong": 90
+        },
+        "by_label": {
+          "clean": {
+            "b2_only_correct": 55,
+            "b4_only_correct": 41,
+            "both_correct": 1015,
+            "both_wrong": 31
+          },
+          "dirty": {
+            "b2_only_correct": 37,
+            "b4_only_correct": 105,
+            "both_correct": 1284,
+            "both_wrong": 59
+          }
+        }
+      }
+    },
+    {
+      "protocol": "unseen_layout_v1",
+      "split": "validation",
+      "seed": 44,
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.9330034259611725,
+          "accuracy_ci95": [
+            0.9227964365926555,
+            0.9419458572801493
+          ],
+          "brier_score": 0.04756520683563508,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.017391304347826087,
+              "mean_probability": 0.030590330756678656,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 805
+            },
+            {
+              "dirty_fraction": 0.13020833333333334,
+              "mean_probability": 0.1431325425316269,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 192
+            },
+            {
+              "dirty_fraction": 0.2823529411764706,
+              "mean_probability": 0.25484862117206347,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 85
+            },
+            {
+              "dirty_fraction": 0.3582089552238806,
+              "mean_probability": 0.34961209234906665,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 67
+            },
+            {
+              "dirty_fraction": 0.5789473684210527,
+              "mean_probability": 0.45099013991523207,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 57
+            },
+            {
+              "dirty_fraction": 0.7083333333333334,
+              "mean_probability": 0.5584090302387873,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 48
+            },
+            {
+              "dirty_fraction": 0.5641025641025641,
+              "mean_probability": 0.6535797638770862,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 39
+            },
+            {
+              "dirty_fraction": 0.8181818181818182,
+              "mean_probability": 0.760172100500627,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 55
+            },
+            {
+              "dirty_fraction": 0.8607594936708861,
+              "mean_probability": 0.8511740414402152,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 79
+            },
+            {
+              "dirty_fraction": 0.9966666666666667,
+              "mean_probability": 0.9948236413300038,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 1200
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1086,
+              56
+            ],
+            [
+              120,
+              1365
+            ]
+          ],
+          "error_rate": 0.06699657403882756,
+          "error_rate_ci95": [
+            0.058054142719850696,
+            0.07720356340734448
+          ],
+          "expected_calibration_error_10bin": 0.015287200763397861,
+          "f1": 0.9394356503785273,
+          "negative_log_likelihood": 0.15599674929081886,
+          "precision": 0.9605911330049262,
+          "recall": 0.9191919191919192,
+          "recall_ci95": [
+            0.904224082361466,
+            0.9319965068536662
+          ],
+          "samples": 2627,
+          "specificity": 0.9509632224168126,
+          "specificity_ci95": [
+            0.9368565811720241,
+            0.9620460245633585
+          ]
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.8983631518842786,
+          "accuracy_ci95": [
+            0.8862200485031986,
+            0.9093428618597819
+          ],
+          "brier_score": 0.06951206143470039,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.036848792884371026,
+              "mean_probability": 0.02554918826844888,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 787
+            },
+            {
+              "dirty_fraction": 0.20567375886524822,
+              "mean_probability": 0.1485198403292514,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 141
+            },
+            {
+              "dirty_fraction": 0.26732673267326734,
+              "mean_probability": 0.2453040123575985,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 101
+            },
+            {
+              "dirty_fraction": 0.43023255813953487,
+              "mean_probability": 0.3511510065128637,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 86
+            },
+            {
+              "dirty_fraction": 0.4714285714285714,
+              "mean_probability": 0.45154798116002764,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 70
+            },
+            {
+              "dirty_fraction": 0.4875,
+              "mean_probability": 0.5470250517129898,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 80
+            },
+            {
+              "dirty_fraction": 0.6811594202898551,
+              "mean_probability": 0.6505173367002736,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 69
+            },
+            {
+              "dirty_fraction": 0.6417910447761194,
+              "mean_probability": 0.75345738076452,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 67
+            },
+            {
+              "dirty_fraction": 0.78125,
+              "mean_probability": 0.8536195438355207,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 64
+            },
+            {
+              "dirty_fraction": 0.9905335628227194,
+              "mean_probability": 0.9961933383330216,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 1162
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1030,
+              112
+            ],
+            [
+              155,
+              1330
+            ]
+          ],
+          "error_rate": 0.10163684811572135,
+          "error_rate_ci95": [
+            0.09065713814021814,
+            0.11377995149680142
+          ],
+          "expected_calibration_error_10bin": 0.020150248656744658,
+          "f1": 0.9087803211479331,
+          "negative_log_likelihood": 0.2187704726991254,
+          "precision": 0.9223300970873787,
+          "recall": 0.8956228956228957,
+          "recall_ci95": [
+            0.8790376588095642,
+            0.9101665117348378
+          ],
+          "samples": 2627,
+          "specificity": 0.9019264448336253,
+          "specificity_ci95": [
+            0.8833054093870805,
+            0.917852446986785
+          ]
+        }
+      },
+      "disagreement": {
+        "overall": {
+          "b2_only_correct": 81,
+          "b4_only_correct": 172,
+          "both_correct": 2279,
+          "both_wrong": 95
+        },
+        "by_label": {
+          "clean": {
+            "b2_only_correct": 27,
+            "b4_only_correct": 83,
+            "both_correct": 1003,
+            "both_wrong": 29
+          },
+          "dirty": {
+            "b2_only_correct": 54,
+            "b4_only_correct": 89,
+            "both_correct": 1276,
+            "both_wrong": 66
+          }
+        }
+      }
+    },
+    {
+      "protocol": "tile_random_reference",
+      "split": "validation",
+      "seed": 42,
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.9437993497445425,
+          "accuracy_ci95": [
+            0.9332569966890664,
+            0.952760780416123
+          ],
+          "brier_score": 0.039522996220925685,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.016243654822335026,
+              "mean_probability": 0.014788545810120821,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 985
+            },
+            {
+              "dirty_fraction": 0.16666666666666666,
+              "mean_probability": 0.13445665983966104,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 108
+            },
+            {
+              "dirty_fraction": 0.375,
+              "mean_probability": 0.24457600872431481,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 56
+            },
+            {
+              "dirty_fraction": 0.37209302325581395,
+              "mean_probability": 0.3491252321143483,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 43
+            },
+            {
+              "dirty_fraction": 0.5428571428571428,
+              "mean_probability": 0.4525319295270102,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 35
+            },
+            {
+              "dirty_fraction": 0.68,
+              "mean_probability": 0.5487074685096741,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 25
+            },
+            {
+              "dirty_fraction": 0.47058823529411764,
+              "mean_probability": 0.6543019554194283,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 17
+            },
+            {
+              "dirty_fraction": 0.8333333333333334,
+              "mean_probability": 0.74748412022988,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 24
+            },
+            {
+              "dirty_fraction": 0.75,
+              "mean_probability": 0.851112699136138,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 32
+            },
+            {
+              "dirty_fraction": 0.9975845410628019,
+              "mean_probability": 0.9959984622571779,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 828
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1137,
+              31
+            ],
+            [
+              90,
+              895
+            ]
+          ],
+          "error_rate": 0.0562006502554575,
+          "error_rate_ci95": [
+            0.04723921958387701,
+            0.0667430033109336
+          ],
+          "expected_calibration_error_10bin": 0.013645801847983294,
+          "f1": 0.9366823652537937,
+          "negative_log_likelihood": 0.12764293116235365,
+          "precision": 0.9665226781857451,
+          "recall": 0.9086294416243654,
+          "recall_ci95": [
+            0.889012616289746,
+            0.9250712572042492
+          ],
+          "samples": 2153,
+          "specificity": 0.973458904109589,
+          "specificity_ci95": [
+            0.9625735975564542,
+            0.9812399690552789
+          ]
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.9191825359962843,
+          "accuracy_ci95": [
+            0.9069089982135892,
+            0.9299628425372568
+          ],
+          "brier_score": 0.053971109386640924,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.0121012101210121,
+              "mean_probability": 0.011047293876157977,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 909
+            },
+            {
+              "dirty_fraction": 0.15730337078651685,
+              "mean_probability": 0.14639830430237094,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 89
+            },
+            {
+              "dirty_fraction": 0.35185185185185186,
+              "mean_probability": 0.2548223248234502,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 54
+            },
+            {
+              "dirty_fraction": 0.1956521739130435,
+              "mean_probability": 0.34562780610893085,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 46
+            },
+            {
+              "dirty_fraction": 0.48,
+              "mean_probability": 0.45042554080486297,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 50
+            },
+            {
+              "dirty_fraction": 0.4166666666666667,
+              "mean_probability": 0.5411219596862793,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 36
+            },
+            {
+              "dirty_fraction": 0.34210526315789475,
+              "mean_probability": 0.6479565124762686,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 38
+            },
+            {
+              "dirty_fraction": 0.5476190476190477,
+              "mean_probability": 0.7527972062428793,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 42
+            },
+            {
+              "dirty_fraction": 0.7213114754098361,
+              "mean_probability": 0.8520988734042059,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 61
+            },
+            {
+              "dirty_fraction": 0.9818840579710145,
+              "mean_probability": 0.995373006604144,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 828
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1071,
+              97
+            ],
+            [
+              77,
+              908
+            ]
+          ],
+          "error_rate": 0.08081746400371574,
+          "error_rate_ci95": [
+            0.0700371574627432,
+            0.09309100178641072
+          ],
+          "expected_calibration_error_10bin": 0.027595382589343086,
+          "f1": 0.9125628140703518,
+          "negative_log_likelihood": 0.17043123837302548,
+          "precision": 0.9034825870646767,
+          "recall": 0.9218274111675127,
+          "recall_ci95": [
+            0.9033766897241848,
+            0.9370005759571942
+          ],
+          "samples": 2153,
+          "specificity": 0.9169520547945206,
+          "specificity_ci95": [
+            0.8997260802660259,
+            0.9314442758640178
+          ]
+        }
+      },
+      "disagreement": {
+        "overall": {
+          "b2_only_correct": 69,
+          "b4_only_correct": 122,
+          "both_correct": 1910,
+          "both_wrong": 52
+        },
+        "by_label": {
+          "clean": {
+            "b2_only_correct": 17,
+            "b4_only_correct": 83,
+            "both_correct": 1054,
+            "both_wrong": 14
+          },
+          "dirty": {
+            "b2_only_correct": 52,
+            "b4_only_correct": 39,
+            "both_correct": 856,
+            "both_wrong": 38
+          }
+        }
+      }
+    },
+    {
+      "protocol": "tile_random_reference",
+      "split": "validation",
+      "seed": 43,
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.9433348815606131,
+          "accuracy_ci95": [
+            0.9327558660670778,
+            0.9523346292201049
+          ],
+          "brier_score": 0.03833510155330049,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.011351909184726523,
+              "mean_probability": 0.014857140246855496,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 969
+            },
+            {
+              "dirty_fraction": 0.1553398058252427,
+              "mean_probability": 0.14374900175240432,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 103
+            },
+            {
+              "dirty_fraction": 0.296875,
+              "mean_probability": 0.2517621151637286,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 64
+            },
+            {
+              "dirty_fraction": 0.3958333333333333,
+              "mean_probability": 0.34898937431474525,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 48
+            },
+            {
+              "dirty_fraction": 0.6176470588235294,
+              "mean_probability": 0.45303411431172314,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 34
+            },
+            {
+              "dirty_fraction": 0.5,
+              "mean_probability": 0.5393539824906517,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 34
+            },
+            {
+              "dirty_fraction": 0.7586206896551724,
+              "mean_probability": 0.6500878436812039,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 29
+            },
+            {
+              "dirty_fraction": 0.8333333333333334,
+              "mean_probability": 0.7576984445254008,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 30
+            },
+            {
+              "dirty_fraction": 0.7666666666666667,
+              "mean_probability": 0.8528230706850688,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 30
+            },
+            {
+              "dirty_fraction": 1,
+              "mean_probability": 0.9954224449073152,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 812
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1132,
+              36
+            ],
+            [
+              86,
+              899
+            ]
+          ],
+          "error_rate": 0.0566651184393869,
+          "error_rate_ci95": [
+            0.04766537077989497,
+            0.06724413393292213
+          ],
+          "expected_calibration_error_10bin": 0.013181234534369554,
+          "f1": 0.9364583333333333,
+          "negative_log_likelihood": 0.12280780288029867,
+          "precision": 0.9614973262032086,
+          "recall": 0.9126903553299492,
+          "recall_ci95": [
+            0.8934193285929234,
+            0.9287548194202669
+          ],
+          "samples": 2153,
+          "specificity": 0.9691780821917808,
+          "specificity_ci95": [
+            0.9576253248232983,
+            0.9776546652367918
+          ]
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.9191825359962843,
+          "accuracy_ci95": [
+            0.9069089982135892,
+            0.9299628425372568
+          ],
+          "brier_score": 0.0534276364415082,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.010227272727272727,
+              "mean_probability": 0.02034182043611798,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 880
+            },
+            {
+              "dirty_fraction": 0.1415929203539823,
+              "mean_probability": 0.14851719938812002,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 113
+            },
+            {
+              "dirty_fraction": 0.27631578947368424,
+              "mean_probability": 0.250742871706423,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 76
+            },
+            {
+              "dirty_fraction": 0.24,
+              "mean_probability": 0.3564622950553894,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 50
+            },
+            {
+              "dirty_fraction": 0.5882352941176471,
+              "mean_probability": 0.45629677118039597,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 51
+            },
+            {
+              "dirty_fraction": 0.5192307692307693,
+              "mean_probability": 0.5539771501834576,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 52
+            },
+            {
+              "dirty_fraction": 0.5849056603773585,
+              "mean_probability": 0.6517759617769493,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 53
+            },
+            {
+              "dirty_fraction": 0.5227272727272727,
+              "mean_probability": 0.7462674121965062,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 44
+            },
+            {
+              "dirty_fraction": 0.7368421052631579,
+              "mean_probability": 0.8473480861437949,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 38
+            },
+            {
+              "dirty_fraction": 0.9899497487437185,
+              "mean_probability": 0.9953355298719214,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 796
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1082,
+              86
+            ],
+            [
+              88,
+              897
+            ]
+          ],
+          "error_rate": 0.08081746400371574,
+          "error_rate_ci95": [
+            0.0700371574627432,
+            0.09309100178641072
+          ],
+          "expected_calibration_error_10bin": 0.022225629196191633,
+          "f1": 0.9115853658536586,
+          "negative_log_likelihood": 0.1670360333958697,
+          "precision": 0.9125127161749745,
+          "recall": 0.9106598984771573,
+          "recall_ci95": [
+            0.8912146099555714,
+            0.9269144007980213
+          ],
+          "samples": 2153,
+          "specificity": 0.9263698630136986,
+          "specificity_ci95": [
+            0.9099534702953371,
+            0.9399907542483215
+          ]
+        }
+      },
+      "disagreement": {
+        "overall": {
+          "b2_only_correct": 60,
+          "b4_only_correct": 112,
+          "both_correct": 1919,
+          "both_wrong": 62
+        },
+        "by_label": {
+          "clean": {
+            "b2_only_correct": 19,
+            "b4_only_correct": 69,
+            "both_correct": 1063,
+            "both_wrong": 17
+          },
+          "dirty": {
+            "b2_only_correct": 41,
+            "b4_only_correct": 43,
+            "both_correct": 856,
+            "both_wrong": 45
+          }
+        }
+      }
+    },
+    {
+      "protocol": "tile_random_reference",
+      "split": "validation",
+      "seed": 44,
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.9396191360891779,
+          "accuracy_ci95": [
+            0.9287532066409148,
+            0.9489190341022162
+          ],
+          "brier_score": 0.04050798003691738,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.011494252873563218,
+              "mean_probability": 0.015278490690901037,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 957
+            },
+            {
+              "dirty_fraction": 0.1919191919191919,
+              "mean_probability": 0.14713527352520914,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 99
+            },
+            {
+              "dirty_fraction": 0.24528301886792453,
+              "mean_probability": 0.25209137600547865,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 53
+            },
+            {
+              "dirty_fraction": 0.3584905660377358,
+              "mean_probability": 0.3479186313332252,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 53
+            },
+            {
+              "dirty_fraction": 0.5,
+              "mean_probability": 0.44754779487848284,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 40
+            },
+            {
+              "dirty_fraction": 0.45161290322580644,
+              "mean_probability": 0.5499434759539943,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 31
+            },
+            {
+              "dirty_fraction": 0.5588235294117647,
+              "mean_probability": 0.6506818322574391,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 34
+            },
+            {
+              "dirty_fraction": 0.6363636363636364,
+              "mean_probability": 0.7445629049431194,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 22
+            },
+            {
+              "dirty_fraction": 0.9090909090909091,
+              "mean_probability": 0.8436415574767373,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 22
+            },
+            {
+              "dirty_fraction": 0.9928741092636579,
+              "mean_probability": 0.9947839862094072,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 842
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1120,
+              48
+            ],
+            [
+              82,
+              903
+            ]
+          ],
+          "error_rate": 0.06038086391082211,
+          "error_rate_ci95": [
+            0.05108096589778367,
+            0.07124679335908525
+          ],
+          "expected_calibration_error_10bin": 0.010531436724846617,
+          "f1": 0.9328512396694215,
+          "negative_log_likelihood": 0.12666176164910192,
+          "precision": 0.9495268138801262,
+          "recall": 0.916751269035533,
+          "recall_ci95": [
+            0.8978372864593193,
+            0.9324271360730662
+          ],
+          "samples": 2153,
+          "specificity": 0.958904109589041,
+          "specificity_ci95": [
+            0.9459345541666445,
+            0.9688648521695019
+          ]
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.9266140269391546,
+          "accuracy_ci95": [
+            0.9148226485470698,
+            0.9368857012918796
+          ],
+          "brier_score": 0.04858170967444966,
+          "calibration_bins": [
+            {
+              "dirty_fraction": 0.0075675675675675675,
+              "mean_probability": 0.012382972644501252,
+              "range": [
+                0,
+                0.1
+              ],
+              "samples": 925
+            },
+            {
+              "dirty_fraction": 0.13043478260869565,
+              "mean_probability": 0.14476486802964972,
+              "range": [
+                0.1,
+                0.2
+              ],
+              "samples": 69
+            },
+            {
+              "dirty_fraction": 0.21818181818181817,
+              "mean_probability": 0.24193022603338415,
+              "range": [
+                0.2,
+                0.3
+              ],
+              "samples": 55
+            },
+            {
+              "dirty_fraction": 0.3404255319148936,
+              "mean_probability": 0.35048125335510744,
+              "range": [
+                0.3,
+                0.4
+              ],
+              "samples": 47
+            },
+            {
+              "dirty_fraction": 0.4791666666666667,
+              "mean_probability": 0.44598337014516193,
+              "range": [
+                0.4,
+                0.5
+              ],
+              "samples": 48
+            },
+            {
+              "dirty_fraction": 0.4444444444444444,
+              "mean_probability": 0.5547300742732154,
+              "range": [
+                0.5,
+                0.6
+              ],
+              "samples": 36
+            },
+            {
+              "dirty_fraction": 0.4594594594594595,
+              "mean_probability": 0.656560298558828,
+              "range": [
+                0.6,
+                0.7
+              ],
+              "samples": 37
+            },
+            {
+              "dirty_fraction": 0.4722222222222222,
+              "mean_probability": 0.7453820705413818,
+              "range": [
+                0.7,
+                0.8
+              ],
+              "samples": 36
+            },
+            {
+              "dirty_fraction": 0.6122448979591837,
+              "mean_probability": 0.8527746966906956,
+              "range": [
+                0.8,
+                0.9
+              ],
+              "samples": 49
+            },
+            {
+              "dirty_fraction": 0.9847238542890717,
+              "mean_probability": 0.9959124943064186,
+              "range": [
+                0.9,
+                1
+              ],
+              "samples": 851
+            }
+          ],
+          "confusion_matrix": [
+            [
+              1077,
+              91
+            ],
+            [
+              67,
+              918
+            ]
+          ],
+          "error_rate": 0.07338597306084534,
+          "error_rate_ci95": [
+            0.06311429870812028,
+            0.08517735145293
+          ],
+          "expected_calibration_error_10bin": 0.02378953377397878,
+          "f1": 0.9207622868605817,
+          "negative_log_likelihood": 0.14918105488396452,
+          "precision": 0.9098116947472745,
+          "recall": 0.9319796954314721,
+          "recall_ci95": [
+            0.9145186640351216,
+            0.9460842879442449
+          ],
+          "samples": 2153,
+          "specificity": 0.9220890410958904,
+          "specificity_ci95": [
+            0.9052966400419895,
+            0.9361140079500259
+          ]
+        }
+      },
+      "disagreement": {
+        "overall": {
+          "b2_only_correct": 64,
+          "b4_only_correct": 92,
+          "both_correct": 1931,
+          "both_wrong": 66
+        },
+        "by_label": {
+          "clean": {
+            "b2_only_correct": 21,
+            "b4_only_correct": 64,
+            "both_correct": 1056,
+            "both_wrong": 27
+          },
+          "dirty": {
+            "b2_only_correct": 43,
+            "b4_only_correct": 28,
+            "both_correct": 875,
+            "both_wrong": 39
+          }
+        }
+      }
+    }
+  ],
+  "train_minus_validation_gaps": [
+    {
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.01043996933428526,
+          "f1": 0.010445284388870268,
+          "recall": 0.024871546515382148
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.033272796870839616,
+          "f1": 0.03208893323943629,
+          "recall": 0.049738480697384846
+        }
+      },
+      "protocol": "unseen_layout_v1",
+      "seed": 42
+    },
+    {
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.002220628874060826,
+          "f1": 0.0029974531802314797,
+          "recall": 0.017249204372492
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.03767860019308478,
+          "f1": 0.03584754370021903,
+          "recall": 0.06167058715003926
+        }
+      },
+      "protocol": "unseen_layout_v1",
+      "seed": 43
+    },
+    {
+      "models": {
+        "CompactBNPool": {
+          "accuracy": -0.005651671847543116,
+          "f1": -0.0034925898803066513,
+          "recall": 0.017520409575204066
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.03597401048765558,
+          "f1": 0.033894838087735746,
+          "recall": 0.057253816705871485
+        }
+      },
+      "protocol": "unseen_layout_v1",
+      "seed": 44
+    },
+    {
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.005407829206494297,
+          "f1": 0.005952683452297047,
+          "recall": 0.0035777570044671636
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.042309013054072864,
+          "f1": 0.04554145133249177,
+          "recall": 0.04065592533981932
+        }
+      },
+      "protocol": "tile_random_reference",
+      "seed": 42
+    },
+    {
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.0025616160870607363,
+          "f1": 0.0024617020753417984,
+          "recall": -0.0037206352766260276
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.03429367937224681,
+          "f1": 0.03662025975254901,
+          "recall": 0.020210411939906026
+        }
+      },
+      "protocol": "tile_random_reference",
+      "seed": 43
+    },
+    {
+      "models": {
+        "CompactBNPool": {
+          "accuracy": 0.010197905207215197,
+          "f1": 0.011052149500816122,
+          "recall": 0.006120564900860104
+        },
+        "NCSU_DRCNN": {
+          "accuracy": 0.03409341338145877,
+          "f1": 0.036428031127078486,
+          "recall": 0.02821836208138262
+        }
+      },
+      "protocol": "tile_random_reference",
+      "seed": 44
+    }
+  ],
+  "eligible_density_slices": [
+    {
+      "candidate": {
+        "complement_error_rate": 0.030335861321776816,
+        "complement_error_rate_ci95": [
+          0.021070394841543882,
+          0.04349468294521061
+        ],
+        "density_bin": "0.15-0.30",
+        "error_rate": 0.1232876712328767,
+        "error_rate_ci95": [
+          0.08612964497976976,
+          0.17343409895314044
+        ],
+        "error_rate_gap": 0.09295180991109989,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "NCSU_DRCNN",
+        "repeating_families": [
+          "tt_um_TSARKA_TinyQV",
+          "tt_um_aes_sbox",
+          "tt_um_yen"
+        ],
+        "support": 219
+      },
+      "protocol": "unseen_layout_v1",
+      "seed": 42,
+      "split": "validation"
+    },
+    {
+      "candidate": {
+        "complement_error_rate": 0.05742145178764897,
+        "complement_error_rate_ci95": [
+          0.044166107926308706,
+          0.07434562050711509
+        ],
+        "density_bin": "0.15-0.30",
+        "error_rate": 0.1232876712328767,
+        "error_rate_ci95": [
+          0.08612964497976976,
+          0.17343409895314044
+        ],
+        "error_rate_gap": 0.06586621944522773,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "CompactBNPool",
+        "repeating_families": [
+          "tt_um_aes_sbox",
+          "tt_um_yen"
+        ],
+        "support": 219
+      },
+      "protocol": "unseen_layout_v1",
+      "seed": 42,
+      "split": "validation"
+    },
+    {
+      "candidate": {
+        "complement_error_rate": 0.05200433369447454,
+        "complement_error_rate_ci95": [
+          0.039446361759803455,
+          0.06827603654428649
+        ],
+        "density_bin": "0.15-0.30",
+        "error_rate": 0.1095890410958904,
+        "error_rate_ci95": [
+          0.07475641034509858,
+          0.15788237882173561
+        ],
+        "error_rate_gap": 0.057584707401415865,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "NCSU_DRCNN",
+        "repeating_families": [
+          "tt_um_aes_sbox",
+          "tt_um_yen"
+        ],
+        "support": 219
+      },
+      "protocol": "unseen_layout_v1",
+      "seed": 43,
+      "split": "validation"
+    },
+    {
+      "candidate": {
+        "complement_error_rate": 0.056338028169014086,
+        "complement_error_rate_ci95": [
+          0.043219074285659506,
+          0.07313478812189753
+        ],
+        "density_bin": "0.15-0.30",
+        "error_rate": 0.1552511415525114,
+        "error_rate_ci95": [
+          0.11327558159818452,
+          0.20911305678890296
+        ],
+        "error_rate_gap": 0.09891311338349731,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "CompactBNPool",
+        "repeating_families": [
+          "tt_um_TSARKA_TinyQV",
+          "tt_um_aes_sbox",
+          "tt_um_yen"
+        ],
+        "support": 219
+      },
+      "protocol": "unseen_layout_v1",
+      "seed": 43,
+      "split": "validation"
+    },
+    {
+      "candidate": {
+        "complement_error_rate": 0.08450704225352113,
+        "complement_error_rate_ci95": [
+          0.068239387230288,
+          0.10421899184980507
+        ],
+        "density_bin": "0.15-0.30",
+        "error_rate": 0.1552511415525114,
+        "error_rate_ci95": [
+          0.11327558159818452,
+          0.20911305678890296
+        ],
+        "error_rate_gap": 0.07074409929899028,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "NCSU_DRCNN",
+        "repeating_families": [
+          "tt_um_TSARKA_TinyQV",
+          "tt_um_aes_sbox",
+          "tt_um_yen"
+        ],
+        "support": 219
+      },
+      "protocol": "unseen_layout_v1",
+      "seed": 44,
+      "split": "validation"
+    },
+    {
+      "candidate": {
+        "complement_error_rate": 0.03683640303358613,
+        "complement_error_rate_ci95": [
+          0.026478443036411364,
+          0.05103383090554377
+        ],
+        "density_bin": "0.15-0.30",
+        "error_rate": 0.1004566210045662,
+        "error_rate_ci95": [
+          0.0672787256115324,
+          0.14741009371125113
+        ],
+        "error_rate_gap": 0.06362021797098008,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "CompactBNPool",
+        "repeating_families": [
+          "tt_um_aes_sbox",
+          "tt_um_yen"
+        ],
+        "support": 219
+      },
+      "protocol": "unseen_layout_v1",
+      "seed": 44,
+      "split": "validation"
+    },
+    {
+      "candidate": {
+        "complement_error_rate": 0.06281156530408774,
+        "complement_error_rate_ci95": [
+          0.049400314211385465,
+          0.07955899775983227
+        ],
+        "density_bin": "0.03-0.15",
+        "error_rate": 0.1393939393939394,
+        "error_rate_ci95": [
+          0.09471387130261513,
+          0.20048352080928142
+        ],
+        "error_rate_gap": 0.07658237408985166,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "NCSU_DRCNN",
+        "repeating_families": [
+          "tt_um_Bingyao_FCOTA",
+          "tt_um_jyblue1001_pll"
+        ],
+        "support": 165
+      },
+      "protocol": "tile_random_reference",
+      "seed": 43,
+      "split": "validation"
+    },
+    {
+      "candidate": {
+        "complement_error_rate": 0.022931206380857428,
+        "complement_error_rate_ci95": [
+          0.015328037065600904,
+          0.03417488375133793
+        ],
+        "density_bin": "0.03-0.15",
+        "error_rate": 0.07878787878787878,
+        "error_rate_ci95": [
+          0.046619396082262975,
+          0.13012377621650698
+        ],
+        "error_rate_gap": 0.05585667240702136,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "CompactBNPool",
+        "repeating_families": [
+          "tt_um_irfantekin_analog",
+          "tt_um_jyblue1001_pll"
+        ],
+        "support": 165
+      },
+      "protocol": "tile_random_reference",
+      "seed": 43,
+      "split": "validation"
+    },
+    {
+      "candidate": {
+        "complement_error_rate": 0.06181455633100698,
+        "complement_error_rate_ci95": [
+          0.048517507964898135,
+          0.07845539422746263
+        ],
+        "density_bin": "0.03-0.15",
+        "error_rate": 0.17575757575757575,
+        "error_rate_ci95": [
+          0.12525114851619204,
+          0.24101877548358044
+        ],
+        "error_rate_gap": 0.11394301942656877,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "NCSU_DRCNN",
+        "repeating_families": [
+          "tt_um_Bingyao_FCOTA",
+          "tt_um_jyblue1001_pll"
+        ],
+        "support": 165
+      },
+      "protocol": "tile_random_reference",
+      "seed": 44,
+      "split": "validation"
+    },
+    {
+      "candidate": {
+        "complement_error_rate": 0.03290129611166501,
+        "complement_error_rate_ci95": [
+          0.023521932888326144,
+          0.04584508571718242
+        ],
+        "density_bin": "0.03-0.15",
+        "error_rate": 0.09090909090909091,
+        "error_rate_ci95": [
+          0.05586585661801881,
+          0.1445681596433765
+        ],
+        "error_rate_gap": 0.058007794797425904,
+        "family_gate_passed": true,
+        "intervals_separated": true,
+        "label": "clean",
+        "model": "CompactBNPool",
+        "repeating_families": [
+          "tt_um_Bingyao_FCOTA",
+          "tt_um_jyblue1001_pll"
+        ],
+        "support": 165
+      },
+      "protocol": "tile_random_reference",
+      "seed": 44,
+      "split": "validation"
+    }
+  ],
+  "disagreement_gate_by_protocol": {
+    "tile_random_reference": {
+      "clean_b4_advantage_families": [
+        "tt_um_2048_vga_game",
+        "tt_um_8_bit_cpu",
+        "tt_um_Bingyao_FCOTA",
+        "tt_um_TSARKA_TinyQV",
+        "tt_um_aes_sbox",
+        "tt_um_c4m_spsram_direct",
+        "tt_um_cmos_inverter",
+        "tt_um_fabulous_sky_26a",
+        "tt_um_fft_adityaamehra",
+        "tt_um_irfantekin_analog",
+        "tt_um_jyblue1001_pll",
+        "tt_um_yen"
+      ],
+      "criterion": "B2 uniquely corrects more dirty samples and B4 uniquely corrects more clean samples in at least two families, each repeated in at least two seeds.",
+      "dirty_b2_advantage_families": [
+        "tt_um_2048_vga_game",
+        "tt_um_analog_atenfyr1",
+        "tt_um_essen",
+        "tt_um_fabulous_sky_26a",
+        "tt_um_jyblue1001_pll",
+        "tt_um_yen"
+      ],
+      "passed": true
+    },
+    "unseen_layout_v1": {
+      "clean_b4_advantage_families": [],
+      "criterion": "B2 uniquely corrects more dirty samples and B4 uniquely corrects more clean samples in at least two families, each repeated in at least two seeds.",
+      "dirty_b2_advantage_families": [],
+      "passed": false
+    }
+  },
+  "disagreement_gate_passed_on_both_validation_protocols": false,
+  "recommendations": [
+    "The recall-constrained B2/B4 disagreement mechanism fails to repeat across both validation protocols; do not run an ensemble-based B5.3.",
+    "The seed-replicated density evidence is limited to clean samples and points in different density directions across the two protocols. Treat density as a diagnostic covariate, not a sufficiently specific mechanism for another classifier-only experiment.",
+    "Close classifier-only tuning, retain B2 as the accepted classifier, and proceed to B6.1 coverage-correct vector-backed localization. Generate exact edge-pair annotations there for boundary, orientation, and severity analysis."
+  ],
+  "b5_3_decision": {
+    "status": "closed_without_experiment",
+    "accepted_classifier": "NCSU_DRCNN (B2)",
+    "rationale": [
+      "Class-conditional B2/B4 complementarity did not pass on both validation protocols.",
+      "After enforcing the declared two-seed minimum, 10 density candidates remain; all are clean-sample slices and the affected density bin differs by protocol.",
+      "The current manifest lacks exact geometry needed to distinguish context, scale, spacing severity, orientation, or boundary mechanisms."
+    ],
+    "next_phase": "B6.1 coverage-correct tiling and vector-backed mask generation"
+  }
+}
