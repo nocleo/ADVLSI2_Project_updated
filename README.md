@@ -13,7 +13,7 @@ classifier in three measurable ways: preserve competitive classification,
 demonstrate generalization to unseen layout families, and progress from coarse
 tile localization to exact violation geometry and verified repair proposals.
 
-> **Project status:** **B0** through **B4** and the first **B5** experiment are complete. B2 established
+> **Project status:** **B0** through **B6.1** are complete. B2 established
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
 > +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
 > +/- 0.84%** on layout-family-disjoint test data. B3 found no accepted
@@ -24,9 +24,11 @@ tile localization to exact violation geometry and verified repair proposals.
 > **89.36% / 90.36%**. B2 therefore remains the frozen classifier baseline.
 > B5's validation-selected 25% B2 / 75% B4 ensemble improved unseen-layout
 > dirty F1 to **91.25%**, but tile-reference recall fell from **93.39%** to
-> **92.07%**, beyond the frozen tolerance. B2 remains accepted. B5 now moves
-> to paired failure-slice analysis before any targeted data or model experiment;
-> localization, exact coordinates, and verified repairs remain the end goal.
+> **92.07%**, beyond the frozen tolerance. B5.2 then closed classifier-only
+> tuning. B6.1 now provides gap-free, vector-backed localization data across 14
+> families: **6,924 exact violations**, **8,021 dirty + 8,021 clean tiles**, and
+> one unique owner for every exact violation. B6.2 multi-task U-Net training is
+> next; exact-coordinate recovery and verified repairs remain the end goal.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -69,6 +71,7 @@ ADVLSI2_Project_updated/
 ├── notebooks/B4_Compact_Architecture.ipynb # Resume-safe B4 Colab launcher
 ├── notebooks/B5_Ensemble.ipynb    # Validation-gated B2/B4 ensemble launcher
 ├── notebooks/B5_2_Failure_Slice_Audit.ipynb # Train/validation error audit
+├── notebooks/B6_1_Localization_Dataset.ipynb # Resume-safe B6.1 dataset launcher
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
 ├── training/classifier_models.py  # Frozen baseline and B4 architecture registry
 ├── training/calibrate_classifier_threshold.py # Validation-only B3 threshold selection
@@ -83,12 +86,14 @@ ADVLSI2_Project_updated/
 ├── scripts/run_b3_extension.py    # Scheduler, early stopping, threshold calibration
 ├── scripts/run_b4_architecture.py # Validation-gated compact architecture experiment
 ├── scripts/run_b5_failure_audit.py # Path-aligned B2/B4 failure-slice analysis
+├── scripts/build_b6_localization_dataset.py # Registry-wide exact-mask builder
 ├── scripts/benchmark_classifier_architectures.py # Paired CPU/ONNX cost benchmark
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
 ├── results/b3_optimization/       # B3 aggregate, calibration, and frozen-test evidence
 ├── results/b4_architecture/       # B4 aggregate, paired cost evidence, and decision
 ├── results/b5_ensemble/           # B5 probability blend evidence and rejection decision
+├── results/b6_localization_dataset/ # B6.1 compact geometry/dataset result
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -498,6 +503,43 @@ boundary-distance fields remain unavailable. Raster pixels are not used to
 invent those physical measurements; B6.1 will generate them from vector DRC
 annotations. The versioned report and compact machine-readable summary are in
 [`results/b5_failure_audit/`](results/b5_failure_audit/).
+
+### B6.1 coverage-correct localization dataset (complete)
+
+B6.1 replaces the old 1600 nm / 100 nm margin / 1500 nm stride geometry,
+which left a 100 nm blind band, with a 1600 nm contextual input, 160 nm halo,
+1280 nm central output, and 1280 nm stride. The input is 200x200 and the mask
+is 160x160 at the same 8 nm/pixel scale. Central outputs therefore cover the
+layout without gaps or overlapping ownership.
+
+The registry build uses KLayout `m1.2` report edge pairs as authoritative
+geometry. Each vector record retains both edges, measured spacing, rule
+deficit, orientation, midpoint, and unique owner. Raster masks are aligned
+training targets only; B7 coordinate evaluation will continue to use the
+vectors. The generated arrays and archive remain ignored because they are
+reproducible; the compact result is versioned in
+[`results/b6_localization_dataset/`](results/b6_localization_dataset/).
+
+Measured result:
+
+- 14 independent layout families;
+- 6,924 exact KLayout violations and 6,924 unique owners;
+- 8,021 dirty and 8,021 balanced clean tiles;
+- clean, dense, sparse, horizontal, vertical, boundary, and near-threshold
+  audit examples in every layout;
+- no raster surrogate or omitted non-owner subpixel fragment in this build.
+
+Rebuild locally with:
+
+```bash
+python scripts/build_b6_localization_dataset.py
+```
+
+The command is resume-safe. It reuses valid injected layouts and RDB reports,
+generates missing deterministic intermediates, writes per-layout JSONL/NPZ
+artifacts under `training_datasets/b6_localization_dataset/`, and produces the
+ignored ZIP plus the compact result summary. B6.2 can now train the multi-task
+U-Net on these registered image/mask pairs.
 
 ### B4 on an Apple-silicon Mac
 

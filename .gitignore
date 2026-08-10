@@ -19,6 +19,11 @@ training_datasets/*/dataset_output/
 training_datasets/*/training_dataset/
 training_datasets/*/training_dataset.zip
 
+# B6.1 localization arrays are reproducible and large. Commit only the compact
+# result summary and documentation under results/b6_localization_dataset/.
+training_datasets/b6_localization_dataset/
+training_datasets/b6_localization_dataset.zip
+
 # Logs and local validation artifacts
 validation_*.log
 training_metrics.json

@@ -386,6 +386,15 @@ ownership of output pixels, correct nm/pixel round trips, and mask registration.
 A visual audit covers clean, dense, sparse, horizontal, vertical, boundary, and
 near-threshold examples.
 
+**Result:** accepted. The 14-family registry build contains 6,924 exact KLayout
+`m1.2` edge pairs, each with one unique central-output owner, plus 8,021 dirty
+and 8,021 balanced clean image/mask tiles. Inputs are 200x200 and central masks
+are 160x160 at 8 nm/pixel. Every layout supplies all seven visual-audit
+categories. Exact vectors remain authoritative; this build required no
+one-pixel surrogate targets and omitted no non-owner subpixel fragments. The
+large generated artifact remains ignored, while its compact result and archive
+hash are versioned under `results/b6_localization_dataset/`. Proceed to B6.2.
+
 #### B6.2 — Multi-task U-Net baseline
 
 Train a small U-Net-style fully convolutional model with:
@@ -491,8 +500,7 @@ sign-off DRC.
 2. Close B5.2 with its validation-only report and B5.3 no-run decision.
 3. Acquire and lock the paper-style SRAM benchmark and a new untouched final
    holdout before the release candidate is chosen.
-4. Implement B6.1 first: correct the tiling coverage gap and generate
-   vector-backed masks.
+4. B6.1 complete: gap-free tiling and vector-backed masks are available.
 5. Train the B6.2 multi-task U-Net, then recover exact geometry and full-layout
    metrics in B7.
 6. Implement one conservative `m1.2` repair family in B8 and accept proposals

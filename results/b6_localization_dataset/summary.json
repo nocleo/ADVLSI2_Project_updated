@@ -1,0 +1,162 @@
+{
+  "archive_sha256": "282521ea1a2124cfe6c6e6506c5efc0f1772d2a1d900800ee96db4aafe232ac3",
+  "clean_tile_count": 8021,
+  "config": {
+    "halo_nm": 160,
+    "input_nm": 1600,
+    "input_px": 200,
+    "min_rule_nm": 140,
+    "nm_per_pixel": 8,
+    "output_nm": 1280,
+    "output_px": 160,
+    "seed": 42,
+    "stride_nm": 1280
+  },
+  "dirty_tile_count": 8021,
+  "exact_violation_count": 6924,
+  "layout_count": 14,
+  "layouts": [
+    {
+      "clean_tile_count": 604,
+      "dirty_tile_count": 604,
+      "exact_violation_count": 493,
+      "layout": "tt_um_8_bit_cpu",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 493
+    },
+    {
+      "clean_tile_count": 563,
+      "dirty_tile_count": 563,
+      "exact_violation_count": 483,
+      "layout": "tt_um_analog_atenfyr1",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 483
+    },
+    {
+      "clean_tile_count": 596,
+      "dirty_tile_count": 596,
+      "exact_violation_count": 555,
+      "layout": "tt_um_cmos_inverter",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 555
+    },
+    {
+      "clean_tile_count": 528,
+      "dirty_tile_count": 528,
+      "exact_violation_count": 449,
+      "layout": "tt_um_irfantekin_analog",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 449
+    },
+    {
+      "clean_tile_count": 576,
+      "dirty_tile_count": 576,
+      "exact_violation_count": 463,
+      "layout": "tt_um_yen",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 463
+    },
+    {
+      "clean_tile_count": 606,
+      "dirty_tile_count": 606,
+      "exact_violation_count": 526,
+      "layout": "tt_um_fabulous_sky_26a",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 526
+    },
+    {
+      "clean_tile_count": 619,
+      "dirty_tile_count": 619,
+      "exact_violation_count": 500,
+      "layout": "tt_um_TSARKA_TinyQV",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 500
+    },
+    {
+      "clean_tile_count": 609,
+      "dirty_tile_count": 609,
+      "exact_violation_count": 493,
+      "layout": "tt_um_aes_sbox",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 493
+    },
+    {
+      "clean_tile_count": 601,
+      "dirty_tile_count": 601,
+      "exact_violation_count": 581,
+      "layout": "tt_um_c4m_spsram_direct",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 581
+    },
+    {
+      "clean_tile_count": 437,
+      "dirty_tile_count": 437,
+      "exact_violation_count": 448,
+      "layout": "tt_um_essen",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 448
+    },
+    {
+      "clean_tile_count": 565,
+      "dirty_tile_count": 565,
+      "exact_violation_count": 470,
+      "layout": "tt_um_Bingyao_FCOTA",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 470
+    },
+    {
+      "clean_tile_count": 493,
+      "dirty_tile_count": 493,
+      "exact_violation_count": 449,
+      "layout": "tt_um_jyblue1001_pll",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 449
+    },
+    {
+      "clean_tile_count": 617,
+      "dirty_tile_count": 617,
+      "exact_violation_count": 508,
+      "layout": "tt_um_2048_vga_game",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 508
+    },
+    {
+      "clean_tile_count": 607,
+      "dirty_tile_count": 607,
+      "exact_violation_count": 506,
+      "layout": "tt_um_fft_adityaamehra",
+      "omitted_nonowner_subpixel_fragment_count": 0,
+      "surrogate_target_count": 0,
+      "unique_owner_count": 506
+    }
+  ],
+  "omitted_nonowner_subpixel_fragment_count": 0,
+  "phase": "B6.1",
+  "schema_version": 1,
+  "status": "complete",
+  "surrogate_target_count": 0,
+  "total_tile_count": 16042,
+  "unique_owner_count": 6924,
+  "visual_audit_categories": [
+    "boundary",
+    "clean",
+    "dense",
+    "horizontal",
+    "near_threshold",
+    "sparse",
+    "vertical"
+  ]
+}

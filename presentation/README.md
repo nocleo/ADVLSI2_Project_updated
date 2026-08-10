@@ -13,7 +13,7 @@ At the end of every project phase:
 3. Update this PPTX path and refresh the convenience Slides copy when needed.
 4. Commit the presentation together with the phase results.
 
-The current 24-slide deck includes the completed B2 three-seed baselines:
+The current 28-slide deck includes the completed B2 three-seed baselines:
 92.47% +/- 0.61% tile-random reference accuracy and 90.38% +/- 0.84%
 accuracy on unseen layout families. The paper's reported result remains an
 external reference because the datasets and protocols differ. It also records
@@ -25,7 +25,13 @@ model used 14.3x fewer parameters, but unseen-layout accuracy/F1 regressed to
 89.36%/90.36% and tile-reference recall fell to 91.36%. B2 remains accepted.
 It also records B5.1's completed ensemble experiment: the 25% B2 / 75% B4
 blend improved unseen-layout accuracy/F1 to 90.47%/91.25%, but tile-reference
-recall fell to 92.07%, beyond tolerance. The ensemble was rejected; B5
-continues with validation/training failure-slice analysis before any targeted
-data, loss, context, or multiscale experiment.
-Exact localization and verified repair follow after those experiments.
+recall fell to 92.07%, beyond tolerance. The ensemble was rejected. B5.2 then
+closed classifier-only tuning after the B2/B4 disagreement mechanism failed to
+repeat across both validation protocols; no B5.3 training run is planned.
+
+B6.1 is now complete. The deck records the gap-free localization dataset across
+14 layout families: 6,924 exact KLayout violations with one unique owner each,
+8,021 dirty and 8,021 balanced clean tiles, 1600 nm contextual inputs with
+160 nm halos, and 1280 nm central outputs. B6.2 multi-task U-Net training is the
+next phase; exact-coordinate recovery and DRC/connectivity-verified repair still
+follow in B7 and B8.
