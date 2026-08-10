@@ -415,6 +415,30 @@ object-level precision/recall/F1, centroid distance, edge-pair distance, spacing
 severity, boundary distance, and per-layout-family metrics. No final-holdout
 result is used for tuning.
 
+**Implementation status:** the family-disjoint B6.2 baseline is ready for the
+official GPU run. It uses the eight `unseen_layout_v1` training families, the
+three validation families for checkpoint and threshold selection, and the
+three previously inspected test families only as development confirmation.
+The old experimental U-Net notebook's random tile split and reported Dice are
+not official evidence. The registered loss is weighted BCE + Dice + 0.25 x
+classification cross-entropy; positive BCE weight is calculated from training
+masks and capped at 50. Three seeds (42/43/44), 30 epochs, AdamW, train-only
+paired Manhattan transforms, and validation-selected 0.1--0.9 thresholds are
+fixed before the run.
+
+The development acceptance gate requires mean dirty-mask Dice >= 0.75,
+per-tile raster-object F1 >= 0.75, exact-vector unique-owner recall >= 0.85,
+and classification dirty recall within two percentage points of B2 when both
+are evaluated on the same B6 tiles. Passing this gate advances the model to B7;
+it does not open or redefine the untouched B9 holdout. Full-layout stitched
+precision and exact edge recovery remain B7 metrics.
+
+The declared coarse localization baseline applies each authoritative B2 dirty
+probability to the entire 160x160 central output box and evaluates it with the
+same mask, raster-object, and exact-vector-owner metrics as the U-Net. This
+quantifies the spatial gain over tile classification without treating Grad-CAM
+as exact geometry.
+
 ### B7 — Exact coordinates and realistic full-layout evaluation
 
 **Hypothesis:** central-region stitching plus deterministic geometry recovery
