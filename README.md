@@ -13,7 +13,7 @@ classifier in three measurable ways: preserve competitive classification,
 demonstrate generalization to unseen layout families, and progress from coarse
 tile localization to exact violation geometry and verified repair proposals.
 
-> **Project status:** **B0** through **B6.1** are complete. B2 established
+> **Project status:** **B0** through **B6.2** are complete. B2 established
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
 > +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
 > +/- 0.84%** on layout-family-disjoint test data. B3 found no accepted
@@ -27,10 +27,13 @@ tile localization to exact violation geometry and verified repair proposals.
 > **92.07%**, beyond the frozen tolerance. B5.2 then closed classifier-only
 > tuning. B6.1 now provides gap-free, vector-backed localization data across 14
 > families: **6,924 exact violations**, **8,021 dirty + 8,021 clean tiles**, and
-> one unique owner for every exact violation. The B6.2 multi-task U-Net flow is
-> implemented and locally validated; its official three-seed Colab GPU result
-> is pending and must be added before the B6.2 PR is merged. Exact-coordinate
-> recovery and verified repairs remain the end goal.
+> one unique owner for every exact violation. B6.2's three-seed multi-task U-Net
+> then passed every development gate: **95.51% +/- 0.83% classification
+> accuracy**, **98.86% +/- 0.27% dirty recall**, **86.32% +/- 1.65% mask Dice**,
+> **84.23% +/- 1.77% raster-object F1**, and **87.19% +/- 0.64% exact-vector
+> owner recall** on three unseen development-confirmation families. B7 exact
+> coordinate recovery and realistic full-layout false-alarm evaluation are
+> next; the untouched B9 final holdout remains unopened.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -101,7 +104,7 @@ ADVLSI2_Project_updated/
 ├── results/b4_architecture/       # B4 aggregate, paired cost evidence, and decision
 ├── results/b5_ensemble/           # B5 probability blend evidence and rejection decision
 ├── results/b6_localization_dataset/ # B6.1 compact geometry/dataset result
-├── results/b6_multitask_unet/       # B6.2 protocol; measured result pending
+├── results/b6_multitask_unet/       # Accepted B6.2 result and three seed records
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -549,7 +552,7 @@ artifacts under `training_datasets/b6_localization_dataset/`, and produces the
 ignored ZIP plus the compact result summary. B6.2 can now train the multi-task
 U-Net on these registered image/mask pairs.
 
-### B6.2 family-disjoint multi-task U-Net (GPU result pending)
+### B6.2 family-disjoint multi-task U-Net (accepted)
 
 B6.2 shares one small U-Net encoder between a central 160x160 segmentation
 head and an auxiliary clean/dirty classification head. The registered loss is
@@ -567,23 +570,28 @@ probabilities also define the declared coarse baseline: the full central output
 box is marked whenever B2 predicts dirty, and the same localization metrics are
 reported for that box baseline and the U-Net.
 
-Run the official three-seed experiment in Colab with
+The official three-seed experiment was launched in Colab with
 [`notebooks/B6_2_Multitask_UNet.ipynb`](notebooks/B6_2_Multitask_UNet.ipynb).
-The run reports classification, mask Dice/IoU, per-tile raster-object metrics,
-unique exact-vector owner recall, centroid and edge-pair bisector error,
-severity/boundary slices, and per-layout results. It does not claim stitched
-full-layout precision or exact recovered edge pairs; those remain B7 work.
+The versioned run reports classification, mask Dice/IoU, per-tile raster-object
+metrics, unique exact-vector owner recall, centroid and edge-pair bisector
+error, severity/boundary slices, and per-layout results. It does not claim
+stitched full-layout precision or exact recovered edge pairs; those remain B7
+work.
 
-The pre-registered development gate is:
+All pre-registered development gates passed:
 
-- dirty-mask Dice at least 0.75;
-- raster-object F1 at least 0.75;
-- exact-vector unique-owner recall at least 0.85;
-- classification dirty recall no more than two points below B2 on the same B6
-  tiles.
+- dirty-mask Dice: **86.32% +/- 1.65%** (required at least 75%);
+- raster-object F1: **84.23% +/- 1.77%** (required at least 75%);
+- exact-vector unique-owner recall: **87.19% +/- 0.64%** (required at least 85%);
+- classification dirty recall: **98.86% +/- 0.27%**, 2.67 points above B2 on
+  the same B6 tiles.
 
-Do not merge the B6.2 PR until the full 42/43/44 GPU result, updated roadmap,
-root README, results report, and presentation are all committed.
+Classification accuracy improved from 94.02% for B2 on the same B6 tiles to
+95.51%, while dirty F1 improved from 94.15% to 95.66%. The main B7 limitation
+is precision: raster-object recall is 99.36%, but precision is 73.12%. B7 will
+therefore freeze validation-only stitching/merging, recover exact M1 edge pairs,
+and measure false alarms at natural full-layout prevalence. Detailed evidence
+is under [`results/b6_multitask_unet/`](results/b6_multitask_unet/).
 
 ### B4 on an Apple-silicon Mac
 

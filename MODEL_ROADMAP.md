@@ -415,29 +415,42 @@ object-level precision/recall/F1, centroid distance, edge-pair distance, spacing
 severity, boundary distance, and per-layout-family metrics. No final-holdout
 result is used for tuning.
 
-**Implementation status:** the family-disjoint B6.2 baseline is ready for the
-official GPU run. It uses the eight `unseen_layout_v1` training families, the
-three validation families for checkpoint and threshold selection, and the
-three previously inspected test families only as development confirmation.
-The old experimental U-Net notebook's random tile split and reported Dice are
-not official evidence. The registered loss is weighted BCE + Dice + 0.25 x
-classification cross-entropy; positive BCE weight is calculated from training
-masks and capped at 50. Three seeds (42/43/44), 30 epochs, AdamW, train-only
-paired Manhattan transforms, and validation-selected 0.1--0.9 thresholds are
-fixed before the run.
+**Result:** accepted. All three CUDA runs completed for seeds 42, 43, and 44
+using 30 epochs, AdamW, batch size 16, train-only paired Manhattan transforms,
+and the registered weighted BCE + Dice + 0.25 x classification loss. The model
+and both thresholds were selected using the three validation families only;
+the three previously inspected test families remained development
+confirmation and the B9 final holdout stayed unopened.
 
-The development acceptance gate requires mean dirty-mask Dice >= 0.75,
+On the development-confirmation families, the 482,963-parameter U-Net reached
+**95.51% +/- 0.83% classification accuracy**, **98.86% +/- 0.27% dirty recall**,
+and **95.66% +/- 0.75% dirty F1**. Localization reached **86.32% +/- 1.65%
+dirty-mask Dice**, **84.23% +/- 1.77% raster-object F1**, and **87.19% +/-
+0.64% exact-vector unique-owner recall**. The same-tile B2 comparison reached
+94.02% accuracy, 96.19% dirty recall, and 94.15% dirty F1, while its declared
+full-box localization baseline reached only 3.82% Dice, 0% raster-object F1,
+and 3.76% vector-owner recall.
+
+The development acceptance gate required mean dirty-mask Dice >= 0.75,
 per-tile raster-object F1 >= 0.75, exact-vector unique-owner recall >= 0.85,
 and classification dirty recall within two percentage points of B2 when both
-are evaluated on the same B6 tiles. Passing this gate advances the model to B7;
-it does not open or redefine the untouched B9 holdout. Full-layout stitched
-precision and exact edge recovery remain B7 metrics.
+are evaluated on the same B6 tiles. All four checks passed, so B6.2 advances to
+B7. This does not open or redefine the untouched B9 holdout. Full-layout
+stitched precision and exact edge recovery remain B7 metrics.
 
 The declared coarse localization baseline applies each authoritative B2 dirty
 probability to the entire 160x160 central output box and evaluates it with the
 same mask, raster-object, and exact-vector-owner metrics as the U-Net. This
 quantifies the spatial gain over tile classification without treating Grad-CAM
 as exact geometry.
+
+The B7 error-analysis priority is precision, not another blind architecture
+sweep. Raster-object recall is 99.36%, but precision is 73.12%, which indicates
+fragmented or duplicate predicted components. The SRAM development family
+`tt_um_c4m_spsram_direct` is weakest at 78.95% mean Dice and 83.25%
+exact-vector recall. B7 must freeze a validation-only stitching/deployment
+policy, report this family separately, and quantify full-layout false alarms
+before any further model change.
 
 ### B7 — Exact coordinates and realistic full-layout evaluation
 
