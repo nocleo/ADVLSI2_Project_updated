@@ -44,6 +44,17 @@ results/b4_architecture/checkpoints/
 results/b6_multitask_unet/seed_*/best.pth
 results/b6_multitask_unet/seed_*/last.pt
 
+# B7 Drive runs export detailed per-layout components, exact candidates, and
+# diagnostic plots. Commit only the compact accepted summary/report after the
+# official run; preserve the complete result ZIP in Drive.
+results/b7_full_layout/layouts/
+results/b7_full_layout/layout_cache/
+results/b7_full_layout/scan_cache/
+results/b7_full_layout/validation_policy_selection.json
+results/b7_full_layout/validation_summary.json
+results/b7_full_layout/development_confirmation_summary.json
+results/b7_full_layout/*.png
+
 # OS / editor
 .DS_Store
 Thumbs.db

@@ -480,6 +480,28 @@ memory, and end-to-end layout runtime. Compare tiled and fully convolutional
 execution where practical; prefer the path that avoids recomputing overlapping
 features without changing model outputs.
 
+**Pre-registered B7 protocol:** implementation ready; measured GPU result
+pending. Average the probability outputs of the accepted seeds 42/43/44. Scan
+all central outputs of the three validation families and their original source
+variants; do not reuse B6's balanced clean sampling for prevalence metrics.
+Select the segmentation threshold first, then select the tile-classification
+gate, minimum merged-component area, and 0/1/2-pixel fragment gap using only
+those complete validation layouts. The selected policy must retain at least
+85% validation violation recall and is frozen before the three development-
+confirmation families are scanned. B7 is accepted only if complete-grid and
+coordinate-round-trip checks pass, development exact-violation recall is at
+least 85%, and development candidate-component precision is at least 80%.
+
+Sparse components are stitched in global raster coordinates without allocating
+a full-layout image. Each proposal exports its physical centroid/bounding box,
+mean/maximum confidence, source tiles, and the exact two M1 edges recovered by
+a local KLayout `m1.2` query. The teammate notebook's four-panel visualization,
+per-component records, confidence fields, and validation threshold plot are
+adapted; its random tile split, 200x200 mask ownership, and checkpoint are not.
+The official execution remains batched non-overlapping tiling because the
+accepted auxiliary classification head uses global pooling and a fixed central
+crop, so a single full-layout convolution would change model outputs.
+
 ### B8 — Constrained, verified repair proposals
 
 **Hypothesis:** a localized `m1.2` edge pair can support a small set of safe,
