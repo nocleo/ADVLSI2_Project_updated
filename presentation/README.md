@@ -29,9 +29,14 @@ recall fell to 92.07%, beyond tolerance. The ensemble was rejected. B5.2 then
 closed classifier-only tuning after the B2/B4 disagreement mechanism failed to
 repeat across both validation protocols; no B5.3 training run is planned.
 
-B6.1 is now complete. The deck records the gap-free localization dataset across
+B6.1 is complete. The deck records the gap-free localization dataset across
 14 layout families: 6,924 exact KLayout violations with one unique owner each,
 8,021 dirty and 8,021 balanced clean tiles, 1600 nm contextual inputs with
-160 nm halos, and 1280 nm central outputs. B6.2 multi-task U-Net training is the
-next phase; exact-coordinate recovery and DRC/connectivity-verified repair still
-follow in B7 and B8.
+160 nm halos, and 1280 nm central outputs. It now also records B6.2's accepted
+three-seed multi-task U-Net result: 95.51% classification accuracy, 98.86%
+dirty recall, 86.32% mask Dice, 84.23% raster-object F1, and 87.19%
+exact-vector owner recall on unseen development-confirmation layouts. The deck
+does not overstate this as sign-off localization: object precision is 73.12%,
+the SRAM family remains weakest, and B7 exact-edge recovery plus realistic
+full-layout false-alarm evaluation is next. DRC/connectivity-verified repair
+follows in B8, and the untouched final holdout remains B9.

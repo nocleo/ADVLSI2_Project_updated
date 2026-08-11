@@ -1,0 +1,2414 @@
+{
+  "phase": "B6.2",
+  "status": "complete",
+  "official_result": true,
+  "dataset": "/content/drive/MyDrive/ADVLSI2_B6_2/b6_localization_dataset.zip",
+  "dataset_sha256": "ebc35cebe605a467ba87f5e615b8e74986d3e15fccba4f9cc3ca0d33e7f2f9e8",
+  "protocol": "unseen_layout_v1",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "untouched_final_holdout_used": false,
+  "unet": {
+    "validation": {
+      "classification_accuracy": {
+        "runs": 3,
+        "mean": 0.9893754619364376,
+        "sample_stddev": 0.0018454346226384046,
+        "min": 0.9872505543237251,
+        "max": 0.9905764966740577
+      },
+      "classification_precision": {
+        "runs": 3,
+        "mean": 0.992567575015248,
+        "sample_stddev": 0.0026097715994352825,
+        "min": 0.9905712701053799,
+        "max": 0.9955207166853304
+      },
+      "classification_recall": {
+        "runs": 3,
+        "mean": 0.9861419068736142,
+        "sample_stddev": 0.003634943749613078,
+        "min": 0.9828159645232816,
+        "max": 0.9900221729490022
+      },
+      "classification_f1": {
+        "runs": 3,
+        "mean": 0.9893398857474617,
+        "sample_stddev": 0.0018622312302607256,
+        "min": 0.9871937639198218,
+        "max": 0.9905292479108636
+      },
+      "dirty_dice": {
+        "runs": 3,
+        "mean": 0.9015384495269293,
+        "sample_stddev": 0.01099646861953815,
+        "min": 0.8889360524829737,
+        "max": 0.9091839001310558
+      },
+      "dirty_iou": {
+        "runs": 3,
+        "mean": 0.8208492713872362,
+        "sample_stddev": 0.018130472649476377,
+        "min": 0.800076408265737,
+        "max": 0.8334896232649017
+      },
+      "raster_object_precision": {
+        "runs": 3,
+        "mean": 0.7481810891330172,
+        "sample_stddev": 0.006461418726273992,
+        "min": 0.7435125987213238,
+        "max": 0.7555555555555555
+      },
+      "raster_object_recall": {
+        "runs": 3,
+        "mean": 0.994629070157771,
+        "sample_stddev": 0.0014535505266606665,
+        "min": 0.9929506545820745,
+        "max": 0.9954682779456193
+      },
+      "raster_object_f1": {
+        "runs": 3,
+        "mean": 0.8539660133840368,
+        "sample_stddev": 0.0036692899073167075,
+        "min": 0.851237890204521,
+        "max": 0.8581375108790252
+      },
+      "exact_vector_owner_recall": {
+        "runs": 3,
+        "mean": 0.9010989010989011,
+        "sample_stddev": 0.007268547557869729,
+        "min": 0.8928571428571429,
+        "max": 0.9065934065934066
+      }
+    },
+    "development_test": {
+      "classification_accuracy": {
+        "runs": 3,
+        "mean": 0.9551318003365115,
+        "sample_stddev": 0.008299858994362705,
+        "min": 0.9455973079080202,
+        "max": 0.9607403252944475
+      },
+      "classification_precision": {
+        "runs": 3,
+        "mean": 0.9268017362905271,
+        "sample_stddev": 0.016260273579135353,
+        "min": 0.9080636877247047,
+        "max": 0.9372006386375732
+      },
+      "classification_recall": {
+        "runs": 3,
+        "mean": 0.9885959992521967,
+        "sample_stddev": 0.0026504854886442012,
+        "min": 0.9865395401009535,
+        "max": 0.9915872125630959
+      },
+      "classification_f1": {
+        "runs": 3,
+        "mean": 0.9566372131390555,
+        "sample_stddev": 0.007532830112848283,
+        "min": 0.9479892761394102,
+        "max": 0.9617695248498088
+      },
+      "dirty_dice": {
+        "runs": 3,
+        "mean": 0.8632329934433592,
+        "sample_stddev": 0.01654784626784603,
+        "min": 0.8445027589071026,
+        "max": 0.8758714808046605
+      },
+      "dirty_iou": {
+        "runs": 3,
+        "mean": 0.7596223531761962,
+        "sample_stddev": 0.02543880322531101,
+        "min": 0.7308565774751234,
+        "max": 0.7791560002690942
+      },
+      "raster_object_precision": {
+        "runs": 3,
+        "mean": 0.7312402080458665,
+        "sample_stddev": 0.02670826183048016,
+        "min": 0.7081632653061225,
+        "max": 0.7604965315808689
+      },
+      "raster_object_recall": {
+        "runs": 3,
+        "mean": 0.9936417103799079,
+        "sample_stddev": 0.0009926876487678577,
+        "min": 0.9928469241773963,
+        "max": 0.994754411063424
+      },
+      "raster_object_f1": {
+        "runs": 3,
+        "mean": 0.8422999526004996,
+        "sample_stddev": 0.017654574915794894,
+        "min": 0.8266825491363908,
+        "max": 0.8614557485525227
+      },
+      "exact_vector_owner_recall": {
+        "runs": 3,
+        "mean": 0.8719264485781485,
+        "sample_stddev": 0.006425049904347578,
+        "min": 0.8652982681205901,
+        "max": 0.8781270044900578
+      }
+    },
+    "runs": [
+      "/content/drive/MyDrive/ADVLSI2_B6_2/b6_multitask_unet/seed_42/run.json",
+      "/content/drive/MyDrive/ADVLSI2_B6_2/b6_multitask_unet/seed_43/run.json",
+      "/content/drive/MyDrive/ADVLSI2_B6_2/b6_multitask_unet/seed_44/run.json"
+    ]
+  },
+  "b2_on_b6": {
+    "validation": {
+      "classification_accuracy": {
+        "runs": 3,
+        "mean": 0.9516814486326681,
+        "sample_stddev": 0.007366112071425624,
+        "min": 0.9440133037694013,
+        "max": 0.9587028824833703
+      },
+      "classification_precision": {
+        "runs": 3,
+        "mean": 0.9528654608085222,
+        "sample_stddev": 0.012565237297624375,
+        "min": 0.9396267837541163,
+        "max": 0.9646266142616507
+      },
+      "classification_recall": {
+        "runs": 3,
+        "mean": 0.9504804138950481,
+        "sample_stddev": 0.0016934869530509248,
+        "min": 0.9490022172949002,
+        "max": 0.9523281596452328
+      },
+      "classification_f1": {
+        "runs": 3,
+        "mean": 0.9516504626905106,
+        "sample_stddev": 0.007090663103001602,
+        "min": 0.9442912300055157,
+        "max": 0.9584379358437936
+      },
+      "dirty_dice": {
+        "runs": 3,
+        "mean": 0.03557311523439274,
+        "sample_stddev": 0.00013035873960348971,
+        "min": 0.03542270695053478,
+        "max": 0.03565345864681357
+      },
+      "dirty_iou": {
+        "runs": 3,
+        "mean": 0.01810865111932639,
+        "sample_stddev": 6.755879409832974e-05,
+        "min": 0.01803070160479702,
+        "max": 0.018150289623669377
+      },
+      "raster_object_precision": {
+        "runs": 3,
+        "mean": 0.0,
+        "sample_stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "raster_object_recall": {
+        "runs": 3,
+        "mean": 0.0,
+        "sample_stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "raster_object_f1": {
+        "runs": 3,
+        "mean": 0.0,
+        "sample_stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "exact_vector_owner_recall": {
+        "runs": 3,
+        "mean": 0.029761904761904764,
+        "sample_stddev": 0.0003965317782895787,
+        "min": 0.029532967032967032,
+        "max": 0.03021978021978022
+      }
+    },
+    "development_test": {
+      "classification_accuracy": {
+        "runs": 3,
+        "mean": 0.9401757337820152,
+        "sample_stddev": 0.010661116043659177,
+        "min": 0.9293325855300056,
+        "max": 0.9506449803701627
+      },
+      "classification_precision": {
+        "runs": 3,
+        "mean": 0.9220708338688767,
+        "sample_stddev": 0.017292802523390424,
+        "min": 0.9052408681842244,
+        "max": 0.939792008757526
+      },
+      "classification_recall": {
+        "runs": 3,
+        "mean": 0.9618620302860347,
+        "sample_stddev": 0.002444699351396872,
+        "min": 0.9590577678070668,
+        "max": 0.9635445877734156
+      },
+      "classification_f1": {
+        "runs": 3,
+        "mean": 0.9415016837760035,
+        "sample_stddev": 0.009942565438116424,
+        "min": 0.9313725490196079,
+        "max": 0.9512465373961219
+      },
+      "dirty_dice": {
+        "runs": 3,
+        "mean": 0.038193964004887095,
+        "sample_stddev": 0.00017174458123713106,
+        "min": 0.03804579281115184,
+        "max": 0.03838219939016723
+      },
+      "dirty_iou": {
+        "runs": 3,
+        "mean": 0.01946878209314914,
+        "sample_stddev": 8.925108195163572e-05,
+        "min": 0.01939178430961704,
+        "max": 0.019566604349855958
+      },
+      "raster_object_precision": {
+        "runs": 3,
+        "mean": 0.0,
+        "sample_stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "raster_object_recall": {
+        "runs": 3,
+        "mean": 0.0,
+        "sample_stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "raster_object_f1": {
+        "runs": 3,
+        "mean": 0.0,
+        "sample_stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "exact_vector_owner_recall": {
+        "runs": 3,
+        "mean": 0.03763096001710498,
+        "sample_stddev": 0.00037033371981374396,
+        "min": 0.03720333547145606,
+        "max": 0.03784477228992944
+      }
+    },
+    "runs": [
+      {
+        "seed": 42,
+        "validation": {
+          "checkpoint": "/content/drive/MyDrive/ADVLSI2_B2/b2_baselines/checkpoints/unseen_layout_v1_seed_42.pth",
+          "checkpoint_sha256": "359c512694b829eaca8c60a69bbed3d463480a98cb07f7b48341e5092b41ddea",
+          "localization_baseline": "B2 probability over the full central output box",
+          "metrics": {
+            "samples": 3608,
+            "segmentation_threshold": 0.5,
+            "classification_threshold": 0.5,
+            "classification": {
+              "accuracy": 0.9587028824833703,
+              "precision": 0.9646266142616507,
+              "recall": 0.9523281596452328,
+              "f1": 0.9584379358437936,
+              "confusion_matrix": [
+                [
+                  1741,
+                  63
+                ],
+                [
+                  86,
+                  1718
+                ]
+              ],
+              "predicted_class_counts": {
+                "clean": 1827,
+                "dirty": 1781
+              }
+            },
+            "pixel_all": {
+              "dice": 0.03419188197780786,
+              "iou": 0.017393295746590192
+            },
+            "pixel_dirty_only": {
+              "dice": 0.03542270695053478,
+              "iou": 0.01803070160479702
+            },
+            "raster_objects": {
+              "true_positive": 0,
+              "false_positive": 1781,
+              "false_negative": 1986,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "exact_vector_owners": {
+              "total": 1456,
+              "matched": 44,
+              "recall": 0.03021978021978022,
+              "centroid_error_nm": {
+                "count": 44,
+                "mean": 89.5025940926526,
+                "median": 92.33882589708693,
+                "p95": 135.33279343970503
+              },
+              "edge_pair_bisector_error_nm": {
+                "count": 44,
+                "mean": 30.446134602685653,
+                "median": 32.5,
+                "p95": 59.625
+              },
+              "slices": {
+                "boundary:boundary": {
+                  "matched": 0,
+                  "total": 589,
+                  "recall": 0.0
+                },
+                "boundary:interior": {
+                  "matched": 44,
+                  "total": 867,
+                  "recall": 0.05074971164936563
+                },
+                "severity:medium": {
+                  "matched": 19,
+                  "total": 580,
+                  "recall": 0.032758620689655175
+                },
+                "severity:near_threshold": {
+                  "matched": 8,
+                  "total": 308,
+                  "recall": 0.025974025974025976
+                },
+                "severity:severe": {
+                  "matched": 17,
+                  "total": 568,
+                  "recall": 0.02992957746478873
+                }
+              }
+            },
+            "per_layout": {
+              "tt_um_TSARKA_TinyQV": {
+                "samples": 1238,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.962843295638126,
+                  "precision": 0.9689034369885434,
+                  "recall": 0.9563812600969306,
+                  "f1": 0.9626016260162602,
+                  "confusion_matrix": [
+                    [
+                      600,
+                      19
+                    ],
+                    [
+                      27,
+                      592
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 627,
+                    "dirty": 611
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.03259620461728871,
+                  "iou": 0.016568131409418114
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03362400931110455,
+                  "iou": 0.017099481213318106
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 611,
+                  "false_negative": 663,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 500,
+                  "matched": 20,
+                  "recall": 0.04,
+                  "centroid_error_nm": {
+                    "count": 20,
+                    "mean": 96.22901112781902,
+                    "median": 107.4968301655191,
+                    "p95": 131.76323799801756
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 20,
+                    "mean": 26.810158791131744,
+                    "median": 26.25,
+                    "p95": 53.212141959034646
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 200,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 20,
+                      "total": 300,
+                      "recall": 0.06666666666666667
+                    },
+                    "severity:medium": {
+                      "matched": 8,
+                      "total": 204,
+                      "recall": 0.0392156862745098
+                    },
+                    "severity:near_threshold": {
+                      "matched": 4,
+                      "total": 103,
+                      "recall": 0.038834951456310676
+                    },
+                    "severity:severe": {
+                      "matched": 8,
+                      "total": 193,
+                      "recall": 0.04145077720207254
+                    }
+                  }
+                }
+              },
+              "tt_um_aes_sbox": {
+                "samples": 1218,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9474548440065681,
+                  "precision": 0.9504132231404959,
+                  "recall": 0.9441707717569786,
+                  "f1": 0.9472817133443163,
+                  "confusion_matrix": [
+                    [
+                      579,
+                      30
+                    ],
+                    [
+                      34,
+                      575
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 613,
+                    "dirty": 605
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.034253437795620234,
+                  "iou": 0.017425154622785443
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.036007125775619396,
+                  "iou": 0.018333633613533
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 605,
+                  "false_negative": 684,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 493,
+                  "matched": 10,
+                  "recall": 0.02028397565922921,
+                  "centroid_error_nm": {
+                    "count": 10,
+                    "mean": 77.75175592671206,
+                    "median": 73.81285493502486,
+                    "p95": 132.7673191594079
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 10,
+                    "mean": 33.40925637648446,
+                    "median": 38.75,
+                    "p95": 60.27545423679231
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 200,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 10,
+                      "total": 293,
+                      "recall": 0.034129692832764506
+                    },
+                    "severity:medium": {
+                      "matched": 5,
+                      "total": 200,
+                      "recall": 0.025
+                    },
+                    "severity:near_threshold": {
+                      "matched": 2,
+                      "total": 102,
+                      "recall": 0.0196078431372549
+                    },
+                    "severity:severe": {
+                      "matched": 3,
+                      "total": 191,
+                      "recall": 0.015706806282722512
+                    }
+                  }
+                }
+              },
+              "tt_um_yen": {
+                "samples": 1152,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9661458333333334,
+                  "precision": 0.9752212389380531,
+                  "recall": 0.9565972222222222,
+                  "f1": 0.9658194566170026,
+                  "confusion_matrix": [
+                    [
+                      562,
+                      14
+                    ],
+                    [
+                      25,
+                      551
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 587,
+                    "dirty": 565
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.03584919976398694,
+                  "iou": 0.018251755292760255
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03674291257505889,
+                  "iou": 0.018715283296520197
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 565,
+                  "false_negative": 639,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 463,
+                  "matched": 14,
+                  "recall": 0.03023758099352052,
+                  "centroid_error_nm": {
+                    "count": 14,
+                    "mean": 88.28688273237239,
+                    "median": 89.91380634058976,
+                    "p95": 133.18949656834909
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 14,
+                    "mean": 33.52387020933495,
+                    "median": 33.75,
+                    "p95": 58.375
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 189,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 14,
+                      "total": 274,
+                      "recall": 0.051094890510948905
+                    },
+                    "severity:medium": {
+                      "matched": 6,
+                      "total": 176,
+                      "recall": 0.03409090909090909
+                    },
+                    "severity:near_threshold": {
+                      "matched": 2,
+                      "total": 103,
+                      "recall": 0.019417475728155338
+                    },
+                    "severity:severe": {
+                      "matched": 6,
+                      "total": 184,
+                      "recall": 0.03260869565217391
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "development_test": {
+          "checkpoint": "/content/drive/MyDrive/ADVLSI2_B2/b2_baselines/checkpoints/unseen_layout_v1_seed_42.pth",
+          "checkpoint_sha256": "359c512694b829eaca8c60a69bbed3d463480a98cb07f7b48341e5092b41ddea",
+          "localization_baseline": "B2 probability over the full central output box",
+          "metrics": {
+            "samples": 3566,
+            "segmentation_threshold": 0.5,
+            "classification_threshold": 0.5,
+            "classification": {
+              "accuracy": 0.9506449803701627,
+              "precision": 0.939792008757526,
+              "recall": 0.9629837352776219,
+              "f1": 0.9512465373961219,
+              "confusion_matrix": [
+                [
+                  1673,
+                  110
+                ],
+                [
+                  66,
+                  1717
+                ]
+              ],
+              "predicted_class_counts": {
+                "clean": 1739,
+                "dirty": 1827
+              }
+            },
+            "pixel_all": {
+              "dice": 0.03579751336241854,
+              "iou": 0.01822496082045924
+            },
+            "pixel_dirty_only": {
+              "dice": 0.03804579281115184,
+              "iou": 0.01939178430961704
+            },
+            "raster_objects": {
+              "true_positive": 0,
+              "false_positive": 1827,
+              "false_negative": 2097,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "exact_vector_owners": {
+              "total": 1559,
+              "matched": 59,
+              "recall": 0.03784477228992944,
+              "centroid_error_nm": {
+                "count": 59,
+                "mean": 94.20780966819883,
+                "median": 106.90182411914213,
+                "p95": 134.82170555244682
+              },
+              "edge_pair_bisector_error_nm": {
+                "count": 59,
+                "mean": 35.77938422570543,
+                "median": 35.0,
+                "p95": 65.0
+              },
+              "slices": {
+                "boundary:boundary": {
+                  "matched": 0,
+                  "total": 615,
+                  "recall": 0.0
+                },
+                "boundary:interior": {
+                  "matched": 59,
+                  "total": 944,
+                  "recall": 0.0625
+                },
+                "severity:medium": {
+                  "matched": 26,
+                  "total": 631,
+                  "recall": 0.04120443740095087
+                },
+                "severity:near_threshold": {
+                  "matched": 14,
+                  "total": 304,
+                  "recall": 0.046052631578947366
+                },
+                "severity:severe": {
+                  "matched": 19,
+                  "total": 624,
+                  "recall": 0.030448717948717948
+                }
+              }
+            },
+            "per_layout": {
+              "tt_um_2048_vga_game": {
+                "samples": 1234,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9586709886547812,
+                  "precision": 0.9594155844155844,
+                  "recall": 0.9578606158833063,
+                  "f1": 0.9586374695863747,
+                  "confusion_matrix": [
+                    [
+                      592,
+                      25
+                    ],
+                    [
+                      26,
+                      591
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 618,
+                    "dirty": 616
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.032595576300396355,
+                  "iou": 0.01656780675480135
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03395004936472539,
+                  "iou": 0.017268151988587766
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 616,
+                  "false_negative": 668,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 508,
+                  "matched": 15,
+                  "recall": 0.02952755905511811,
+                  "centroid_error_nm": {
+                    "count": 15,
+                    "mean": 93.0474107719662,
+                    "median": 102.08329931972223,
+                    "p95": 134.8802506132689
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 15,
+                    "mean": 38.89737114902268,
+                    "median": 40.0,
+                    "p95": 56.249999999999986
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 211,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 15,
+                      "total": 297,
+                      "recall": 0.050505050505050504
+                    },
+                    "severity:medium": {
+                      "matched": 9,
+                      "total": 224,
+                      "recall": 0.04017857142857143
+                    },
+                    "severity:near_threshold": {
+                      "matched": 4,
+                      "total": 115,
+                      "recall": 0.034782608695652174
+                    },
+                    "severity:severe": {
+                      "matched": 2,
+                      "total": 169,
+                      "recall": 0.011834319526627219
+                    }
+                  }
+                }
+              },
+              "tt_um_Bingyao_FCOTA": {
+                "samples": 1130,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.952212389380531,
+                  "precision": 0.9443478260869566,
+                  "recall": 0.9610619469026549,
+                  "f1": 0.9526315789473684,
+                  "confusion_matrix": [
+                    [
+                      533,
+                      32
+                    ],
+                    [
+                      22,
+                      543
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 555,
+                    "dirty": 575
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.036334998714656466,
+                  "iou": 0.01850366467339027
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.038433449978853784,
+                  "iou": 0.019593242950864686
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 575,
+                  "false_negative": 670,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 470,
+                  "matched": 20,
+                  "recall": 0.0425531914893617,
+                  "centroid_error_nm": {
+                    "count": 20,
+                    "mean": 95.13308439110455,
+                    "median": 101.30571032190792,
+                    "p95": 135.7055172223159
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 20,
+                    "mean": 36.25,
+                    "median": 36.25,
+                    "p95": 65.125
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 178,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 20,
+                      "total": 292,
+                      "recall": 0.0684931506849315
+                    },
+                    "severity:medium": {
+                      "matched": 5,
+                      "total": 191,
+                      "recall": 0.02617801047120419
+                    },
+                    "severity:near_threshold": {
+                      "matched": 6,
+                      "total": 79,
+                      "recall": 0.0759493670886076
+                    },
+                    "severity:severe": {
+                      "matched": 9,
+                      "total": 200,
+                      "recall": 0.045
+                    }
+                  }
+                }
+              },
+              "tt_um_c4m_spsram_direct": {
+                "samples": 1202,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9409317803660566,
+                  "precision": 0.9166666666666666,
+                  "recall": 0.9700499168053245,
+                  "f1": 0.942603071948262,
+                  "confusion_matrix": [
+                    [
+                      548,
+                      53
+                    ],
+                    [
+                      18,
+                      583
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 566,
+                    "dirty": 636
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.0384047936203884,
+                  "iou": 0.01957834801771851
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.04182155122229241,
+                  "iou": 0.021357374885009776
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 636,
+                  "false_negative": 759,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 581,
+                  "matched": 24,
+                  "recall": 0.04130808950086059,
+                  "centroid_error_nm": {
+                    "count": 24,
+                    "mean": 94.16199670925619,
+                    "median": 115.12884971526424,
+                    "p95": 131.2114475864479
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 24,
+                    "mean": 33.43846258672,
+                    "median": 32.5,
+                    "p95": 63.874999999999986
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 226,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 24,
+                      "total": 355,
+                      "recall": 0.0676056338028169
+                    },
+                    "severity:medium": {
+                      "matched": 12,
+                      "total": 216,
+                      "recall": 0.05555555555555555
+                    },
+                    "severity:near_threshold": {
+                      "matched": 4,
+                      "total": 110,
+                      "recall": 0.03636363636363636
+                    },
+                    "severity:severe": {
+                      "matched": 8,
+                      "total": 255,
+                      "recall": 0.03137254901960784
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "seed": 43,
+        "validation": {
+          "checkpoint": "/content/drive/MyDrive/ADVLSI2_B2/b2_baselines/checkpoints/unseen_layout_v1_seed_43.pth",
+          "checkpoint_sha256": "cdee7cbdee374f51eb6498e0b12e47d1b90ad343e389c9366044cba8cef843ed",
+          "localization_baseline": "B2 probability over the full central output box",
+          "metrics": {
+            "samples": 3608,
+            "segmentation_threshold": 0.5,
+            "classification_threshold": 0.5,
+            "classification": {
+              "accuracy": 0.9523281596452328,
+              "precision": 0.9543429844097996,
+              "recall": 0.950110864745011,
+              "f1": 0.9522222222222222,
+              "confusion_matrix": [
+                [
+                  1722,
+                  82
+                ],
+                [
+                  90,
+                  1714
+                ]
+              ],
+              "predicted_class_counts": {
+                "clean": 1812,
+                "dirty": 1796
+              }
+            },
+            "pixel_all": {
+              "dice": 0.03404440953642272,
+              "iou": 0.01731697791219941
+            },
+            "pixel_dirty_only": {
+              "dice": 0.03564318010582987,
+              "iou": 0.018144962129512776
+            },
+            "raster_objects": {
+              "true_positive": 0,
+              "false_positive": 1796,
+              "false_negative": 1986,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "exact_vector_owners": {
+              "total": 1456,
+              "matched": 43,
+              "recall": 0.029532967032967032,
+              "centroid_error_nm": {
+                "count": 43,
+                "mean": 89.10447432396633,
+                "median": 92.13576938409967,
+                "p95": 135.56009732225482
+              },
+              "edge_pair_bisector_error_nm": {
+                "count": 43,
+                "mean": 30.428528992919393,
+                "median": 32.5,
+                "p95": 59.75
+              },
+              "slices": {
+                "boundary:boundary": {
+                  "matched": 0,
+                  "total": 589,
+                  "recall": 0.0
+                },
+                "boundary:interior": {
+                  "matched": 43,
+                  "total": 867,
+                  "recall": 0.049596309111880045
+                },
+                "severity:medium": {
+                  "matched": 18,
+                  "total": 580,
+                  "recall": 0.03103448275862069
+                },
+                "severity:near_threshold": {
+                  "matched": 8,
+                  "total": 308,
+                  "recall": 0.025974025974025976
+                },
+                "severity:severe": {
+                  "matched": 17,
+                  "total": 568,
+                  "recall": 0.02992957746478873
+                }
+              }
+            },
+            "per_layout": {
+              "tt_um_TSARKA_TinyQV": {
+                "samples": 1238,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9499192245557351,
+                  "precision": 0.9543230016313213,
+                  "recall": 0.9450726978998385,
+                  "f1": 0.9496753246753247,
+                  "confusion_matrix": [
+                    [
+                      591,
+                      28
+                    ],
+                    [
+                      34,
+                      585
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 625,
+                    "dirty": 613
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.03259765006155925,
+                  "iou": 0.016568878278802105
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03413017993029566,
+                  "iou": 0.017361363189901096
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 613,
+                  "false_negative": 663,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 500,
+                  "matched": 18,
+                  "recall": 0.036,
+                  "centroid_error_nm": {
+                    "count": 18,
+                    "mean": 94.22447073206627,
+                    "median": 102.30664205465104,
+                    "p95": 132.35245912133593
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 18,
+                    "mean": 24.305555555555557,
+                    "median": 23.75,
+                    "p95": 41.874999999999986
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 200,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 18,
+                      "total": 300,
+                      "recall": 0.06
+                    },
+                    "severity:medium": {
+                      "matched": 7,
+                      "total": 204,
+                      "recall": 0.03431372549019608
+                    },
+                    "severity:near_threshold": {
+                      "matched": 3,
+                      "total": 103,
+                      "recall": 0.02912621359223301
+                    },
+                    "severity:severe": {
+                      "matched": 8,
+                      "total": 193,
+                      "recall": 0.04145077720207254
+                    }
+                  }
+                }
+              },
+              "tt_um_aes_sbox": {
+                "samples": 1218,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9482758620689655,
+                  "precision": 0.941747572815534,
+                  "recall": 0.9556650246305419,
+                  "f1": 0.9486552567237164,
+                  "confusion_matrix": [
+                    [
+                      573,
+                      36
+                    ],
+                    [
+                      27,
+                      582
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 600,
+                    "dirty": 618
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.03407286241271261,
+                  "iou": 0.017331701547458684
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03614148212448352,
+                  "iou": 0.01840330237413489
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 618,
+                  "false_negative": 684,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 493,
+                  "matched": 11,
+                  "recall": 0.02231237322515213,
+                  "centroid_error_nm": {
+                    "count": 11,
+                    "mean": 81.76686950001327,
+                    "median": 74.21590126111789,
+                    "p95": 132.40649850074718
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 11,
+                    "mean": 36.508414887713144,
+                    "median": 40.0,
+                    "p95": 65.02314021526574
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 200,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 11,
+                      "total": 293,
+                      "recall": 0.03754266211604096
+                    },
+                    "severity:medium": {
+                      "matched": 5,
+                      "total": 200,
+                      "recall": 0.025
+                    },
+                    "severity:near_threshold": {
+                      "matched": 3,
+                      "total": 102,
+                      "recall": 0.029411764705882353
+                    },
+                    "severity:severe": {
+                      "matched": 3,
+                      "total": 191,
+                      "recall": 0.015706806282722512
+                    }
+                  }
+                }
+              },
+              "tt_um_yen": {
+                "samples": 1152,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9592013888888888,
+                  "precision": 0.968141592920354,
+                  "recall": 0.9496527777777778,
+                  "f1": 0.9588080631025416,
+                  "confusion_matrix": [
+                    [
+                      558,
+                      18
+                    ],
+                    [
+                      29,
+                      547
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 587,
+                    "dirty": 565
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.03558071930231999,
+                  "iou": 0.018112589125923874
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03672935463400602,
+                  "iou": 0.01870824825945427
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 565,
+                  "false_negative": 639,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 463,
+                  "matched": 14,
+                  "recall": 0.03023758099352052,
+                  "centroid_error_nm": {
+                    "count": 14,
+                    "mean": 88.28688273237239,
+                    "median": 89.91380634058976,
+                    "p95": 133.18949656834909
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 14,
+                    "mean": 33.52387020933495,
+                    "median": 33.75,
+                    "p95": 58.375
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 189,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 14,
+                      "total": 274,
+                      "recall": 0.051094890510948905
+                    },
+                    "severity:medium": {
+                      "matched": 6,
+                      "total": 176,
+                      "recall": 0.03409090909090909
+                    },
+                    "severity:near_threshold": {
+                      "matched": 2,
+                      "total": 103,
+                      "recall": 0.019417475728155338
+                    },
+                    "severity:severe": {
+                      "matched": 6,
+                      "total": 184,
+                      "recall": 0.03260869565217391
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "development_test": {
+          "checkpoint": "/content/drive/MyDrive/ADVLSI2_B2/b2_baselines/checkpoints/unseen_layout_v1_seed_43.pth",
+          "checkpoint_sha256": "cdee7cbdee374f51eb6498e0b12e47d1b90ad343e389c9366044cba8cef843ed",
+          "localization_baseline": "B2 probability over the full central output box",
+          "metrics": {
+            "samples": 3566,
+            "segmentation_threshold": 0.5,
+            "classification_threshold": 0.5,
+            "classification": {
+              "accuracy": 0.9405496354458778,
+              "precision": 0.9211796246648793,
+              "recall": 0.9635445877734156,
+              "f1": 0.9418859649122807,
+              "confusion_matrix": [
+                [
+                  1636,
+                  147
+                ],
+                [
+                  65,
+                  1718
+                ]
+              ],
+              "predicted_class_counts": {
+                "clean": 1701,
+                "dirty": 1865
+              }
+            },
+            "pixel_all": {
+              "dice": 0.0354117536659603,
+              "iou": 0.018025025718258942
+            },
+            "pixel_dirty_only": {
+              "dice": 0.03838219939016723,
+              "iou": 0.019566604349855958
+            },
+            "raster_objects": {
+              "true_positive": 0,
+              "false_positive": 1865,
+              "false_negative": 2097,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "exact_vector_owners": {
+              "total": 1559,
+              "matched": 59,
+              "recall": 0.03784477228992944,
+              "centroid_error_nm": {
+                "count": 59,
+                "mean": 93.82363241679776,
+                "median": 106.90182411914213,
+                "p95": 134.82170555244682
+              },
+              "edge_pair_bisector_error_nm": {
+                "count": 59,
+                "mean": 35.82175710706136,
+                "median": 35.0,
+                "p95": 65.1726923334874
+              },
+              "slices": {
+                "boundary:boundary": {
+                  "matched": 0,
+                  "total": 615,
+                  "recall": 0.0
+                },
+                "boundary:interior": {
+                  "matched": 59,
+                  "total": 944,
+                  "recall": 0.0625
+                },
+                "severity:medium": {
+                  "matched": 26,
+                  "total": 631,
+                  "recall": 0.04120443740095087
+                },
+                "severity:near_threshold": {
+                  "matched": 14,
+                  "total": 304,
+                  "recall": 0.046052631578947366
+                },
+                "severity:severe": {
+                  "matched": 19,
+                  "total": 624,
+                  "recall": 0.030448717948717948
+                }
+              }
+            },
+            "per_layout": {
+              "tt_um_2048_vga_game": {
+                "samples": 1234,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9416531604538088,
+                  "precision": 0.9373996789727127,
+                  "recall": 0.946515397082658,
+                  "f1": 0.9419354838709677,
+                  "confusion_matrix": [
+                    [
+                      578,
+                      39
+                    ],
+                    [
+                      33,
+                      584
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 611,
+                    "dirty": 623
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.03236087103996662,
+                  "iou": 0.016446547826618228
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.034483329464057313,
+                  "iou": 0.01754415517353748
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 623,
+                  "false_negative": 668,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 508,
+                  "matched": 16,
+                  "recall": 0.031496062992125984,
+                  "centroid_error_nm": {
+                    "count": 16,
+                    "mean": 92.22725789939032,
+                    "median": 102.00241888482475,
+                    "p95": 134.8656143480634
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 16,
+                    "mean": 40.685035452208766,
+                    "median": 41.25,
+                    "p95": 65.625
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 211,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 16,
+                      "total": 297,
+                      "recall": 0.05387205387205387
+                    },
+                    "severity:medium": {
+                      "matched": 9,
+                      "total": 224,
+                      "recall": 0.04017857142857143
+                    },
+                    "severity:near_threshold": {
+                      "matched": 5,
+                      "total": 115,
+                      "recall": 0.043478260869565216
+                    },
+                    "severity:severe": {
+                      "matched": 2,
+                      "total": 169,
+                      "recall": 0.011834319526627219
+                    }
+                  }
+                }
+              },
+              "tt_um_Bingyao_FCOTA": {
+                "samples": 1130,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9513274336283186,
+                  "precision": 0.9336734693877551,
+                  "recall": 0.9716814159292035,
+                  "f1": 0.9522983521248916,
+                  "confusion_matrix": [
+                    [
+                      526,
+                      39
+                    ],
+                    [
+                      16,
+                      549
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 542,
+                    "dirty": 588
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.03621278837362015,
+                  "iou": 0.018440281186895627
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.038734368560676254,
+                  "iou": 0.019749679971830268
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 588,
+                  "false_negative": 670,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 470,
+                  "matched": 19,
+                  "recall": 0.04042553191489362,
+                  "centroid_error_nm": {
+                    "count": 19,
+                    "mean": 94.74054027256183,
+                    "median": 100.0199980003999,
+                    "p95": 135.73126439765684
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 19,
+                    "mean": 34.73684210526316,
+                    "median": 35.0,
+                    "p95": 60.749999999999986
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 178,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 19,
+                      "total": 292,
+                      "recall": 0.06506849315068493
+                    },
+                    "severity:medium": {
+                      "matched": 5,
+                      "total": 191,
+                      "recall": 0.02617801047120419
+                    },
+                    "severity:near_threshold": {
+                      "matched": 5,
+                      "total": 79,
+                      "recall": 0.06329113924050633
+                    },
+                    "severity:severe": {
+                      "matched": 9,
+                      "total": 200,
+                      "recall": 0.045
+                    }
+                  }
+                }
+              },
+              "tt_um_c4m_spsram_direct": {
+                "samples": 1202,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9292845257903494,
+                  "precision": 0.8944954128440367,
+                  "recall": 0.9733777038269551,
+                  "f1": 0.9322709163346613,
+                  "confusion_matrix": [
+                    [
+                      532,
+                      69
+                    ],
+                    [
+                      16,
+                      585
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 548,
+                    "dirty": 654
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.037591414118156294,
+                  "iou": 0.01915575298059752
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.04193086750675051,
+                  "iou": 0.02141439585095705
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 654,
+                  "false_negative": 759,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 581,
+                  "matched": 24,
+                  "recall": 0.04130808950086059,
+                  "centroid_error_nm": {
+                    "count": 24,
+                    "mean": 94.16199670925619,
+                    "median": 115.12884971526424,
+                    "p95": 131.2114475864479
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 24,
+                    "mean": 33.43846258672,
+                    "median": 32.5,
+                    "p95": 63.874999999999986
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 226,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 24,
+                      "total": 355,
+                      "recall": 0.0676056338028169
+                    },
+                    "severity:medium": {
+                      "matched": 12,
+                      "total": 216,
+                      "recall": 0.05555555555555555
+                    },
+                    "severity:near_threshold": {
+                      "matched": 4,
+                      "total": 110,
+                      "recall": 0.03636363636363636
+                    },
+                    "severity:severe": {
+                      "matched": 8,
+                      "total": 255,
+                      "recall": 0.03137254901960784
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "seed": 44,
+        "validation": {
+          "checkpoint": "/content/drive/MyDrive/ADVLSI2_B2/b2_baselines/checkpoints/unseen_layout_v1_seed_44.pth",
+          "checkpoint_sha256": "1a65d95ec11488652deb137d46463b654352c1abc2507f83b23af34a004866eb",
+          "localization_baseline": "B2 probability over the full central output box",
+          "metrics": {
+            "samples": 3608,
+            "segmentation_threshold": 0.5,
+            "classification_threshold": 0.5,
+            "classification": {
+              "accuracy": 0.9440133037694013,
+              "precision": 0.9396267837541163,
+              "recall": 0.9490022172949002,
+              "f1": 0.9442912300055157,
+              "confusion_matrix": [
+                [
+                  1694,
+                  110
+                ],
+                [
+                  92,
+                  1712
+                ]
+              ],
+              "predicted_class_counts": {
+                "clean": 1786,
+                "dirty": 1822
+              }
+            },
+            "pixel_all": {
+              "dice": 0.03353823130117924,
+              "iou": 0.01705511484384006
+            },
+            "pixel_dirty_only": {
+              "dice": 0.03565345864681357,
+              "iou": 0.018150289623669377
+            },
+            "raster_objects": {
+              "true_positive": 0,
+              "false_positive": 1822,
+              "false_negative": 1986,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "exact_vector_owners": {
+              "total": 1456,
+              "matched": 43,
+              "recall": 0.029532967032967032,
+              "centroid_error_nm": {
+                "count": 43,
+                "mean": 89.44135745796777,
+                "median": 92.5418824100742,
+                "p95": 135.56009732225482
+              },
+              "edge_pair_bisector_error_nm": {
+                "count": 43,
+                "mean": 31.037905174841136,
+                "median": 32.5,
+                "p95": 59.75
+              },
+              "slices": {
+                "boundary:boundary": {
+                  "matched": 0,
+                  "total": 589,
+                  "recall": 0.0
+                },
+                "boundary:interior": {
+                  "matched": 43,
+                  "total": 867,
+                  "recall": 0.049596309111880045
+                },
+                "severity:medium": {
+                  "matched": 19,
+                  "total": 580,
+                  "recall": 0.032758620689655175
+                },
+                "severity:near_threshold": {
+                  "matched": 7,
+                  "total": 308,
+                  "recall": 0.022727272727272728
+                },
+                "severity:severe": {
+                  "matched": 17,
+                  "total": 568,
+                  "recall": 0.02992957746478873
+                }
+              }
+            },
+            "per_layout": {
+              "tt_um_TSARKA_TinyQV": {
+                "samples": 1238,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9402261712439418,
+                  "precision": 0.9318541996830428,
+                  "recall": 0.9499192245557351,
+                  "f1": 0.9408000000000001,
+                  "confusion_matrix": [
+                    [
+                      576,
+                      43
+                    ],
+                    [
+                      31,
+                      588
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 607,
+                    "dirty": 631
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.031568137955741385,
+                  "iou": 0.016037201268911182
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03383591275142295,
+                  "iou": 0.017209099164644217
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 631,
+                  "false_negative": 663,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 500,
+                  "matched": 19,
+                  "recall": 0.038,
+                  "centroid_error_nm": {
+                    "count": 19,
+                    "mean": 96.44444490380424,
+                    "median": 108.46197490364999,
+                    "p95": 132.05784855967673
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 19,
+                    "mean": 27.958061885401836,
+                    "median": 27.5,
+                    "p95": 53.92428391806924
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 200,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 19,
+                      "total": 300,
+                      "recall": 0.06333333333333334
+                    },
+                    "severity:medium": {
+                      "matched": 8,
+                      "total": 204,
+                      "recall": 0.0392156862745098
+                    },
+                    "severity:near_threshold": {
+                      "matched": 3,
+                      "total": 103,
+                      "recall": 0.02912621359223301
+                    },
+                    "severity:severe": {
+                      "matched": 8,
+                      "total": 193,
+                      "recall": 0.04145077720207254
+                    }
+                  }
+                }
+              },
+              "tt_um_aes_sbox": {
+                "samples": 1218,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9334975369458128,
+                  "precision": 0.9285714285714286,
+                  "recall": 0.9392446633825944,
+                  "f1": 0.9338775510204081,
+                  "confusion_matrix": [
+                    [
+                      565,
+                      44
+                    ],
+                    [
+                      37,
+                      572
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 602,
+                    "dirty": 616
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.03400660409151126,
+                  "iou": 0.01729741522137553
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.0365732859115812,
+                  "iou": 0.018627273250971056
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 616,
+                  "false_negative": 684,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 493,
+                  "matched": 10,
+                  "recall": 0.02028397565922921,
+                  "centroid_error_nm": {
+                    "count": 10,
+                    "mean": 77.75175592671206,
+                    "median": 73.81285493502486,
+                    "p95": 132.7673191594079
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 10,
+                    "mean": 33.40925637648446,
+                    "median": 38.75,
+                    "p95": 60.27545423679231
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 200,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 10,
+                      "total": 293,
+                      "recall": 0.034129692832764506
+                    },
+                    "severity:medium": {
+                      "matched": 5,
+                      "total": 200,
+                      "recall": 0.025
+                    },
+                    "severity:near_threshold": {
+                      "matched": 2,
+                      "total": 102,
+                      "recall": 0.0196078431372549
+                    },
+                    "severity:severe": {
+                      "matched": 3,
+                      "total": 191,
+                      "recall": 0.015706806282722512
+                    }
+                  }
+                }
+              },
+              "tt_um_yen": {
+                "samples": 1152,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9592013888888888,
+                  "precision": 0.96,
+                  "recall": 0.9583333333333334,
+                  "f1": 0.9591659426585578,
+                  "confusion_matrix": [
+                    [
+                      553,
+                      23
+                    ],
+                    [
+                      24,
+                      552
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 577,
+                    "dirty": 575
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.035195238032342285,
+                  "iou": 0.017912842392083753
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03663413456123874,
+                  "iou": 0.01865884255507924
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 575,
+                  "false_negative": 639,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 463,
+                  "matched": 14,
+                  "recall": 0.03023758099352052,
+                  "centroid_error_nm": {
+                    "count": 14,
+                    "mean": 88.28688273237239,
+                    "median": 89.91380634058976,
+                    "p95": 133.18949656834909
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 14,
+                    "mean": 33.52387020933495,
+                    "median": 33.75,
+                    "p95": 58.375
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 189,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 14,
+                      "total": 274,
+                      "recall": 0.051094890510948905
+                    },
+                    "severity:medium": {
+                      "matched": 6,
+                      "total": 176,
+                      "recall": 0.03409090909090909
+                    },
+                    "severity:near_threshold": {
+                      "matched": 2,
+                      "total": 103,
+                      "recall": 0.019417475728155338
+                    },
+                    "severity:severe": {
+                      "matched": 6,
+                      "total": 184,
+                      "recall": 0.03260869565217391
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "development_test": {
+          "checkpoint": "/content/drive/MyDrive/ADVLSI2_B2/b2_baselines/checkpoints/unseen_layout_v1_seed_44.pth",
+          "checkpoint_sha256": "1a65d95ec11488652deb137d46463b654352c1abc2507f83b23af34a004866eb",
+          "localization_baseline": "B2 probability over the full central output box",
+          "metrics": {
+            "samples": 3566,
+            "segmentation_threshold": 0.5,
+            "classification_threshold": 0.5,
+            "classification": {
+              "accuracy": 0.9293325855300056,
+              "precision": 0.9052408681842244,
+              "recall": 0.9590577678070668,
+              "f1": 0.9313725490196079,
+              "confusion_matrix": [
+                [
+                  1604,
+                  179
+                ],
+                [
+                  73,
+                  1710
+                ]
+              ],
+              "predicted_class_counts": {
+                "clean": 1677,
+                "dirty": 1889
+              }
+            },
+            "pixel_all": {
+              "dice": 0.03460320511775137,
+              "iou": 0.017606218351355625
+            },
+            "pixel_dirty_only": {
+              "dice": 0.038153899813342225,
+              "iou": 0.019447957619974428
+            },
+            "raster_objects": {
+              "true_positive": 0,
+              "false_positive": 1889,
+              "false_negative": 2097,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "exact_vector_owners": {
+              "total": 1559,
+              "matched": 58,
+              "recall": 0.03720333547145606,
+              "centroid_error_nm": {
+                "count": 58,
+                "mean": 94.063264616902,
+                "median": 108.01280352238604,
+                "p95": 134.83634181765234
+              },
+              "edge_pair_bisector_error_nm": {
+                "count": 58,
+                "mean": 35.27558050545897,
+                "median": 35.0,
+                "p95": 65.0
+              },
+              "slices": {
+                "boundary:boundary": {
+                  "matched": 0,
+                  "total": 615,
+                  "recall": 0.0
+                },
+                "boundary:interior": {
+                  "matched": 58,
+                  "total": 944,
+                  "recall": 0.0614406779661017
+                },
+                "severity:medium": {
+                  "matched": 26,
+                  "total": 631,
+                  "recall": 0.04120443740095087
+                },
+                "severity:near_threshold": {
+                  "matched": 13,
+                  "total": 304,
+                  "recall": 0.04276315789473684
+                },
+                "severity:severe": {
+                  "matched": 19,
+                  "total": 624,
+                  "recall": 0.030448717948717948
+                }
+              }
+            },
+            "per_layout": {
+              "tt_um_2048_vga_game": {
+                "samples": 1234,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9294975688816856,
+                  "precision": 0.917981072555205,
+                  "recall": 0.9432739059967585,
+                  "f1": 0.9304556354916067,
+                  "confusion_matrix": [
+                    [
+                      565,
+                      52
+                    ],
+                    [
+                      35,
+                      582
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 600,
+                    "dirty": 634
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.031683226393889985,
+                  "iou": 0.016096609457757066
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03446326171690389,
+                  "iou": 0.017533766245960727
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 634,
+                  "false_negative": 668,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 508,
+                  "matched": 15,
+                  "recall": 0.02952755905511811,
+                  "centroid_error_nm": {
+                    "count": 15,
+                    "mean": 93.0474107719662,
+                    "median": 102.08329931972223,
+                    "p95": 134.8802506132689
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 15,
+                    "mean": 38.89737114902268,
+                    "median": 40.0,
+                    "p95": 56.249999999999986
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 211,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 15,
+                      "total": 297,
+                      "recall": 0.050505050505050504
+                    },
+                    "severity:medium": {
+                      "matched": 9,
+                      "total": 224,
+                      "recall": 0.04017857142857143
+                    },
+                    "severity:near_threshold": {
+                      "matched": 4,
+                      "total": 115,
+                      "recall": 0.034782608695652174
+                    },
+                    "severity:severe": {
+                      "matched": 2,
+                      "total": 169,
+                      "recall": 0.011834319526627219
+                    }
+                  }
+                }
+              },
+              "tt_um_Bingyao_FCOTA": {
+                "samples": 1130,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.9460176991150443,
+                  "precision": 0.9344827586206896,
+                  "recall": 0.95929203539823,
+                  "f1": 0.9467248908296944,
+                  "confusion_matrix": [
+                    [
+                      527,
+                      38
+                    ],
+                    [
+                      23,
+                      542
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 550,
+                    "dirty": 580
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.035988120623818586,
+                  "iou": 0.0183237795054729
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.03846070452436127,
+                  "iou": 0.019607409656830364
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 580,
+                  "false_negative": 670,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 470,
+                  "matched": 19,
+                  "recall": 0.04042553191489362,
+                  "centroid_error_nm": {
+                    "count": 19,
+                    "mean": 94.74054027256183,
+                    "median": 100.0199980003999,
+                    "p95": 135.73126439765684
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 19,
+                    "mean": 34.73684210526316,
+                    "median": 35.0,
+                    "p95": 60.749999999999986
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 178,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 19,
+                      "total": 292,
+                      "recall": 0.06506849315068493
+                    },
+                    "severity:medium": {
+                      "matched": 5,
+                      "total": 191,
+                      "recall": 0.02617801047120419
+                    },
+                    "severity:near_threshold": {
+                      "matched": 5,
+                      "total": 79,
+                      "recall": 0.06329113924050633
+                    },
+                    "severity:severe": {
+                      "matched": 9,
+                      "total": 200,
+                      "recall": 0.045
+                    }
+                  }
+                }
+              },
+              "tt_um_c4m_spsram_direct": {
+                "samples": 1202,
+                "segmentation_threshold": 0.5,
+                "classification_threshold": 0.5,
+                "classification": {
+                  "accuracy": 0.913477537437604,
+                  "precision": 0.8681481481481481,
+                  "recall": 0.9750415973377704,
+                  "f1": 0.9184952978056425,
+                  "confusion_matrix": [
+                    [
+                      512,
+                      89
+                    ],
+                    [
+                      15,
+                      586
+                    ]
+                  ],
+                  "predicted_class_counts": {
+                    "clean": 527,
+                    "dirty": 675
+                  }
+                },
+                "pixel_all": {
+                  "dice": 0.03614989282512825,
+                  "iou": 0.018407663952078435
+                },
+                "pixel_dirty_only": {
+                  "dice": 0.04152352981319866,
+                  "iou": 0.02120195491000109
+                },
+                "raster_objects": {
+                  "true_positive": 0,
+                  "false_positive": 675,
+                  "false_negative": 759,
+                  "precision": 0.0,
+                  "recall": 0.0,
+                  "f1": 0.0
+                },
+                "exact_vector_owners": {
+                  "total": 581,
+                  "matched": 24,
+                  "recall": 0.04130808950086059,
+                  "centroid_error_nm": {
+                    "count": 24,
+                    "mean": 94.16199670925619,
+                    "median": 115.12884971526424,
+                    "p95": 131.2114475864479
+                  },
+                  "edge_pair_bisector_error_nm": {
+                    "count": 24,
+                    "mean": 33.43846258672,
+                    "median": 32.5,
+                    "p95": 63.874999999999986
+                  },
+                  "slices": {
+                    "boundary:boundary": {
+                      "matched": 0,
+                      "total": 226,
+                      "recall": 0.0
+                    },
+                    "boundary:interior": {
+                      "matched": 24,
+                      "total": 355,
+                      "recall": 0.0676056338028169
+                    },
+                    "severity:medium": {
+                      "matched": 12,
+                      "total": 216,
+                      "recall": 0.05555555555555555
+                    },
+                    "severity:near_threshold": {
+                      "matched": 4,
+                      "total": 110,
+                      "recall": 0.03636363636363636
+                    },
+                    "severity:severe": {
+                      "matched": 8,
+                      "total": 255,
+                      "recall": 0.03137254901960784
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "acceptance": {
+    "passed": true,
+    "checks": {
+      "dirty_dice_at_least_0_75": true,
+      "raster_object_f1_at_least_0_75": true,
+      "exact_vector_owner_recall_at_least_0_85": true,
+      "classification_recall_within_2_points_of_b2": true
+    }
+  },
+  "repository_commit": "9adbdbbdc398f1ed848c6ed782493777ec27e093"
+}

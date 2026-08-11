@@ -38,6 +38,12 @@ results/b3_optimization/**/checkpoints/
 # B4 candidate checkpoints remain resume-safe in Drive and are hash-identified.
 results/b4_architecture/checkpoints/
 
+# B6.2 checkpoints are retained in Drive and identified by SHA-256. The small
+# run JSON, aggregate summary, report, and presentation update are committed
+# only after the official three-seed GPU run is accepted.
+results/b6_multitask_unet/seed_*/best.pth
+results/b6_multitask_unet/seed_*/last.pt
+
 # OS / editor
 .DS_Store
 Thumbs.db
