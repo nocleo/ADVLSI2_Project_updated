@@ -46,8 +46,15 @@ from training.multitask_unet import MultiTaskUNet
 
 DEFAULT_SEGMENTATION_THRESHOLDS = tuple(round(index / 10, 1) for index in range(1, 10))
 DEFAULT_CLASSIFICATION_THRESHOLDS = tuple(round(index / 10, 1) for index in range(1, 10))
+B7_1_CLASSIFICATION_THRESHOLDS = tuple(
+    sorted(
+        set(DEFAULT_CLASSIFICATION_THRESHOLDS)
+        | {round(index / 100, 2) for index in range(80, 100)}
+    )
+)
 DEFAULT_MINIMUM_AREAS = (1, 4, 9, 16)
 DEFAULT_MERGE_GAPS = (0, 1, 2)
+POLICY_SELECTION_OBJECTIVES = ("f1", "precision_at_recall")
 
 
 def _threshold_key(value: float) -> str:
@@ -304,8 +311,14 @@ def select_validation_policy(
     minimum_areas: Sequence[int] = DEFAULT_MINIMUM_AREAS,
     merge_gaps: Sequence[int] = DEFAULT_MERGE_GAPS,
     minimum_recall: float = 0.85,
+    selection_objective: str = "f1",
 ) -> dict[str, Any]:
     """Select in two validation-only stages to limit post-processing overfit."""
+
+    if selection_objective not in POLICY_SELECTION_OBJECTIVES:
+        raise ValueError(
+            f"selection_objective must be one of {POLICY_SELECTION_OBJECTIVES}"
+        )
 
     segmentation_sweep = []
     for segmentation_threshold in segmentation_thresholds:
@@ -349,9 +362,18 @@ def select_validation_policy(
         item for item in postprocess_sweep if item["metrics"]["violation_recall"] >= minimum_recall
     ]
     pool = eligible or postprocess_sweep
-    selected = max(
-        pool,
-        key=lambda item: (
+    if selection_objective == "precision_at_recall":
+        selection_key = lambda item: (
+            item["metrics"]["component_precision"],
+            item["metrics"]["f1"],
+            item["metrics"]["violation_recall"],
+            -item["metrics"]["false_component_count"],
+            item["policy"]["classification_threshold"],
+            item["policy"]["minimum_component_area_px"],
+            -item["policy"]["merge_gap_px"],
+        )
+    else:
+        selection_key = lambda item: (
             item["metrics"]["f1"],
             item["metrics"]["component_precision"],
             item["metrics"]["violation_recall"],
@@ -359,11 +381,12 @@ def select_validation_policy(
             item["policy"]["classification_threshold"],
             item["policy"]["minimum_component_area_px"],
             -item["policy"]["merge_gap_px"],
-        ),
-    )
+        )
+    selected = max(pool, key=selection_key)
     return {
         "selection_split": "validation_layout_families_only",
         "two_stage_selection": True,
+        "selection_objective": selection_objective,
         "minimum_violation_recall": minimum_recall,
         "passed_recall_constraint": bool(eligible),
         "selected_policy": selected["policy"],
@@ -715,18 +738,63 @@ def render_four_panel(scan: dict[str, Any], policy: DeploymentPolicy, output_pat
 def render_threshold_tradeoff(selection: dict[str, Any], output_path: Path) -> None:
     import matplotlib.pyplot as plt
 
-    sweep = selection["segmentation_sweep"]
-    thresholds = [item["policy"]["segmentation_threshold"] for item in sweep]
-    precision = [item["metrics"]["component_precision"] for item in sweep]
-    recall = [item["metrics"]["violation_recall"] for item in sweep]
-    f1 = [item["metrics"]["f1"] for item in sweep]
-    figure, axis = plt.subplots(figsize=(7.2, 4.2))
-    axis.plot(thresholds, precision, marker="o", label="Component precision")
-    axis.plot(thresholds, recall, marker="o", label="Violation recall")
-    axis.plot(thresholds, f1, marker="o", label="F1")
-    axis.set(xlabel="Segmentation threshold", ylabel="Validation metric", ylim=(0, 1.02))
-    axis.grid(alpha=0.25)
-    axis.legend()
+    figure, axes = plt.subplots(1, 2, figsize=(11.2, 4.2), sharey=True)
+    segmentation = selection["segmentation_sweep"]
+    segmentation_thresholds = [
+        item["policy"]["segmentation_threshold"] for item in segmentation
+    ]
+    for metric, label in (
+        ("component_precision", "Component precision"),
+        ("violation_recall", "Violation recall"),
+        ("f1", "F1"),
+    ):
+        axes[0].plot(
+            segmentation_thresholds,
+            [item["metrics"][metric] for item in segmentation],
+            marker="o",
+            label=label,
+        )
+    axes[0].set(xlabel="Segmentation threshold", ylabel="Validation metric")
+
+    by_classification: dict[float, dict[str, Any]] = {}
+    recall_floor = float(selection["minimum_violation_recall"])
+    objective = selection.get("selection_objective", "f1")
+    for item in selection["postprocess_sweep"]:
+        threshold = float(item["policy"]["classification_threshold"])
+        eligible = item["metrics"]["violation_recall"] >= recall_floor
+        key = (
+            int(eligible),
+            item["metrics"]["component_precision"]
+            if objective == "precision_at_recall"
+            else item["metrics"]["f1"],
+            item["metrics"]["f1"],
+        )
+        previous = by_classification.get(threshold)
+        if previous is None or key > previous["_plot_key"]:
+            by_classification[threshold] = {**item, "_plot_key": key}
+    classification_thresholds = sorted(by_classification)
+    for metric, label in (
+        ("component_precision", "Component precision"),
+        ("violation_recall", "Violation recall"),
+        ("f1", "F1"),
+    ):
+        axes[1].plot(
+            classification_thresholds,
+            [by_classification[value]["metrics"][metric] for value in classification_thresholds],
+            marker="o",
+            label=label,
+        )
+    selected_threshold = selection["selected_policy"]["classification_threshold"]
+    axes[1].axvline(selected_threshold, color="black", linestyle="--", alpha=0.55)
+    axes[1].axhline(recall_floor, color="tab:red", linestyle=":", alpha=0.55)
+    axes[1].set(xlabel="Classification threshold")
+    for axis in axes:
+        axis.set_ylim(0, 1.02)
+        axis.grid(alpha=0.25)
+    axes[0].legend()
+    axes[1].set_title(
+        f"{objective}; recall floor={recall_floor:.2f}; selected={selected_threshold:.2f}"
+    )
     figure.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output_path, dpi=160)

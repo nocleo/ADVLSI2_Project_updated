@@ -23,6 +23,7 @@ try:
         LocalizationConfig,
     )
     from training.full_layout_evaluation import (
+        B7_1_CLASSIFICATION_THRESHOLDS,
         canonical_pair_key,
         evaluate_exact_layout,
         load_layout_variant,
@@ -183,6 +184,67 @@ class B7DependencyBackedTest(unittest.TestCase):
         )
         self.assertEqual(selection["selection_split"], "validation_layout_families_only")
         self.assertEqual(selection["selected_policy"]["segmentation_threshold"], 0.5)
+
+    def test_b7_1_precision_objective_differs_from_original_f1_selection(self) -> None:
+        raw = []
+        vectors = []
+        for index in range(10):
+            row = 10 + index * 10
+            column = 20
+            raw.append(
+                {
+                    "component_id": f"true-{index}",
+                    "tile_id": f"true-tile-{index}",
+                    "grid_index": [0, 0],
+                    "class_probability": 0.7 if index == 9 else 0.95,
+                    "area_pixels": 1,
+                    "mean_confidence": 0.9,
+                    "max_confidence": 0.9,
+                    "_pixels_yx": np.asarray([[row, column]], dtype=np.int32),
+                }
+            )
+            vectors.append(
+                {
+                    "violation_id": f"v{index}",
+                    "midpoint_nm": [164, row * 8 + 4],
+                }
+            )
+        raw.append(
+            {
+                "component_id": "false",
+                "tile_id": "false-tile",
+                "grid_index": [0, 0],
+                "class_probability": 0.7,
+                "area_pixels": 1,
+                "mean_confidence": 0.9,
+                "max_confidence": 0.9,
+                "_pixels_yx": np.asarray([[150, 120]], dtype=np.int32),
+            }
+        )
+        scan = {
+            "layout": "validation",
+            "variant": "injected",
+            "grid": {"x0_nm": 0, "y0_nm": 0},
+            "vectors": vectors,
+            "components_by_threshold": {"0.500": raw},
+        }
+        common = dict(
+            segmentation_thresholds=[0.5],
+            classification_thresholds=[0.5, 0.9],
+            minimum_areas=[1],
+            merge_gaps=[0],
+            minimum_recall=0.85,
+        )
+        original = select_validation_policy([scan], **common, selection_objective="f1")
+        b7_1 = select_validation_policy(
+            [scan], **common, selection_objective="precision_at_recall"
+        )
+        self.assertEqual(original["selected_policy"]["classification_threshold"], 0.5)
+        self.assertEqual(b7_1["selected_policy"]["classification_threshold"], 0.9)
+        self.assertEqual(b7_1["selected_validation_proxy_metrics"]["component_precision"], 1.0)
+        self.assertEqual(b7_1["selected_validation_proxy_metrics"]["violation_recall"], 0.9)
+        self.assertIn(0.95, B7_1_CLASSIFICATION_THRESHOLDS)
+        self.assertIn(0.99, B7_1_CLASSIFICATION_THRESHOLDS)
 
 
 if __name__ == "__main__":

@@ -18,7 +18,9 @@ import torch
 from project_paths import layout_oas
 from scripts.build_b6_localization_dataset import ensure_layout_intermediates
 from training.full_layout_evaluation import (
+    B7_1_CLASSIFICATION_THRESHOLDS,
     DeploymentPolicy,
+    POLICY_SELECTION_OBJECTIVES,
     aggregate_exact_layouts,
     evaluate_exact_layout,
     json_ready_scan,
@@ -93,6 +95,7 @@ def _scan_split(
     include_source: bool,
     output_dir: Path,
     checkpoint_signature: str,
+    reuse_scans_only: bool = False,
 ) -> list[dict[str, Any]]:
     scans = []
     for layout in layouts:
@@ -120,6 +123,13 @@ def _scan_split(
                 print(f"[B7] reusing scan cache {variant['variant']}::{layout}", flush=True)
                 scans.append(cached)
                 continue
+            if reuse_scans_only:
+                raise RuntimeError(
+                    "Missing, stale, or incomplete B7 scan cache for "
+                    f"{variant['variant']}::{layout}: {cache_path}. "
+                    "Run the original full-layout inference flow before the B7.1 "
+                    "cache-only policy evaluation."
+                )
             print(f"[B7] scanning {variant['variant']}::{layout}", flush=True)
             scan = scan_full_layout(
                 variant,
@@ -183,9 +193,13 @@ def _acceptance(
     validation: dict[str, Any],
     development: dict[str, Any],
     complete: bool,
+    selection: dict[str, Any],
 ) -> dict[str, Any]:
     checks = {
         "complete_full_grid_scans": complete,
+        "validation_policy_recall_constraint_passed": selection[
+            "passed_recall_constraint"
+        ],
         "validation_violation_recall_at_least_0_85": validation["violation_recall"] >= 0.85,
         "development_violation_recall_at_least_0_85": development["violation_recall"] >= 0.85,
         "development_component_precision_at_least_0_80": development[
@@ -204,8 +218,10 @@ def _render_readme(summary: dict[str, Any]) -> str:
     validation = summary["validation"]
     development = summary["development_confirmation"]
     policy = summary["deployment_policy"]
+    selection = summary["policy_selection"]
+    phase = summary["phase"]
     status = "accepted" if summary["acceptance"]["passed"] else "not accepted"
-    return f"""# B7 full-layout stitching and exact-coordinate recovery
+    return f"""# {phase} full-layout stitching and exact-coordinate recovery
 
 Status: **{status}**.
 
@@ -213,6 +229,9 @@ The three B6.2 checkpoints are averaged at inference. The deployment policy was
 selected only on complete validation-family layouts, including their natural
 clean-source variants, and then frozen for development confirmation. The B9
 final holdout remains unopened.
+
+Policy selection objective: `{selection['selection_objective']}` with a
+validation violation-recall floor of `{selection['minimum_violation_recall']}`.
 
 ## Frozen deployment policy
 
@@ -251,8 +270,35 @@ separate controlled experiment.
 """
 
 
+def _archive_original_b7_result(output_dir: Path, phase: str) -> None:
+    """Keep the failed original B7 headline before B7.1 replaces top-level files."""
+
+    if phase != "B7.1":
+        return
+    summary_path = output_dir / "summary.json"
+    if not summary_path.is_file():
+        return
+    try:
+        previous = json.loads(summary_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return
+    if previous.get("phase") != "B7":
+        return
+    history = output_dir / "history" / "b7_original_failure"
+    history.mkdir(parents=True, exist_ok=True)
+    if not (history / "summary.json").exists():
+        shutil.copy2(summary_path, history / "summary.json")
+    readme_path = output_dir / "README.md"
+    if readme_path.is_file() and not (history / "README.md").exists():
+        shutil.copy2(readme_path, history / "README.md")
+    selection_path = output_dir / "validation_policy_selection.json"
+    if selection_path.is_file() and not (history / selection_path.name).exists():
+        shutil.copy2(selection_path, history / selection_path.name)
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    _archive_original_b7_result(args.output_dir, args.phase)
     device = select_device(args.device)
     models, checkpoints = load_ensemble(
         args.checkpoint_dir, args.seeds, device, args.base_channels
@@ -275,8 +321,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         not args.no_source_variants,
         args.output_dir,
         checkpoint_signature,
+        args.reuse_scans_only,
     )
-    selection = select_validation_policy(validation_scans)
+    selection = select_validation_policy(
+        validation_scans,
+        segmentation_thresholds=args.segmentation_thresholds,
+        classification_thresholds=args.classification_thresholds,
+        minimum_recall=args.selection_minimum_recall,
+        selection_objective=args.selection_objective,
+    )
     _write_json(args.output_dir / "validation_policy_selection.json", selection)
     render_threshold_tradeoff(selection, args.output_dir / "validation_threshold_tradeoff.png")
     policy = DeploymentPolicy(**selection["selected_policy"])
@@ -294,6 +347,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         not args.no_source_variants,
         args.output_dir,
         checkpoint_signature,
+        args.reuse_scans_only,
     )
     development_results, development_aggregate = _evaluate_and_export(
         development_scans, policy, args.output_dir, "development_confirmation"
@@ -301,10 +355,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     complete = all(
         item["complete_scan"] for item in validation_results + development_results
     )
-    acceptance = _acceptance(validation_aggregate, development_aggregate, complete)
+    acceptance = _acceptance(
+        validation_aggregate, development_aggregate, complete, selection
+    )
     summary = {
-        "schema_version": 1,
-        "phase": "B7",
+        "schema_version": 2,
+        "phase": args.phase,
         "status": "complete" if complete else "smoke_only",
         "official_result": bool(complete),
         "protocol": args.protocol,
@@ -316,6 +372,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "checkpoints": checkpoints,
         },
         "deployment_policy": policy.to_dict(),
+        "policy_selection": {
+            "selection_split": selection["selection_split"],
+            "selection_objective": selection["selection_objective"],
+            "minimum_violation_recall": selection["minimum_violation_recall"],
+            "segmentation_thresholds": list(args.segmentation_thresholds),
+            "classification_thresholds": list(args.classification_thresholds),
+            "passed_recall_constraint": selection["passed_recall_constraint"],
+        },
         "validation_policy_proxy": selection["selected_validation_proxy_metrics"],
         "validation": validation_aggregate,
         "development_confirmation": development_aggregate,
@@ -346,6 +410,31 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--device", choices=DEVICE_CHOICES, default="auto")
     parser.add_argument("--max-tiles-per-layout", type=int)
+    parser.add_argument("--phase", choices=("B7", "B7.1"), default="B7.1")
+    parser.add_argument(
+        "--selection-objective",
+        choices=POLICY_SELECTION_OBJECTIVES,
+        default="precision_at_recall",
+    )
+    parser.add_argument("--selection-minimum-recall", type=float, default=0.95)
+    parser.add_argument(
+        "--segmentation-thresholds",
+        type=float,
+        nargs="+",
+        default=(0.4,),
+        help="B7.1 freezes the original validation-selected mask threshold at 0.4.",
+    )
+    parser.add_argument(
+        "--classification-thresholds",
+        type=float,
+        nargs="+",
+        default=B7_1_CLASSIFICATION_THRESHOLDS,
+    )
+    parser.add_argument(
+        "--reuse-scans-only",
+        action="store_true",
+        help="Fail instead of running inference when a trusted complete scan cache is unavailable.",
+    )
     parser.add_argument("--no-source-variants", action="store_true")
     parser.add_argument("--validation-layouts", nargs="+")
     parser.add_argument("--development-layouts", nargs="+")
