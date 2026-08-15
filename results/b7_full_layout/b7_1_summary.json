@@ -1,0 +1,149 @@
+{
+  "acceptance": {
+    "checks": {
+      "complete_full_grid_scans": true,
+      "development_component_precision_at_least_0_80": true,
+      "development_violation_recall_at_least_0_85": true,
+      "validation_policy_recall_constraint_passed": true,
+      "validation_violation_recall_at_least_0_85": true
+    },
+    "passed": true
+  },
+  "deployment_policy": {
+    "classification_threshold": 0.92,
+    "merge_gap_px": 2,
+    "minimum_component_area_px": 16,
+    "recovery_radius_nm": 140.0,
+    "segmentation_threshold": 0.4
+  },
+  "development_confirmation": {
+    "candidate_component_count": 1622,
+    "clean_layouts_incorrectly_flagged": 1,
+    "component_f1": 0.8791714650503721,
+    "component_precision": 0.8144266337854501,
+    "detected_unique_violation_count": 1489,
+    "end_to_end_seconds": 2116.686916728,
+    "exact_candidate_count": 1489,
+    "exact_candidate_precision": 1.0,
+    "false_component_count": 301,
+    "false_detections_per_mm2": 1122.065147648221,
+    "false_positive_tile_count": 33,
+    "false_positive_tiles_per_million_scanned": 199.13827437633512,
+    "ground_truth_violation_count": 1559,
+    "layout_count": 6,
+    "matched_exact_candidate_count": 1489,
+    "tiles_scanned": 165714,
+    "total_layout_area_mm2": 0.2682553688,
+    "true_component_count": 1321,
+    "violation_recall": 0.9550994227068633
+  },
+  "development_confirmation_is_final_holdout": false,
+  "ensemble": {
+    "checkpoints": [
+      {
+        "path": "/content/drive/MyDrive/ADVLSI2_B6_2/b6_multitask_unet/seed_42/best.pth",
+        "seed": 42,
+        "sha256": "5c711bb7aa735964f324d8ec3e0fac6f013a26d74d59b485b14c792b910a1e4c"
+      },
+      {
+        "path": "/content/drive/MyDrive/ADVLSI2_B6_2/b6_multitask_unet/seed_43/best.pth",
+        "seed": 43,
+        "sha256": "c37cb0d3f693b822cec82816b769e752a27b110565b3b98ba0aa03e218a613d9"
+      },
+      {
+        "path": "/content/drive/MyDrive/ADVLSI2_B6_2/b6_multitask_unet/seed_44/best.pth",
+        "seed": 44,
+        "sha256": "0c68e3eb3236ce0d85405ad628e46dcc7e105143414b522455cb47a0a2260bfa"
+      }
+    ],
+    "method": "arithmetic mean of three B6.2 probability outputs"
+  },
+  "execution": {
+    "fully_convolutional_equivalent": false,
+    "reason": "global classification pooling and fixed central output crop make a full-layout pass non-equivalent",
+    "selected": "batched_nonoverlapping_central_tiles"
+  },
+  "official_result": true,
+  "phase": "B7.1",
+  "policy_selection": {
+    "classification_thresholds": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.81,
+      0.82,
+      0.83,
+      0.84,
+      0.85,
+      0.86,
+      0.87,
+      0.88,
+      0.89,
+      0.9,
+      0.91,
+      0.92,
+      0.93,
+      0.94,
+      0.95,
+      0.96,
+      0.97,
+      0.98,
+      0.99
+    ],
+    "minimum_violation_recall": 0.95,
+    "passed_recall_constraint": true,
+    "segmentation_thresholds": [
+      0.4
+    ],
+    "selection_objective": "precision_at_recall",
+    "selection_split": "validation_layout_families_only"
+  },
+  "protocol": "unseen_layout_v1",
+  "runtime": {
+    "cuda_device": null,
+    "device": "cpu",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.35",
+    "python": "3.12.13",
+    "pytorch": "2.11.0+cpu"
+  },
+  "schema_version": 2,
+  "selection_split": "validation_layout_families_only",
+  "status": "complete",
+  "untouched_b9_final_holdout_used": false,
+  "validation": {
+    "candidate_component_count": 1453,
+    "clean_layouts_incorrectly_flagged": 0,
+    "component_f1": 0.9089510865447782,
+    "component_precision": 0.868547832071576,
+    "detected_unique_violation_count": 1388,
+    "end_to_end_seconds": 4601.344253256,
+    "exact_candidate_count": 1388,
+    "exact_candidate_precision": 1.0,
+    "false_component_count": 191,
+    "false_detections_per_mm2": 345.7479584084481,
+    "false_positive_tile_count": 14,
+    "false_positive_tiles_per_million_scanned": 41.04488551408719,
+    "ground_truth_violation_count": 1456,
+    "layout_count": 6,
+    "matched_exact_candidate_count": 1388,
+    "tiles_scanned": 341090,
+    "total_layout_area_mm2": 0.5524255324,
+    "true_component_count": 1262,
+    "violation_recall": 0.9532967032967034
+  },
+  "validation_policy_proxy": {
+    "component_count": 1453,
+    "component_precision": 0.868547832071576,
+    "detected_violation_count": 1388,
+    "f1": 0.9089510865447782,
+    "false_component_count": 191,
+    "total_violation_count": 1456,
+    "true_component_count": 1262,
+    "violation_recall": 0.9532967032967034
+  }
+}

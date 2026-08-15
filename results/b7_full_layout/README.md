@@ -1,6 +1,6 @@
 # B7 full-layout stitching and exact-coordinate recovery
 
-Status: **original B7 rejected; B7.1 cache-based correction pending**.
+Status: **original B7 rejected; B7.1 cache-based correction accepted**.
 
 The runner averages the accepted B6.2 seeds 42/43/44, scans every central
 output of each complete layout at natural prevalence, and includes the original
@@ -54,8 +54,33 @@ B7.1 is a controlled validation-policy correction, not a model retrain:
 The development layouts have already informed this correction and are not a
 final holdout. B9 remains sealed and cannot influence B7.1.
 
+## B7.1 measured result
+
+Validation-only selection froze this policy:
+
+- segmentation threshold: `0.4`;
+- classification threshold: `0.92`;
+- minimum merged component area: `16` pixels;
+- fragment merge gap: `2` pixels;
+- exact-recovery radius: `140` nm.
+
+| Metric | Validation | Development confirmation | Gate |
+|---|---:|---:|---:|
+| Unique violation recall | 95.33% | **95.51%** | >=85% |
+| Candidate-component precision | 86.85% | **81.44%** | >=80% |
+| Component F1 | 90.90% | 87.92% | report |
+| Exact recovered-pair precision | 100.00% | 100.00% | report |
+| False detections/mm2 | 345.75 | 1122.07 | report |
+| False-positive tiles/million | 41.0 | 199.1 | report |
+| Clean layouts incorrectly flagged | 0 | 1 | report |
+
+All registered B7.1 gates passed. Validation selected the deployment policy;
+the three development families were recomputed once and are sequential
+confirmation rather than a final holdout. The untouched B9 holdout was not
+opened. Full machine-readable evidence is in [`b7_1_summary.json`](b7_1_summary.json),
+while [`b7_original_failure_summary.json`](b7_original_failure_summary.json)
+preserves the rejected original result.
+
 Run [`../../notebooks/B7_Full_Layout_Stitching.ipynb`](../../notebooks/B7_Full_Layout_Stitching.ipynb).
 The notebook uses `--reuse-scans-only`, so a missing or stale cache causes an
-immediate failure instead of another multi-hour inference scan. Upload
-`ADVLSI2_B7_1_results.zip` after completion. The compact measured evidence and
-presentation update must be added before PR #11 is eligible to merge.
+immediate failure instead of another multi-hour inference scan.

@@ -13,10 +13,9 @@ classifier in three measurable ways: preserve competitive classification,
 demonstrate generalization to unseen layout families, and progress from coarse
 tile localization to exact violation geometry and verified repair proposals.
 
-> **Project status:** **B0** through **B6.2** are complete. The original B7
-> full-layout run is complete but rejected on deployment precision; B7.1 is a
-> validation-only precision-policy correction that reuses the trusted B7 scan
-> caches. B2 established
+> **Project status:** **B0** through **B7.1** are complete. The original B7
+> full-layout run was rejected on deployment precision; B7.1 accepted a
+> validation-only precision policy using the trusted B7 scan caches. B2 established
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
 > +/- 0.61%** accuracy on the leakage-aware tile-random reference and **90.38%
 > +/- 0.84%** on layout-family-disjoint test data. B3 found no accepted
@@ -34,15 +33,17 @@ tile localization to exact violation geometry and verified repair proposals.
 > then passed every development gate: **95.51% +/- 0.83% classification
 > accuracy**, **98.86% +/- 0.27% dirty recall**, **86.32% +/- 1.65% mask Dice**,
 > **84.23% +/- 1.77% raster-object F1**, and **87.19% +/- 0.64% exact-vector
-> owner recall** on three unseen development-confirmation families. B7 now
+> owner recall** on three unseen development-confirmation families. B7
 > stitches sparse central-output components across tile boundaries, scans every
 > output at natural prevalence, exports four-panel diagnostics and per-component
 > confidence/geometry records, and locally recovers exact M1 edge pairs with
 > KLayout. Original B7 achieved **97.88% development violation recall** and
 > **100% exact recovered-pair precision**, but only **62.57% candidate-component
-> precision** versus the 80% gate. B7.1 therefore expands only the
-> validation-side classification sweep and selects precision subject to a 95%
-> validation-recall floor. The untouched B9 final holdout remains unopened.
+> precision** versus the 80% gate. B7.1 selected classification threshold
+> **0.92** at the unchanged segmentation threshold **0.4** and passed with
+> **95.51% development violation recall**, **81.44% component precision**,
+> **87.92% component F1**, and **100% exact recovered-pair precision**. The
+> untouched B9 final holdout remains unopened; verified repair is next in B8.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
@@ -118,7 +119,7 @@ ADVLSI2_Project_updated/
 ├── results/b5_ensemble/           # B5 probability blend evidence and rejection decision
 ├── results/b6_localization_dataset/ # B6.1 compact geometry/dataset result
 ├── results/b6_multitask_unet/       # Accepted B6.2 result and three seed records
-├── results/b7_full_layout/           # B7 protocol; measured result added after Colab
+├── results/b7_full_layout/           # Original B7 failure and accepted B7.1 evidence
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -647,7 +648,7 @@ alone produces 301 false components. The other two development families
 combine to 87.41% component precision, indicating family-specific repeated
 SRAM geometry rather than a stitching-coordinate failure.
 
-### B7.1 validation-only precision policy (implementation ready)
+### B7.1 validation-only precision policy (accepted)
 
 B7.1 preserves the failed B7 result and changes no model or mask threshold,
 layout, checkpoint, or development label. It extends the classification sweep
@@ -657,14 +658,22 @@ frozen at the original validation-selected `0.4`. The selected
 policy is then frozen for one cache-based development recomputation. This
 sequential development result is not a final holdout; B9 remains sealed.
 
+The completed cache-only run selected classification threshold `0.92` with
+segmentation threshold `0.4`, minimum component area `16` pixels, merge gap
+`2` pixels, and recovery radius `140` nm. Validation reached 95.33% violation
+recall, 86.85% component precision, and 90.90% component F1. Frozen development
+confirmation reached 95.51% violation recall, 81.44% component precision,
+87.92% component F1, and 100% exact recovered-pair precision. Every registered
+gate passed. One development clean layout was flagged; B9 remained unopened.
+
 Run the cache-only correction with
 [`notebooks/B7_Full_Layout_Stitching.ipynb`](notebooks/B7_Full_Layout_Stitching.ipynb).
 Injected geometry/RDB files and sparse scan caches are hash-bound to the three
 checkpoints and kept in Drive, so an interrupted Colab run can resume per layout.
 They are excluded from the downloaded evidence ZIP and from Git.
 The `--reuse-scans-only` guard makes B7.1 fail rather than silently repeat GPU
-inference if any cache is missing or stale. The presentation will be updated
-after the measured B7.1 result exists.
+inference if any cache is missing or stale. Compact measured evidence is stored
+under [`results/b7_full_layout/`](results/b7_full_layout/).
 
 ### B4 on an Apple-silicon Mac
 

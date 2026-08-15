@@ -525,6 +525,13 @@ acceptance gates of at least 85% development violation recall and at least 80%
 development candidate-component precision. This is sequential development,
 not final evidence, and does not open B9.
 
+**B7.1 result — accepted:** validation-only selection chose classification
+threshold `0.92` with the unchanged segmentation threshold `0.4`, minimum area
+`16` pixels, merge gap `2` pixels, and recovery radius `140` nm. Development
+confirmation achieved 95.51% violation recall, 81.44% candidate-component
+precision, 87.92% component F1, and 100% exact recovered-pair precision. All
+registered gates passed. The B9 final holdout remained unopened, so B8 is next.
+
 ### B8 — Constrained, verified repair proposals
 
 **Hypothesis:** a localized `m1.2` edge pair can support a small set of safe,
