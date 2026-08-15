@@ -2,17 +2,30 @@
 
 ## Goal
 
-Improve on the paper's Metal-1 DRC classifier with a reproducible system that:
+Produce a publishable result that solves a problem an exact DRC engine does not
+already solve better. A learned system is useful only if it creates a measured
+workflow benefit while KLayout remains the source of truth.
 
-1. exceeds the paper's reported 92% accuracy on a clearly documented,
-   paper-style clean/dirty benchmark without sacrificing dirty recall;
-2. demonstrates generalization to layout families and violation geometries that
-   were not used for model or threshold selection;
-3. localizes violations as pixel-level masks and exact layout coordinates;
-4. reports realistic full-layout false-alarm rate, violation recall, and
-   end-to-end runtime; and
-5. proposes repairs that are accepted only after DRC and connectivity/LVS
-   verification.
+The original classifier/localizer work through B7.1 is retained as a completed
+feasibility study. It is **not yet a competitive DRC accelerator**: on the B7.1
+development layouts it recovered 1,489 of 1,559 violations (95.51% recall),
+flagged one clean layout, and used 2,116.7 CPU-seconds to process 0.268 mm².
+KLayout is exact for the implemented rule and already supports local,
+hierarchical, tiled, and multicore checking. Until a direct controlled
+benchmark proves otherwise, do not claim that the CNN is faster than, replaces,
+or competes with KLayout.
+
+The revised research goal is therefore:
+
+1. measure the complete learned pipeline against optimized KLayout on identical
+   layouts, hardware, rule scope, and process conditions;
+2. stop the detection-accelerator branch if it cannot deliver a material
+   end-to-end advantage at near-signoff recall;
+3. use exact downstream DRC as the outcome oracle for a harder task—predicting
+   the consequences of available flow actions and choosing an action before
+   detailed routing—rather than relearning a deterministic spacing check; and
+4. release a reproducible, family-disjoint benchmark and an honest Pareto
+   comparison against deterministic baselines.
 
 [*Design Rule Checking with a CNN Based Feature
 Extractor*](https://arxiv.org/abs/2012.11510) reports accuracy of up to 92% on
@@ -23,12 +36,38 @@ claims:
 - **Numerically better than the paper:** mean accuracy above 92% across the
   fixed seeds on a pre-registered paper-style SRAM benchmark, with dirty recall
   preserved.
-- **A stronger DRC system:** unseen-layout generalization, exact localization,
-  realistic full-layout metrics, and verified repair in addition to tile
-  classification.
+- **A stronger design-flow system:** unseen-family generalization and measured
+  reduction in routing attempts or turnaround through action-conditioned DRC
+  prevention, while exact DRC and PPA checks remain authoritative.
 
 Do not call the first claim a direct reproduction unless the original data and
 protocol are obtained. Report the protocol differences beside every comparison.
+
+## Impact test
+
+[KLayout's DRC engine](https://www.klayout.de/doc/manual/drc_basic.html) already
+returns exact error geometry and supports local region checks, tiling,
+multicore execution, and hierarchical processing. Commercial interactive DRC
+also checks a visible area, changed area, or whole cell view with signoff-quality
+decks, as documented for [Cadence iPegasus](https://www.cadence.com/en_US/home/tools/digital-design-and-signoff/silicon-signoff/ipegasus-for-virtuoso-studio.html).
+Therefore, “a CNN can detect an error” is not a sufficient contribution.
+
+| Candidate contribution | Benefit over exact DRC | Decision |
+|---|---|---|
+| Finished-layout `m1.2` detection and coordinates | None unless end-to-end latency is materially lower at near-perfect recall; KLayout already reports exact coordinates | Audit in B7.2, then stop if the hard gate fails |
+| Incremental changed-region screening | Potential lower interactive latency, but only if it beats KLayout's local check including all preprocessing | Keep only as a measured B7.2 deployment scenario |
+| Verified repair ranking | KLayout can accept/reject edits but does not encode which legal edit best preserves design intent and cost | Possible downstream extension, but current repair work is crowded |
+| Pre-route hotspot prediction only | Exact polygon DRC cannot run before final geometry exists | Useful baseline, but prediction alone is already crowded |
+| Action-conditioned DRC prevention | Predicts the DRC/PPA consequence of available flow actions before expensive routing and selects an action | Recommended publication track, subject to B8.0 actionability gate |
+
+The research landscape is also moving beyond binary detection: recent work
+studies [AI-guided detailed routing](https://doi.org/10.1145/3769306),
+[offline-RL routing schedules](https://arxiv.org/abs/2512.03594),
+[uncertainty-aware routability maps](https://arxiv.org/abs/2607.16674), and
+[verification-in-the-loop repair](https://arxiv.org/abs/2607.22761). A
+publishable B8 result must therefore contribute counterfactual action
+conditioning, system-level closed-loop evidence, calibrated fallback, and
+generalization—not merely add a predictor or tune global parameters.
 
 The roadmap follows one rule: **change one experimental factor at a time and
 compare it with the last accepted benchmark on the same frozen evaluation
@@ -530,72 +569,200 @@ threshold `0.92` with the unchanged segmentation threshold `0.4`, minimum area
 `16` pixels, merge gap `2` pixels, and recovery radius `140` nm. Development
 confirmation achieved 95.51% violation recall, 81.44% candidate-component
 precision, 87.92% component F1, and 100% exact recovered-pair precision. All
-registered gates passed. The B9 final holdout remained unopened, so B8 is next.
+registered gates passed. The final holdout remained unopened. The revised plan
+requires the B7.2 KLayout competitiveness audit before any B8 work.
 
-### B8 — Constrained, verified repair proposals
+### B7.2 — KLayout competitiveness audit (mandatory next phase)
 
-**Hypothesis:** a localized `m1.2` edge pair can support a small set of safe,
-ranked repair candidates.
+**Question:** is there any density, layout size, or interactive-change regime
+where the learned detector reduces end-to-end latency enough to justify its
+misses and false candidates?
 
-**Work:** begin only with isolated synthetic spacing violations. For each exact
-edge pair, enumerate minimal grid-snapped translations or trims that add the
-spacing deficit plus a declared guard band. Rank proposals by displacement,
-area change, and collateral geometry impact. Write candidates to copies and
-retain a complete audit trail; never edit the source layout in place and never
-accept a repair from model confidence alone.
+**Benchmark contract:** run the current frozen B7.1 system and direct KLayout
+on the same source and injected layouts, same host, same `m1.2` rule, and same
+loaded-layout boundary. Measure at least five repetitions after one warm-up.
+Separate process startup and layout parsing from rule execution, and also report
+the user-visible cold-command total.
 
-For every candidate:
+Use a staged audit to avoid optimizing a detector that already fails the
+quality gate. Stage A benchmarks the exact KLayout Python
+`Region.space_check(140 nm)` operation used by the label and local-recovery
+path, including fresh-layout, loaded-layout, and changed-region cases. If the
+CNN fails the registered quality gate or is already slower, record the negative
+result and stop. Only a detector that survives Stage A may support a positive
+latency claim; Stage B must then test the KLayout CLI in applicable flat/deep
+or hierarchical modes and sweep tiling and thread count rather than using a
+deliberately weak default.
 
-1. rerun the exact `m1.2` check;
-2. rerun the complete available Sky130 DRC deck;
-3. reject any proposal that creates a new violation;
-4. compare polygon/net connectivity with the original;
-5. run true LVS only when a reference netlist and reproducible LVS flow exist.
+Record:
 
-**Gate:** report attempted proposals, original violations removed, new
-violations introduced, verified-fix rate, displacement/area cost, and
-connectivity or LVS result. Without a reference netlist, call the safety check
-a connectivity-equivalence check rather than LVS.
+- layout area, shapes, hierarchy depth, tile count, and true violation count;
+- KLayout parse, rule-execution, report-write, peak-memory, and total time;
+- CNN rasterization, inference, stitching, local exact recovery, report-write,
+  peak-memory, and total time;
+- violation recall, false candidates per mm², clean-layout false-alarm rate,
+  exact recovered-pair precision, and p50/p95 latency;
+- scaling with area, shape count, violation density, thread count, and changed
+  region size.
 
-### B9 — Final claim and reproducible release
+Include two deployment scenarios:
 
-**Purpose:** freeze the end-to-end result and state only claims supported by the
-evaluation design.
+1. **Batch signoff-like:** a fresh process reads a whole layout and emits an
+   exact report.
+2. **Interactive incremental:** the layout is already loaded and only a known
+   changed bounding box plus a rule halo is checked.
 
-**Work:** select the release candidate without the untouched final holdout,
-then open that holdout once. Evaluate the paper-style SRAM benchmark, final
-unseen/generator-disjoint layouts, full-layout detection, localization, and
-repair. Export PyTorch and ONNX models, verify numerical agreement, record
-hardware and commands, and add automated smoke/regression tests. INT8
-post-training quantization is optional and is accepted only if it preserves the
-quality gates while improving measured latency or memory.
+**Hard gate:** the accelerator claim survives only if the complete learned
+pipeline is at least 2× faster than the best correctly configured KLayout
+baseline at at least 99.5% violation recall, with no miss on the registered
+critical and near-threshold slices, no clean-layout false alarm in the final
+holdout, and lower p95 latency in the claimed deployment scenario. This is an
+engineering claim, not a signoff-equivalence claim. If any requirement fails,
+archive the CNN detection branch as a negative result and do not spend another
+phase tuning it.
 
-**Gate:** a clean clone reproduces inference; PyTorch and ONNX agree within
-tolerance; the final holdout is still untouched at evaluation time; and the
-report separates:
+The current B7.1 result fails the quality side of this gate before runtime is
+compared, so B7.2 is an audit and likely kill decision, not a promised win.
 
-- numerical accuracy relative to the paper;
-- unseen-layout generalization;
-- localization quality;
-- full-layout false-alarm/throughput results; and
-- verified repair quality.
+### B8 — Action-conditioned, uncertainty-aware DRC prevention
 
-The release must state that the CNN proposes candidates and does not replace
-sign-off DRC.
+**Research question:** before detailed routing creates final geometry, can a
+model predict the DRC, runtime, and PPA consequences of several available flow
+actions and select the best action for an unseen design?
 
-## Immediate sequence after B5.1
+OpenROAD already exposes controls such as placement density and padding, macro
+halos, routing-layer capacity adjustments, routing layers, effort, and random
+seeds. The contribution is not adding another knob. It is a counterfactual
+controller that predicts “what will happen if this action is chosen,” selects a
+design-specific or region-specific action, reports uncertainty, and falls back
+to the standard flow when the case is out of distribution. Detailed routing and
+exact KLayout verification remain authoritative.
 
-1. Keep B2 as the accepted classifier and record B5.1 as a useful rejection.
-2. Close B5.2 with its validation-only report and B5.3 no-run decision.
-3. Acquire and lock the paper-style SRAM benchmark and a new untouched final
-   holdout before the release candidate is chosen.
-4. B6.1 complete: gap-free tiling and vector-backed masks are available.
-5. Train the B6.2 multi-task U-Net, then recover exact geometry and full-layout
-   metrics in B7.
-6. Implement one conservative `m1.2` repair family in B8 and accept proposals
-   only after DRC plus connectivity/LVS verification.
-7. Open the final holdout once in B9 and make the strongest claim the evidence
-   supports.
+This goes beyond another hotspot detector. Existing work already predicts
+pre-route DRC maps, injects predicted violations into routing, or learns global
+router cost schedules. A publishable result must make action selection,
+multi-objective consequences, uncertainty, and generalization the central
+contribution.
+
+#### B8.0 — Actionability pilot and kill gate
+
+Run a small, reproducible OpenROAD experiment before building a large dataset:
+
+- five to eight design families;
+- eight to twelve configurations per design;
+- at least two placement/router seeds;
+- one open PDK initially;
+- exact post-route DRC plus timing, wirelength, via count, runtime, and other
+  available PPA proxies for every run.
+
+Candidate actions include placement density, global or instance-class padding,
+macro extension/halo, routing-layer capacity adjustment, allowed routing layer
+range, congestion-driven placement settings, and detailed-routing effort or
+ordering seed. Freeze the action space before inspecting model results.
+
+**Gate:** continue only if actions materially change DRC/turnaround outcomes,
+no single fixed configuration dominates nearly every design, and useful
+pre-route features contain information about which action will win. If a simple
+fixed heuristic or cheap bisection solves the pilot, there is no ML problem.
+
+#### B8.1 — Action-conditioned trajectory dataset
+
+For each pre-detailed-routing snapshot and candidate action, store:
+
+- spatial features: macro, cell, pin, routing-demand, congestion, blockage, and
+  layer-utilization maps;
+- structural features: cells, nets, pin connectivity, placement, and timing
+  criticality when available;
+- context: PDK/rule parameters and the candidate action vector;
+- exact outcomes: post-route DRC map/count by rule, iterations, runtime,
+  wirelength, vias, WNS/TNS, power/area proxies, and DRC-clean status.
+
+Keep design families and generators disjoint across training, development, and
+final holdout. Hash every source snapshot, action configuration, tool version,
+and output. CircuitNet can be used for representation pretraining or external
+comparison, but the action labels and end-to-end claims must come from the
+reproducible flow generated here.
+
+#### B8.2 — Counterfactual multi-modal model
+
+Build a shared spatial/structural encoder with explicit action and rule
+conditioning. For each candidate action, predict:
+
+- post-route DRC heatmap and count by rule;
+- probability of DRC-clean completion;
+- routing runtime/iteration count;
+- timing, wirelength, via, and power/area deltas; and
+- calibrated predictive uncertainty.
+
+Start with transparent baselines before a large model: per-action mean,
+linear/gradient-boosted models, a spatial CNN, and a design-level graph model.
+Only add CNN+GNN/point fusion when simpler models establish that spatial and
+connectivity information are complementary. The controller enumerates the
+declared candidate actions, rejects high-uncertainty predictions, and selects
+the lowest-risk action satisfying registered PPA limits.
+
+#### B8.3 — Closed-loop comparison
+
+Compare the selected action against:
+
+- default OpenROAD configuration;
+- documented manual heuristic or bisection;
+- random and grid search at the same full-flow run budget;
+- Bayesian optimization at the same budget;
+- a hotspot predictor without action conditioning; and
+- the oracle best measured action as an upper bound.
+
+Primary metrics are system outcomes, not pixel accuracy: number of expensive
+full routing attempts, total design-turnaround time, exact final DRC count,
+DRC-clean completion rate, routing iterations, PPA change, action-selection
+regret, inference overhead, calibration, and out-of-distribution fallback rate.
+
+**Acceptance gate:** on family-disjoint development data, reduce full routing
+attempts by at least 25% or total turnaround time by at least 1.3x versus the
+best non-oracle baseline, without a worse exact DRC result, with less than 1%
+wirelength degradation and no material registered WNS/TNS regression. Use
+paired confidence intervals rather than one favorable seed.
+
+#### B8.4 — Stretch: cross-PDK and spatial actions
+
+If B8.3 passes, condition on normalized technology/rule features and test
+transfer to a second open platform with an exact available verification flow.
+Then evaluate region-specific padding/capacity actions instead of global-only
+configuration selection. These are stretch contributions; do not claim them
+without unseen-technology evidence and a safe uncertainty fallback.
+
+Verified local repair remains a possible downstream application, but it is not
+the primary post-B7.2 publication track.
+
+### B9 — Final holdout and reproducible release
+
+Select the release controller without opening the holdout, then evaluate it
+once. Release the trajectory/action manifest, split hashes, action generator,
+non-learned baselines, learned model, exact verification scripts, environment,
+and per-run results. Export ONNX only if it changes a measured deployment
+constraint.
+
+The paper must separate four claims:
+
+- B7.2 evidence about whether the detector accelerator survived or failed;
+- full-flow attempts and turnaround improvement from action selection;
+- exact DRC and PPA preservation versus search/tuning baselines; and
+- calibrated generalization to unseen design families and, if claimed, PDKs.
+
+The title and abstract must not imply replacement of signoff DRC. KLayout is
+the exact oracle and final acceptance authority.
+
+## Immediate sequence after B7.1
+
+1. Preserve B0–B7.1 as historical evidence; do not tune on their development
+   results again.
+2. Run B7.2 and make the accelerator go/no-go decision before any new training.
+3. If the hard gate fails, record the negative result and move to B8.0.
+4. Run the small B8.0 OpenROAD actionability pilot and freeze the action space.
+5. Build the action-conditioned trajectory dataset and non-learned baselines.
+6. Train a counterfactual controller only if B8.0 proves the task is
+   non-trivial and learnable.
+7. Open the final holdout once in B9 and state only claims supported by it.
 
 ## Experiment record template
 

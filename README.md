@@ -8,10 +8,10 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 4. Trains a CNN (Google Colab)
 5. Runs fast ONNX inference on a PC with Grad-CAM localization and GDS output
 
-The research goal is to improve on the paper's tile-level clean/dirty
-classifier in three measurable ways: preserve competitive classification,
-demonstrate generalization to unseen layout families, and progress from coarse
-tile localization to exact violation geometry and verified repair proposals.
+The completed B0–B7.1 work tests whether a learned detector can progress from
+tile classification to exact violation geometry. The current research goal is
+stricter: demonstrate a workflow advantage that a correctly configured exact
+DRC engine does not already provide. KLayout remains the source of truth.
 
 > **Project status:** **B0** through **B7.1** are complete. The original B7
 > full-layout run was rejected on deployment precision; B7.1 accepted a
@@ -43,13 +43,19 @@ tile localization to exact violation geometry and verified repair proposals.
 > **0.92** at the unchanged segmentation threshold **0.4** and passed with
 > **95.51% development violation recall**, **81.44% component precision**,
 > **87.92% component F1**, and **100% exact recovered-pair precision**. The
-> untouched B9 final holdout remains unopened; verified repair is next in B8.
+> untouched final holdout remains unopened. The next phase is the mandatory
+> B7.2 end-to-end competitiveness audit against optimized KLayout. The current
+> B7.1 system is not yet competitive: it misses about 4.5% of violations and
+> used 2,116.7 CPU-seconds for 0.268 mm². If it does not pass the B7.2 hard
+> gate, detector tuning stops and the project pivots to action-conditioned,
+> uncertainty-aware DRC prevention before detailed routing.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
 
-See [MODEL_ROADMAP.md](MODEL_ROADMAP.md) for the benchmark acceptance criteria
-and the controlled improvement phases planned after B0.
+See [MODEL_ROADMAP.md](MODEL_ROADMAP.md) for the revised publishability gates
+and [EXPERIMENT_STORAGE.md](EXPERIMENT_STORAGE.md) for the canonical Google
+Drive layout, Colab links, and rerun order.
 
 ---
 
@@ -89,6 +95,7 @@ ADVLSI2_Project_updated/
 ├── notebooks/B6_1_Localization_Dataset.ipynb # Resume-safe B6.1 dataset launcher
 ├── notebooks/B6_2_Multitask_UNet.ipynb # Official family-disjoint U-Net GPU run
 ├── notebooks/B7_Full_Layout_Stitching.ipynb # B7 complete-layout GPU launcher
+├── notebooks/B7_2_KLayout_Competitiveness.ipynb # Same-layout CNN/KLayout audit
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
 ├── training/classifier_models.py  # Frozen baseline and B4 architecture registry
 ├── training/localization_dataset.py # B6 family-disjoint paired image/mask loader
@@ -96,6 +103,7 @@ ADVLSI2_Project_updated/
 ├── training/train_multitask_unet.py # Resume-safe B6.2 training and metrics
 ├── training/full_layout_stitching.py # Sparse boundary merge and nm transforms
 ├── training/full_layout_evaluation.py # Full scans, policy selection, exact recovery
+├── training/klayout_performance.py # Exact m1.2 batch/incremental timing and checks
 ├── training/calibrate_classifier_threshold.py # Validation-only B3 threshold selection
 ├── training/evaluate_classifier.py # Test-only evaluation after B3 selection
 ├── training/dataset_manifest.py   # B1 integrity audit and frozen split logic
@@ -111,6 +119,7 @@ ADVLSI2_Project_updated/
 ├── scripts/build_b6_localization_dataset.py # Registry-wide exact-mask builder
 ├── scripts/run_b6_multitask_unet.py # Three-seed B6.2 training/evaluation runner
 ├── scripts/run_b7_full_layout.py # B7 validation selection and layout evaluation
+├── scripts/run_b7_2_klayout_benchmark.py # B7.2 exact competitiveness audit
 ├── scripts/benchmark_classifier_architectures.py # Paired CPU/ONNX cost benchmark
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
@@ -413,14 +422,15 @@ Run the extension with the persistent B2 checkpoint directory:
 
 ```bash
 python scripts/run_b3_extension.py \
-  --b2-checkpoints /path/to/ADVLSI2_B2/b2_baselines/checkpoints
+  --b2-checkpoints "/content/drive/MyDrive/ADVLSI2 2026 Project/experiments/B2_baselines/b2_baselines/checkpoints"
 ```
 
 For a GPU run, open
 [`notebooks/B3_Training_Optimization.ipynb`](notebooks/B3_Training_Optimization.ipynb)
-in Colab. Persistent artifacts are written under
-`My Drive/ADVLSI2_B3/b3_optimization/`, while accepted B2 checkpoints are reused
-from `My Drive/ADVLSI2_B2/b2_baselines/checkpoints/`.
+in Colab. Persistent artifacts are written under `My Drive/ADVLSI2 2026
+Project/experiments/B3_training_optimization/b3_optimization/`, while accepted
+B2 checkpoints are reused from `My Drive/ADVLSI2 2026
+Project/experiments/B2_baselines/b2_baselines/checkpoints/`.
 
 ### B4 compact architecture experiment (complete; no replacement accepted)
 
@@ -485,7 +495,8 @@ accuracy, recall, or F1. The test data never selects a weight or threshold.
 The experiment reuses checkpoints already saved by B2 and B4. Open
 [`notebooks/B5_Ensemble.ipynb`](notebooks/B5_Ensemble.ipynb) in Colab; it reads
 the checkpoints from Drive and writes resume-safe prediction artifacts and the
-final decision under `My Drive/ADVLSI2_B5/b5_ensemble/`.
+final decision under `My Drive/ADVLSI2 2026
+Project/experiments/B5_ensemble/b5_ensemble/`.
 
 The selected 25% B2 / 75% B4 blend passed the validation gate, raising mean
 dirty F1 from B4's 93.61% to **93.87%**, so frozen tests were legitimately
@@ -512,7 +523,8 @@ Open
 in a GPU Colab runtime. It verifies and reuses the authoritative B2/B4
 checkpoints, exports non-augmented training and validation probabilities for
 both development protocols, and writes resume-safe artifacts under
-`My Drive/ADVLSI2_B5_2/`. It never reads either test split.
+`My Drive/ADVLSI2 2026 Project/experiments/B5_2_failure_audit/`. It never reads
+either test split.
 
 The completed validation-only audit found that B2/B4 class-conditional
 complementarity repeats on the tile-random protocol but not on unseen layouts.
@@ -675,6 +687,31 @@ The `--reuse-scans-only` guard makes B7.1 fail rather than silently repeat GPU
 inference if any cache is missing or stale. Compact measured evidence is stored
 under [`results/b7_full_layout/`](results/b7_full_layout/).
 
+### B7.2 KLayout competitiveness audit (ready to run)
+
+B7.2 compares the frozen B7.1 pipeline with exact KLayout on the same six
+unseen layouts and both source/injected variants. The KLayout runner warms once
+and measures five repetitions, separates parse, recursive M1 materialization,
+exact `Region.space_check(140 nm)`, report writing, and total time, and verifies
+that every injected-layout edge pair exactly matches the cached authoritative
+RDB. It also measures an already-loaded rule-only case and known 10 µm changed
+regions.
+
+The CNN timer now synchronizes CUDA before and after a scan. The Colab launcher
+reruns B7.1 on GPU without reusing scan caches, then runs the exact KLayout
+baseline and shows one 200×200 input, exact central mask, probability map,
+final overlay, and recovered edge coordinates:
+[`notebooks/B7_2_KLayout_Competitiveness.ipynb`](notebooks/B7_2_KLayout_Competitiveness.ipynb).
+
+The hard gate is intentionally strict: at least 2× complete-pipeline speedup,
+at least 99.5% violation recall, no registered severe or near-threshold miss,
+no clean-layout false alarm, exact-pair precision of one, and lower p95
+latency. The existing B7.1 quality result already falls below this threshold;
+B7.2 measures the performance gap and records the kill decision rather than
+opening another detector-tuning loop. An optimized KLayout CLI mode/thread
+sweep is required only if the CNN unexpectedly survives this exact Stage-A
+audit; the project cannot make a positive speed claim from a weak baseline.
+
 ### B4 on an Apple-silicon Mac
 
 An M4 Mac with 24 GB unified memory can run the official B4 protocol through
@@ -701,8 +738,8 @@ floating-point differences are possible.
 
 For the official GPU run, open
 [`notebooks/B4_Compact_Architecture.ipynb`](notebooks/B4_Compact_Architecture.ipynb)
-in Colab. Resume-safe artifacts are written under
-`My Drive/ADVLSI2_B4/b4_architecture/`.
+in Colab. Resume-safe artifacts are written under `My Drive/ADVLSI2 2026
+Project/experiments/B4_compact_architecture/b4_architecture/`.
 
 ---
 

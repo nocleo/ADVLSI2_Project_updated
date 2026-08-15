@@ -179,9 +179,13 @@ def scan_full_layout(
     components = {_threshold_key(threshold): [] for threshold in thresholds}
     tile_records: list[dict[str, Any]] = []
     diagnostics: list[dict[str, Any]] = []
-    started = time.perf_counter()
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
+        # CUDA launches are asynchronous.  Synchronize at both timing
+        # boundaries so B7.2 measures the complete user-visible scan rather
+        # than only the CPU time spent enqueueing GPU kernels.
+        torch.cuda.synchronize(device)
+    started = time.perf_counter()
 
     for start in range(0, len(all_indices), batch_size):
         batch_indices = all_indices[start : start + batch_size]
@@ -239,6 +243,8 @@ def scan_full_layout(
             )
             diagnostics = diagnostics[:8]
 
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
     elapsed = time.perf_counter() - started
     bbox = variant["layout_bbox_nm"]
     area_mm2 = ((bbox[2] - bbox[0]) * (bbox[3] - bbox[1])) / 1e12
