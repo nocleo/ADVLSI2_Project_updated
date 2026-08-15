@@ -72,6 +72,10 @@ derives all other persistent paths from it:
 from pathlib import Path
 
 PROJECT_DRIVE = Path('/content/drive/MyDrive/ADVLSI2 2026 Project')
+assert PROJECT_DRIVE.is_dir(), (
+    f'Missing canonical project root: {PROJECT_DRIVE}. '
+    'Do not create an empty replacement with the same name.'
+)
 NOTEBOOKS_ROOT = PROJECT_DRIVE / 'notebooks'
 EXPERIMENTS_ROOT = PROJECT_DRIVE / 'experiments'
 DATASETS_ROOT = PROJECT_DRIVE / 'datasets'
@@ -81,6 +85,11 @@ REPORTS_ROOT = PROJECT_DRIVE / 'reports'
 Temporary archives may still be created under `/content` for download, but the
 authoritative inputs, checkpoints, caches, metrics, and reports live under the
 Drive root above.
+
+The project folder must already exist directly in **My Drive** before a
+notebook creates phase output directories. This guard prevents Colab from
+silently producing a second, empty `ADVLSI2 2026 Project` folder when the
+canonical folder is only visible under **Shared with me**.
 
 ## Rerun order
 
