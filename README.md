@@ -701,7 +701,8 @@ The CNN timer now synchronizes CUDA before and after a scan. The Colab launcher
 reruns B7.1 on GPU without reusing scan caches, then runs the exact KLayout
 baseline and shows one 200×200 input, exact central mask, probability map,
 final overlay, and recovered edge coordinates:
-[`notebooks/B7_2_KLayout_Competitiveness.ipynb`](notebooks/B7_2_KLayout_Competitiveness.ipynb).
+[`notebooks/B7_2_KLayout_Competitiveness.ipynb`](notebooks/B7_2_KLayout_Competitiveness.ipynb)
+or the canonical [Drive/Colab copy](https://colab.research.google.com/drive/1U6EBCcYkDBqJBDk6xDoGK9MRhkeLuaB2).
 
 The hard gate is intentionally strict: at least 2× complete-pipeline speedup,
 at least 99.5% violation recall, no registered severe or near-threshold miss,

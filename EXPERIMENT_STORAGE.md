@@ -61,7 +61,7 @@ as reference inputs. They are not experiment-output locations.
 | B6.1 | [Localization dataset](https://colab.research.google.com/drive/1XvRYnfTmZieAvu5EymiXVk524QLXyIXV) |
 | B6.2 | [Multi-task U-Net](https://colab.research.google.com/drive/16WKJV8nePYJrY_KVPQDqVM-CUAHPgWOF) |
 | B7 | [Full-layout stitching](https://colab.research.google.com/drive/1nZlAcR6YDWxXfIX-P5OlxZPaY4DTNRqA) |
-| B7.2 | [`B7_2_KLayout_Competitiveness.ipynb`](notebooks/B7_2_KLayout_Competitiveness.ipynb) (repository launcher; copy it to the Drive notebook folder before execution) |
+| B7.2 | [KLayout competitiveness audit](https://colab.research.google.com/drive/1U6EBCcYkDBqJBDk6xDoGK9MRhkeLuaB2) |
 
 ## Path contract
 
