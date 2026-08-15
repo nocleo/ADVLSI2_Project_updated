@@ -13,7 +13,7 @@ At the end of every project phase:
 3. Update this PPTX path and refresh the convenience Slides copy when needed.
 4. Commit the presentation together with the phase results.
 
-The current 28-slide deck includes the completed B2 three-seed baselines:
+The current 29-slide deck includes the completed B2 three-seed baselines:
 92.47% +/- 0.61% tile-random reference accuracy and 90.38% +/- 0.84%
 accuracy on unseen layout families. The paper's reported result remains an
 external reference because the datasets and protocols differ. It also records
@@ -37,6 +37,8 @@ three-seed multi-task U-Net result: 95.51% classification accuracy, 98.86%
 dirty recall, 86.32% mask Dice, 84.23% raster-object F1, and 87.19%
 exact-vector owner recall on unseen development-confirmation layouts. The deck
 does not overstate this as sign-off localization: object precision is 73.12%,
-the SRAM family remains weakest, and B7 exact-edge recovery plus realistic
-full-layout false-alarm evaluation is next. DRC/connectivity-verified repair
-follows in B8, and the untouched final holdout remains B9.
+and the SRAM family remains weakest. It now also records the accepted B7.1
+cache-only policy correction: classification threshold 0.92, segmentation
+threshold 0.4, 95.51% development violation recall, 81.44% candidate precision,
+87.92% component F1, and 100% exact-pair precision. DRC/connectivity-verified
+repair follows in B8, and the untouched final holdout remains B9.

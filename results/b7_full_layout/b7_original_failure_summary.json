@@ -1,0 +1,42 @@
+{
+  "acceptance": {
+    "checks": {
+      "complete_full_grid_scans": true,
+      "development_component_precision_at_least_0_80": false,
+      "development_violation_recall_at_least_0_85": true,
+      "validation_violation_recall_at_least_0_85": true
+    },
+    "passed": false
+  },
+  "deployment_policy": {
+    "classification_threshold": 0.8,
+    "merge_gap_px": 2,
+    "minimum_component_area_px": 16,
+    "recovery_radius_nm": 140.0,
+    "segmentation_threshold": 0.4
+  },
+  "development_confirmation": {
+    "candidate_component_count": 2164,
+    "component_f1": 0.7634017161911272,
+    "component_precision": 0.6256931608133087,
+    "detected_unique_violation_count": 1526,
+    "exact_candidate_precision": 1.0,
+    "false_component_count": 810,
+    "ground_truth_violation_count": 1559,
+    "violation_recall": 0.9788325849903784
+  },
+  "official_result": true,
+  "phase": "B7",
+  "status": "complete",
+  "untouched_b9_final_holdout_used": false,
+  "validation": {
+    "candidate_component_count": 1511,
+    "component_f1": 0.9110671730634272,
+    "component_precision": 0.8537392455327598,
+    "detected_unique_violation_count": 1422,
+    "exact_candidate_precision": 1.0,
+    "false_component_count": 221,
+    "ground_truth_violation_count": 1456,
+    "violation_recall": 0.9766483516483516
+  }
+}

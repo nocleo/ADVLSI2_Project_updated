@@ -480,6 +480,58 @@ memory, and end-to-end layout runtime. Compare tiled and fully convolutional
 execution where practical; prefer the path that avoids recomputing overlapping
 features without changing model outputs.
 
+**Original B7 protocol:** complete; precision gate failed. Average the
+probability outputs of the accepted seeds 42/43/44. Scan
+all central outputs of the three validation families and their original source
+variants; do not reuse B6's balanced clean sampling for prevalence metrics.
+Select the segmentation threshold first, then select the tile-classification
+gate, minimum merged-component area, and 0/1/2-pixel fragment gap using only
+those complete validation layouts. The selected policy must retain at least
+85% validation violation recall and is frozen before the three development-
+confirmation families are scanned. B7 is accepted only if complete-grid and
+coordinate-round-trip checks pass, development exact-violation recall is at
+least 85%, and development candidate-component precision is at least 80%.
+
+Sparse components are stitched in global raster coordinates without allocating
+a full-layout image. Each proposal exports its physical centroid/bounding box,
+mean/maximum confidence, source tiles, and the exact two M1 edges recovered by
+a local KLayout `m1.2` query. The teammate notebook's four-panel visualization,
+per-component records, confidence fields, and validation threshold plot are
+adapted; its random tile split, 200x200 mask ownership, and checkpoint are not.
+The official execution remains batched non-overlapping tiling because the
+accepted auxiliary classification head uses global pooling and a fixed central
+crop, so a single full-layout convolution would change model outputs.
+
+**Original B7 result:** the validation-selected policy was segmentation
+threshold `0.4`, classification threshold `0.8`, 16-pixel minimum area, and a
+2-pixel merge gap. It achieved 97.66% validation violation recall and 85.37%
+validation component precision. Development confirmation retained 97.88%
+violation recall and 100% exact recovered-pair precision, but component
+precision was 62.57%, below the 80% gate. `tt_um_c4m_spsram_direct` accounts
+for 686 of 810 false components, including 301 detections on its clean source
+layout; the other two development families combine to 87.41% precision. B7 is
+therefore rejected as a deployment policy, while its stitching, coordinate
+mapping, and exact KLayout recovery are retained.
+
+**B7.1 controlled correction:** preserve the original B7 evidence and reuse
+only its checkpoint/hash-bound complete scan caches. Extend the validation
+classification thresholds densely from `0.80` through `0.99`; keep the model,
+freeze segmentation at the original validation-selected `0.4`, and keep the
+minimum-area candidates, merge-gap candidates, layouts,
+and checkpoints unchanged. Select maximum validation component precision
+subject to at least 95% validation violation recall, freeze the policy, and
+then recompute development metrics once. B7.1 retains the original B7
+acceptance gates of at least 85% development violation recall and at least 80%
+development candidate-component precision. This is sequential development,
+not final evidence, and does not open B9.
+
+**B7.1 result — accepted:** validation-only selection chose classification
+threshold `0.92` with the unchanged segmentation threshold `0.4`, minimum area
+`16` pixels, merge gap `2` pixels, and recovery radius `140` nm. Development
+confirmation achieved 95.51% violation recall, 81.44% candidate-component
+precision, 87.92% component F1, and 100% exact recovered-pair precision. All
+registered gates passed. The B9 final holdout remained unopened, so B8 is next.
+
 ### B8 — Constrained, verified repair proposals
 
 **Hypothesis:** a localized `m1.2` edge pair can support a small set of safe,
