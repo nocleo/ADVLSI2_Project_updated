@@ -6,7 +6,7 @@ All Colab notebooks and persistent artifacts use one Google Drive root:
 /content/drive/MyDrive/ADVLSI2 2026 Project
 ```
 
-Drive folder: [ADVLSI2 2026 Project](https://drive.google.com/drive/folders/1gGH6ETL-xT1HUYrNv_T5ScPzio9bQXLf)
+Drive folder: [ADVLSI2 2026 Project](https://drive.google.com/drive/folders/1WVKzwWkh-onnEnmSKJpF4Wp-NSkbjuBw)
 
 ## Canonical structure
 
