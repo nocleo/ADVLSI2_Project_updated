@@ -1,6 +1,7 @@
 # B7 full-layout stitching and exact-coordinate recovery
 
-Status: **original B7 rejected; B7.1 cache-based correction accepted**.
+Status: **original B7 rejected; B7.1 internal policy accepted; B7.2
+competitiveness gate failed and the detector branch is closed**.
 
 The runner averages the accepted B6.2 seeds 42/43/44, scans every central
 output of each complete layout at natural prevalence, and includes the original
@@ -84,3 +85,36 @@ preserves the rejected original result.
 Run [`../../notebooks/B7_Full_Layout_Stitching.ipynb`](../../notebooks/B7_Full_Layout_Stitching.ipynb).
 The notebook uses `--reuse-scans-only`, so a missing or stale cache causes an
 immediate failure instead of another multi-hour inference scan.
+
+## B7.2 measured competitiveness result
+
+B7.2 reran the frozen B7.1 policy with synchronized CUDA timing and compared it
+with exact KLayout on the same six layouts and both source/injected variants.
+KLayout used one warm-up and five measured repetitions. The CNN has one
+complete timing repetition, so its p95 is unavailable; this does not change the
+decision because recall and median speed both fail by large margins.
+
+| Split | CNN total | KLayout median | KLayout conservative p95 | KLayout faster by | CNN recall |
+|---|---:|---:|---:|---:|---:|
+| Validation | 4,693.87 s | 18.35 s | 21.15 s | 255.85x | 95.33% |
+| Development confirmation | 1,392.87 s | 8.59 s | 10.65 s | 162.21x | 95.51% |
+
+The hard gate required at least 2x CNN speedup, at least 99.5% violation recall,
+no registered critical/near-threshold miss, no clean-layout false alarm, exact
+recovered-pair precision of one, and lower p95 latency. Validation missed
+near-threshold and severe-slice violations. Development confirmation missed
+near-threshold violations and flagged one clean layout. The comparison boundary
+favored the CNN by excluding model/layout load and result serialization, while
+KLayout included parsing, M1 materialization, exact checking, and RDB writing.
+
+Exact recovered-pair precision remained 100% only for CNN-proposed candidates
+because KLayout performs local exact recovery. It does not recover the 4.5–4.7%
+of true violations that the CNN never proposed. The B7.2 hard gate therefore
+failed; no optimized Stage-B benchmark or further detector tuning is warranted.
+B9 remains unopened, and the next experiment is the preregistered B8.0
+OpenROAD actionability pilot.
+
+Machine-readable evidence:
+
+- [`b7_2_cnn_gpu_summary.json`](b7_2_cnn_gpu_summary.json)
+- [`b7_2_klayout_competitiveness_summary.json`](b7_2_klayout_competitiveness_summary.json)

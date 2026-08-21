@@ -26,7 +26,9 @@ try:
         B7_1_CLASSIFICATION_THRESHOLDS,
         canonical_pair_key,
         evaluate_exact_layout,
+        load_scan_cache,
         load_layout_variant,
+        save_scan_cache,
         scan_full_layout,
         select_validation_policy,
     )
@@ -162,6 +164,79 @@ class B7DependencyBackedTest(unittest.TestCase):
             self.assertGreaterEqual(result["exact_candidate_count"], 1)
             self.assertEqual(result["detected_unique_violation_count"], 1)
 
+    def test_frozen_classification_floor_is_prediction_equivalent_and_cache_safe(self) -> None:
+        class LowConfidenceModel(torch.nn.Module):
+            def forward(self, inputs):
+                count = inputs.shape[0]
+                segmentation = torch.full(
+                    (count, 1, 160, 160), 20.0, device=inputs.device
+                )
+                classification = torch.tensor(
+                    [[10.0, 0.0]], device=inputs.device
+                ).repeat(count, 1)
+                return segmentation, classification
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "layout.gds"
+            self._write_layout(path, with_violation=True)
+            variant = load_layout_variant(
+                "synthetic",
+                path,
+                None,
+                LocalizationConfig(),
+                "injected",
+            )
+            model = LowConfidenceModel()
+            unfiltered = scan_full_layout(
+                variant,
+                [model],
+                torch.device("cpu"),
+                thresholds=[0.5],
+                batch_size=2,
+            )
+            filtered = scan_full_layout(
+                variant,
+                [model],
+                torch.device("cpu"),
+                thresholds=[0.5],
+                batch_size=2,
+                component_class_probability_floor=0.5,
+            )
+            policy = DeploymentPolicy(0.5, 0.5, 1, 0)
+            first = evaluate_exact_layout(unfiltered, policy)
+            second = evaluate_exact_layout(filtered, policy)
+            for key in (
+                "detected_unique_violation_count",
+                "candidate_component_count",
+                "exact_candidate_count",
+                "violation_recall",
+                "component_precision",
+            ):
+                self.assertEqual(first[key], second[key])
+            self.assertGreater(len(unfiltered["components_by_threshold"]["0.500"]), 0)
+            self.assertEqual(filtered["components_by_threshold"]["0.500"], [])
+
+            cache = root / "filtered.pkl.gz"
+            save_scan_cache(cache, filtered, "checkpoint-signature")
+            self.assertIsNone(
+                load_scan_cache(
+                    cache,
+                    variant,
+                    "checkpoint-signature",
+                    require_complete=True,
+                )
+            )
+            self.assertIsNotNone(
+                load_scan_cache(
+                    cache,
+                    variant,
+                    "checkpoint-signature",
+                    require_complete=True,
+                    maximum_component_class_probability_floor=0.5,
+                )
+            )
+
     def test_policy_selection_uses_only_supplied_validation_scans(self) -> None:
         probability = np.zeros((160, 160), dtype=np.float32)
         probability[80, 80] = 0.8
@@ -189,8 +264,10 @@ class B7DependencyBackedTest(unittest.TestCase):
         raw = []
         vectors = []
         for index in range(10):
-            row = 10 + index * 10
-            column = 20
+            # Keep synthetic vectors farther apart than the declared 140 nm
+            # proxy-match radius so one component cannot claim two vectors.
+            row = 10 + (index // 4) * 40
+            column = 10 + (index % 4) * 40
             raw.append(
                 {
                     "component_id": f"true-{index}",
@@ -206,7 +283,7 @@ class B7DependencyBackedTest(unittest.TestCase):
             vectors.append(
                 {
                     "violation_id": f"v{index}",
-                    "midpoint_nm": [164, row * 8 + 4],
+                    "midpoint_nm": [column * 8 + 4, row * 8 + 4],
                 }
             )
         raw.append(
@@ -218,7 +295,7 @@ class B7DependencyBackedTest(unittest.TestCase):
                 "area_pixels": 1,
                 "mean_confidence": 0.9,
                 "max_confidence": 0.9,
-                "_pixels_yx": np.asarray([[150, 120]], dtype=np.int32),
+                "_pixels_yx": np.asarray([[155, 155]], dtype=np.int32),
             }
         )
         scan = {

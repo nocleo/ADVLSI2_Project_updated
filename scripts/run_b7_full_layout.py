@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import gc
 import json
 import shutil
 import sys
@@ -46,14 +47,20 @@ DEFAULT_PROTOCOLS = PROJECT_ROOT / "data" / "evaluation_protocols.json"
 
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    temporary.replace(path)
 
 
 def _write_jsonl(path: Path, records: Sequence[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    with temporary.open("w", encoding="utf-8") as handle:
         for record in records:
             handle.write(json.dumps(record, sort_keys=True) + "\n")
+    temporary.replace(path)
 
 
 def _slug(layout: str, variant: str) -> str:
@@ -96,6 +103,7 @@ def _scan_split(
     output_dir: Path,
     checkpoint_signature: str,
     reuse_scans_only: bool = False,
+    component_class_probability_floor: float = 0.0,
 ) -> list[dict[str, Any]]:
     scans = []
     for layout in layouts:
@@ -112,6 +120,9 @@ def _scan_split(
                 variant,
                 checkpoint_signature,
                 require_complete=max_tiles is None,
+                maximum_component_class_probability_floor=(
+                    component_class_probability_floor
+                ),
             )
             if cached is not None and max_tiles is not None:
                 expected_tiles = min(
@@ -137,6 +148,9 @@ def _scan_split(
                 device,
                 batch_size=batch_size,
                 max_tiles=max_tiles,
+                component_class_probability_floor=(
+                    component_class_probability_floor
+                ),
             )
             save_scan_cache(cache_path, scan, checkpoint_signature)
             print(
@@ -155,37 +169,173 @@ def _scan_split(
     return scans
 
 
+def _evaluate_and_export_layout(
+    scan: dict[str, Any],
+    policy: DeploymentPolicy,
+    output_dir: Path,
+    split: str,
+) -> dict[str, Any]:
+    result = evaluate_exact_layout(scan, policy)
+    slug = _slug(scan["layout"], scan["variant"])
+    layout_dir = output_dir / "layouts" / split / slug
+    _write_json(layout_dir / "result.json", result)
+    _write_jsonl(layout_dir / "components.jsonl", result["components"])
+    _write_jsonl(layout_dir / "exact_candidates.jsonl", result["exact_candidates"])
+    _write_json(layout_dir / "scan.json", json_ready_scan(scan))
+    render_four_panel(scan, policy, layout_dir / "four_panel.png")
+    print(
+        json.dumps(
+            {
+                "layout": scan["layout"],
+                "variant": scan["variant"],
+                "recall": result["violation_recall"],
+                "component_precision": result["component_precision"],
+                "false_components": result["false_component_count"],
+            }
+        ),
+        flush=True,
+    )
+    return result
+
+
 def _evaluate_and_export(
     scans: Sequence[dict[str, Any]],
     policy: DeploymentPolicy,
     output_dir: Path,
     split: str,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    results = []
-    for scan in scans:
-        result = evaluate_exact_layout(scan, policy)
-        slug = _slug(scan["layout"], scan["variant"])
-        layout_dir = output_dir / "layouts" / split / slug
-        _write_json(layout_dir / "result.json", result)
-        _write_jsonl(layout_dir / "components.jsonl", result["components"])
-        _write_jsonl(layout_dir / "exact_candidates.jsonl", result["exact_candidates"])
-        _write_json(layout_dir / "scan.json", json_ready_scan(scan))
-        render_four_panel(scan, policy, layout_dir / "four_panel.png")
-        print(
-            json.dumps(
-                {
-                    "layout": scan["layout"],
-                    "variant": scan["variant"],
-                    "recall": result["violation_recall"],
-                    "component_precision": result["component_precision"],
-                    "false_components": result["false_component_count"],
-                }
-            ),
-            flush=True,
-        )
-        results.append(result)
+    results = [
+        _evaluate_and_export_layout(scan, policy, output_dir, split)
+        for scan in scans
+    ]
     aggregate = aggregate_exact_layouts(results)
     _write_json(output_dir / f"{split}_summary.json", {"aggregate": aggregate, "layouts": results})
+    return results, aggregate
+
+
+def _load_completed_validation(
+    output_dir: Path,
+) -> tuple[dict[str, Any], DeploymentPolicy, list[dict[str, Any]], dict[str, Any]]:
+    selection_path = output_dir / "validation_policy_selection.json"
+    summary_path = output_dir / "validation_summary.json"
+    if not selection_path.is_file() or not summary_path.is_file():
+        raise FileNotFoundError(
+            "--resume-completed-validation requires both "
+            f"{selection_path} and {summary_path}"
+        )
+    selection = json.loads(selection_path.read_text(encoding="utf-8"))
+    payload = json.loads(summary_path.read_text(encoding="utf-8"))
+    results = list(payload["layouts"])
+    aggregate = dict(payload["aggregate"])
+    policy = DeploymentPolicy(**selection["selected_policy"])
+    policy.validate()
+    if not results or not all(bool(item.get("complete_scan")) for item in results):
+        raise ValueError(f"Validation resume artifact is incomplete: {summary_path}")
+    if any(item.get("policy") != policy.to_dict() for item in results):
+        raise ValueError(
+            "Validation results do not match the selected frozen policy in "
+            f"{selection_path}"
+        )
+    return selection, policy, results, aggregate
+
+
+def _load_reusable_layout_result(
+    path: Path, policy: DeploymentPolicy
+) -> dict[str, Any] | None:
+    if not path.is_file():
+        return None
+    try:
+        result = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not result.get("complete_scan") or result.get("policy") != policy.to_dict():
+        return None
+    return result
+
+
+def _release_scan_memory(device: torch.device) -> None:
+    gc.collect()
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
+
+
+def _scan_development_incrementally(
+    layouts: Sequence[str],
+    models: Sequence[torch.nn.Module],
+    device: torch.device,
+    batch_size: int,
+    max_tiles: int | None,
+    include_source: bool,
+    output_dir: Path,
+    checkpoint_signature: str,
+    policy: DeploymentPolicy,
+    reuse_scans_only: bool,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Resume development one layout variant at a time with bounded memory."""
+
+    results: list[dict[str, Any]] = []
+    split = "development_confirmation"
+    for layout in layouts:
+        for variant in _prepare_variants(
+            layout, include_source, output_dir / "layout_cache"
+        ):
+            slug = _slug(layout, variant["variant"])
+            result_path = output_dir / "layouts" / split / slug / "result.json"
+            existing = _load_reusable_layout_result(result_path, policy)
+            if existing is not None:
+                print(f"[B7] reusing completed result {slug}", flush=True)
+                results.append(existing)
+                continue
+
+            cache_path = output_dir / "scan_cache" / f"{slug}.pkl.gz"
+            scan = load_scan_cache(
+                cache_path,
+                variant,
+                checkpoint_signature,
+                require_complete=max_tiles is None,
+                maximum_component_class_probability_floor=(
+                    policy.classification_threshold
+                ),
+            )
+            if scan is None:
+                if reuse_scans_only:
+                    raise RuntimeError(
+                        "Missing, stale, or incomplete B7 scan cache for "
+                        f"{slug}: {cache_path}"
+                    )
+                print(f"[B7] scanning resumable {slug}", flush=True)
+                scan = scan_full_layout(
+                    variant,
+                    models,
+                    device,
+                    thresholds=(policy.segmentation_threshold,),
+                    batch_size=batch_size,
+                    max_tiles=max_tiles,
+                    component_class_probability_floor=(
+                        policy.classification_threshold
+                    ),
+                )
+                save_scan_cache(cache_path, scan, checkpoint_signature)
+            else:
+                print(f"[B7] reusing scan cache {slug}", flush=True)
+
+            result = _evaluate_and_export_layout(scan, policy, output_dir, split)
+            results.append(result)
+            progress = {
+                "status": "in_progress",
+                "completed_layout_variants": len(results),
+                "aggregate": aggregate_exact_layouts(results),
+                "layouts": results,
+            }
+            _write_json(output_dir / f"{split}_progress.json", progress)
+            del scan
+            _release_scan_memory(device)
+
+    aggregate = aggregate_exact_layouts(results)
+    _write_json(
+        output_dir / f"{split}_summary.json",
+        {"aggregate": aggregate, "layouts": results},
+    )
     return results, aggregate
 
 
@@ -312,46 +462,74 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if args.development_layouts:
         development_layouts = list(args.development_layouts)
 
-    validation_scans = _scan_split(
-        validation_layouts,
-        models,
-        device,
-        args.batch_size,
-        args.max_tiles_per_layout,
-        not args.no_source_variants,
-        args.output_dir,
-        checkpoint_signature,
-        args.reuse_scans_only,
-    )
-    selection = select_validation_policy(
-        validation_scans,
-        segmentation_thresholds=args.segmentation_thresholds,
-        classification_thresholds=args.classification_thresholds,
-        minimum_recall=args.selection_minimum_recall,
-        selection_objective=args.selection_objective,
-    )
-    _write_json(args.output_dir / "validation_policy_selection.json", selection)
-    render_threshold_tradeoff(selection, args.output_dir / "validation_threshold_tradeoff.png")
-    policy = DeploymentPolicy(**selection["selected_policy"])
-    validation_results, validation_aggregate = _evaluate_and_export(
-        validation_scans, policy, args.output_dir, "validation"
-    )
-    del validation_scans
+    if args.resume_completed_validation:
+        selection, policy, validation_results, validation_aggregate = (
+            _load_completed_validation(args.output_dir)
+        )
+        print(
+            "[B7] reusing completed validation and frozen deployment policy",
+            flush=True,
+        )
+    else:
+        validation_scans = _scan_split(
+            validation_layouts,
+            models,
+            device,
+            args.batch_size,
+            args.max_tiles_per_layout,
+            not args.no_source_variants,
+            args.output_dir,
+            checkpoint_signature,
+            args.reuse_scans_only,
+        )
+        selection = select_validation_policy(
+            validation_scans,
+            segmentation_thresholds=args.segmentation_thresholds,
+            classification_thresholds=args.classification_thresholds,
+            minimum_recall=args.selection_minimum_recall,
+            selection_objective=args.selection_objective,
+        )
+        _write_json(args.output_dir / "validation_policy_selection.json", selection)
+        render_threshold_tradeoff(
+            selection, args.output_dir / "validation_threshold_tradeoff.png"
+        )
+        policy = DeploymentPolicy(**selection["selected_policy"])
+        validation_results, validation_aggregate = _evaluate_and_export(
+            validation_scans, policy, args.output_dir, "validation"
+        )
+        del validation_scans
+        _release_scan_memory(device)
 
-    development_scans = _scan_split(
-        development_layouts,
-        models,
-        device,
-        args.batch_size,
-        args.max_tiles_per_layout,
-        not args.no_source_variants,
-        args.output_dir,
-        checkpoint_signature,
-        args.reuse_scans_only,
-    )
-    development_results, development_aggregate = _evaluate_and_export(
-        development_scans, policy, args.output_dir, "development_confirmation"
-    )
+    if args.incremental_development:
+        development_results, development_aggregate = (
+            _scan_development_incrementally(
+                development_layouts,
+                models,
+                device,
+                args.batch_size,
+                args.max_tiles_per_layout,
+                not args.no_source_variants,
+                args.output_dir,
+                checkpoint_signature,
+                policy,
+                args.reuse_scans_only,
+            )
+        )
+    else:
+        development_scans = _scan_split(
+            development_layouts,
+            models,
+            device,
+            args.batch_size,
+            args.max_tiles_per_layout,
+            not args.no_source_variants,
+            args.output_dir,
+            checkpoint_signature,
+            args.reuse_scans_only,
+        )
+        development_results, development_aggregate = _evaluate_and_export(
+            development_scans, policy, args.output_dir, "development_confirmation"
+        )
     complete = all(
         item["complete_scan"] for item in validation_results + development_results
     )
@@ -389,6 +567,22 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "selected": "batched_nonoverlapping_central_tiles",
             "fully_convolutional_equivalent": False,
             "reason": "global classification pooling and fixed central output crop make a full-layout pass non-equivalent",
+            "resumed_completed_validation": bool(
+                args.resume_completed_validation
+            ),
+            "incremental_development": bool(args.incremental_development),
+            "development_component_materialization_floor": (
+                policy.classification_threshold
+                if args.incremental_development
+                else 0.0
+            ),
+            "prediction_equivalence": (
+                "Development components below the frozen classification "
+                "threshold are discarded before materialization; the frozen "
+                "policy would reject the same tiles later."
+                if args.incremental_development
+                else "No early component floor applied."
+            ),
         },
     }
     _write_json(args.output_dir / "summary.json", summary)
@@ -434,6 +628,22 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--reuse-scans-only",
         action="store_true",
         help="Fail instead of running inference when a trusted complete scan cache is unavailable.",
+    )
+    parser.add_argument(
+        "--resume-completed-validation",
+        action="store_true",
+        help=(
+            "Reuse validation_policy_selection.json and validation_summary.json "
+            "from output-dir instead of loading the large validation scan caches."
+        ),
+    )
+    parser.add_argument(
+        "--incremental-development",
+        action="store_true",
+        help=(
+            "Process, export, and release each development layout variant "
+            "independently so a disconnected run can resume."
+        ),
     )
     parser.add_argument("--no-source-variants", action="store_true")
     parser.add_argument("--validation-layouts", nargs="+")

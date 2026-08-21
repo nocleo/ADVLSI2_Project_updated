@@ -13,7 +13,7 @@ At the end of every project phase:
 3. Update this PPTX path and refresh the convenience Slides copy when needed.
 4. Commit the presentation together with the phase results.
 
-The current 29-slide deck includes the completed B2 three-seed baselines:
+The current 31-slide deck includes the completed B2 three-seed baselines:
 92.47% +/- 0.61% tile-random reference accuracy and 90.38% +/- 0.84%
 accuracy on unseen layout families. The paper's reported result remains an
 external reference because the datasets and protocols differ. It also records
@@ -37,8 +37,21 @@ three-seed multi-task U-Net result: 95.51% classification accuracy, 98.86%
 dirty recall, 86.32% mask Dice, 84.23% raster-object F1, and 87.19%
 exact-vector owner recall on unseen development-confirmation layouts. The deck
 does not overstate this as sign-off localization: object precision is 73.12%,
-and the SRAM family remains weakest. It now also records the accepted B7.1
+and the SRAM family remains weakest. It also records the accepted B7.1
 cache-only policy correction: classification threshold 0.92, segmentation
 threshold 0.4, 95.51% development violation recall, 81.44% candidate precision,
-87.92% component F1, and 100% exact-pair precision. DRC/connectivity-verified
-repair follows in B8, and the untouched final holdout remains B9.
+87.92% component F1, and 100% exact-pair precision.
+
+The deck now includes the completed B7.2 competitiveness decision. On the
+validation batch, the CNN took 4,693.87 seconds versus an 18.35-second KLayout
+median, so KLayout was 255.85x faster; CNN recall was 95.33%. Development
+confirmation took 1,392.87 seconds versus 8.59 seconds, making KLayout 162.21x
+faster at 95.51% CNN recall. The registered 99.5%-recall and 2x-speedup gate
+failed, so detector tuning is closed.
+
+The final slide defines B8.0 as a kill-gated actionability pilot: seven
+`sky130hd` design families, nine OpenROAD configurations, two paired seeds, and
+126 full flows. A controller is trained only if actions create stable,
+design-dependent oracle headroom and pre-action features predict the winner.
+OpenROAD AutoTuner is a required equal-full-flow-budget baseline. The untouched
+final holdout remains B9.

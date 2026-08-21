@@ -162,8 +162,18 @@ def scan_full_layout(
     thresholds: Sequence[float] = DEFAULT_SEGMENTATION_THRESHOLDS,
     batch_size: int = 32,
     max_tiles: int | None = None,
+    component_class_probability_floor: float = 0.0,
 ) -> dict[str, Any]:
-    """Run every central output in the coverage grid and keep sparse components."""
+    """Run every central output in the coverage grid and keep sparse components.
+
+    ``component_class_probability_floor`` is a memory-only optimization for a
+    frozen deployment policy. Components from a tile below the floor are never
+    materialized. This is prediction-equivalent whenever the floor is no
+    greater than the later deployment-policy classification threshold.
+    """
+
+    if not 0.0 <= component_class_probability_floor < 1.0:
+        raise ValueError("component_class_probability_floor must be in [0, 1)")
 
     config = LocalizationConfig()
     grid: CoverageGrid = variant["grid"]
@@ -179,9 +189,13 @@ def scan_full_layout(
     components = {_threshold_key(threshold): [] for threshold in thresholds}
     tile_records: list[dict[str, Any]] = []
     diagnostics: list[dict[str, Any]] = []
-    started = time.perf_counter()
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
+        # CUDA launches are asynchronous.  Synchronize at both timing
+        # boundaries so B7.2 measures the complete user-visible scan rather
+        # than only the CPU time spent enqueueing GPU kernels.
+        torch.cuda.synchronize(device)
+    started = time.perf_counter()
 
     for start in range(0, len(all_indices), batch_size):
         batch_indices = all_indices[start : start + batch_size]
@@ -213,16 +227,18 @@ def scan_full_layout(
                 "owner_violation_ids": owner_ids,
             }
             tile_records.append(tile_record)
-            for threshold in thresholds:
-                components[_threshold_key(threshold)].extend(
-                    tile_components(
-                        probabilities[offset],
-                        threshold,
-                        [ix, iy],
-                        tile_id,
-                        float(class_probabilities[offset]),
+            class_probability = float(class_probabilities[offset])
+            if class_probability >= component_class_probability_floor:
+                for threshold in thresholds:
+                    components[_threshold_key(threshold)].extend(
+                        tile_components(
+                            probabilities[offset],
+                            threshold,
+                            [ix, iy],
+                            tile_id,
+                            class_probability,
+                        )
                     )
-                )
             diagnostic = {
                 **tile_record,
                 "image": images[offset],
@@ -239,6 +255,8 @@ def scan_full_layout(
             )
             diagnostics = diagnostics[:8]
 
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
     elapsed = time.perf_counter() - started
     bbox = variant["layout_bbox_nm"]
     area_mm2 = ((bbox[2] - bbox[0]) * (bbox[3] - bbox[1])) / 1e12
@@ -263,6 +281,7 @@ def scan_full_layout(
         "tile_count": len(all_indices),
         "full_grid_tile_count": grid.nx * grid.ny,
         "complete_scan": max_tiles is None or len(all_indices) == grid.nx * grid.ny,
+        "component_class_probability_floor": component_class_probability_floor,
         "vectors": variant["vectors"],
         "tiles": tile_records,
         "components_by_threshold": components,
@@ -850,6 +869,7 @@ def load_scan_cache(
     variant: dict[str, Any],
     checkpoint_signature: str,
     require_complete: bool,
+    maximum_component_class_probability_floor: float = 0.0,
 ) -> dict[str, Any] | None:
     """Reuse only a cache tied to the exact layout, report, and checkpoints."""
 
@@ -872,6 +892,11 @@ def load_scan_cache(
             return None
         scan = payload["scan"]
         if require_complete and not scan.get("complete_scan", False):
+            return None
+        if (
+            float(scan.get("component_class_probability_floor", 0.0))
+            > maximum_component_class_probability_floor
+        ):
             return None
         scan["_variant"] = variant
         return scan
