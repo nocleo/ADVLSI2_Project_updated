@@ -115,4 +115,7 @@ The next execution phase is the B8.0 OpenROAD actionability pilot defined in
 implementation must write one hash-bound record per full flow below
 `experiments/B8_action_control/b8_0_actionability/<protocol hash>/`, persist
 after every run, and resume without keeping the 126-run matrix in notebook
-memory. Run the nine-flow harness smoke test before the full matrix.
+memory. B8.0 therefore runs from the command-line harness on a persistent Linux
+host rather than a long-lived Colab session. Follow [`B8_RUNBOOK.md`](B8_RUNBOOK.md)
+and run one smoke flow before resuming the remaining eight; do not launch the
+full matrix until all smoke artifacts and exact reports validate.

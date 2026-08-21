@@ -693,8 +693,10 @@ If the harness passes, run the frozen actionability matrix on the seven official
 and `riscv32i`): nine actions by two seeds, for 126 full flows. The initial
 action grid is the Cartesian product of
 `PLACE_DENSITY_LB_ADDON = {0.00, 0.05, 0.10}` and
-`ROUTING_LAYER_ADJUSTMENT = {0.20, 0.35, 0.50}`. Seeds are paired nuisance
-repetitions, not actions. Do not add macro-specific knobs until this gate passes.
+FastRoute layer adjustment `{0.20, 0.35, 0.50}`. The latter is serialized in a
+per-run `FASTROUTE_TCL` using `set_global_routing_layer_adjustment`; it is not a
+standalone ORFS environment variable. Seeds are paired nuisance repetitions,
+not actions. Do not add macro-specific knobs until this gate passes.
 
 Record flow success, exact post-route DRC total and per rule, stage/total
 runtime, wirelength, vias, WNS/TNS, power/area proxies, the resolved placement

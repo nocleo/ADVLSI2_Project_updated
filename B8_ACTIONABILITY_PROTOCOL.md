@@ -68,7 +68,7 @@ Use the Cartesian product below. The `0.00 / 0.50` point is the registered
 default-like reference. Record the final resolved `PLACE_DENSITY` because its
 base value can be design-specific.
 
-| Action | `PLACE_DENSITY_LB_ADDON` | `ROUTING_LAYER_ADJUSTMENT` |
+| Action | `PLACE_DENSITY_LB_ADDON` | FastRoute layer adjustment |
 |---|---:|---:|
 | A00 | 0.00 | 0.20 |
 | A01 | 0.00 | 0.35 |
@@ -83,6 +83,13 @@ base value can be design-specific.
 Do not add padding, macro-halo, routing-layer-range, or detailed-route knobs
 until this gate passes. A larger action space can manufacture search headroom
 without proving a learnable cross-design choice.
+
+The routing value is implemented by generating a per-run `FASTROUTE_TCL` with
+`set_global_routing_layer_adjustment` over the registered signal-layer range.
+It is not passed as a `ROUTING_LAYER_ADJUSTMENT` environment variable, because
+that is not a current ORFS flow variable. This is the same underlying control
+that AutoTuner exposes as `_FR_LAYER_ADJUST`. The generated Tcl also freezes
+the paired global-routing seed with `set_global_routing_random -seed`.
 
 ## Execution stages
 
