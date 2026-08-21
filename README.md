@@ -8,12 +8,12 @@ This project provides an end-to-end workflow for **Machine-Learning-based Design
 4. Trains a CNN (Google Colab)
 5. Runs fast ONNX inference on a PC with Grad-CAM localization and GDS output
 
-The completed B0–B7.1 work tests whether a learned detector can progress from
+The completed B0–B7.2 work tests whether a learned detector can progress from
 tile classification to exact violation geometry. The current research goal is
 stricter: demonstrate a workflow advantage that a correctly configured exact
 DRC engine does not already provide. KLayout remains the source of truth.
 
-> **Project status:** **B0** through **B7.1** are complete. The original B7
+> **Project status:** **B0** through **B7.2** are complete. The original B7
 > full-layout run was rejected on deployment precision; B7.1 accepted a
 > validation-only precision policy using the trusted B7 scan caches. B2 established
 > reproducible three-seed baselines with the unchanged `NCSU_DRCNN`: **92.47%
@@ -42,20 +42,24 @@ DRC engine does not already provide. KLayout remains the source of truth.
 > precision** versus the 80% gate. B7.1 selected classification threshold
 > **0.92** at the unchanged segmentation threshold **0.4** and passed with
 > **95.51% development violation recall**, **81.44% component precision**,
-> **87.92% component F1**, and **100% exact recovered-pair precision**. The
-> untouched final holdout remains unopened. The next phase is the mandatory
-> B7.2 end-to-end competitiveness audit against optimized KLayout. The current
-> B7.1 system is not yet competitive: it misses about 4.5% of violations and
-> used 2,116.7 CPU-seconds for 0.268 mm². If it does not pass the B7.2 hard
-> gate, detector tuning stops and the project pivots to action-conditioned,
-> uncertainty-aware DRC prevention before detailed routing.
+> **87.92% component F1**, and **100% exact recovered-pair precision**. B7.2
+> then rejected the detector as an accelerator: KLayout was **255.85x faster**
+> on validation (18.35 s versus 4,693.87 s) and **162.21x faster** on
+> development confirmation (8.59 s versus 1,392.87 s), while CNN recall was
+> only **95.33% / 95.51%** versus the registered **99.5%** requirement. Exact
+> recovered-pair precision applies only after KLayout checks CNN proposals and
+> does not repair missed proposals. Detector tuning is closed. The untouched
+> final holdout remains unopened. The next phase is the preregistered B8.0
+> OpenROAD actionability pilot: first prove that flow actions create stable,
+> design-dependent oracle headroom before training any controller.
 > Do not treat the generated CNN report as a replacement for sign-off DRC.
 
 **Repository:** https://github.com/nocleo/ADVLSI2_Project_updated
 
 See [MODEL_ROADMAP.md](MODEL_ROADMAP.md) for the revised publishability gates
-and [EXPERIMENT_STORAGE.md](EXPERIMENT_STORAGE.md) for the canonical Google
-Drive layout, Colab links, and rerun order.
+and [B8_ACTIONABILITY_PROTOCOL.md](B8_ACTIONABILITY_PROTOCOL.md) for the frozen
+next experiment. [EXPERIMENT_STORAGE.md](EXPERIMENT_STORAGE.md) defines the
+canonical Google Drive layout, Colab links, and rerun order.
 
 ---
 
@@ -96,6 +100,7 @@ ADVLSI2_Project_updated/
 ├── notebooks/B6_2_Multitask_UNet.ipynb # Official family-disjoint U-Net GPU run
 ├── notebooks/B7_Full_Layout_Stitching.ipynb # B7 complete-layout GPU launcher
 ├── notebooks/B7_2_KLayout_Competitiveness.ipynb # Same-layout CNN/KLayout audit
+├── B8_ACTIONABILITY_PROTOCOL.md # Frozen B8.0 action matrix and kill gates
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
 ├── training/classifier_models.py  # Frozen baseline and B4 architecture registry
 ├── training/localization_dataset.py # B6 family-disjoint paired image/mask loader
@@ -128,7 +133,7 @@ ADVLSI2_Project_updated/
 ├── results/b5_ensemble/           # B5 probability blend evidence and rejection decision
 ├── results/b6_localization_dataset/ # B6.1 compact geometry/dataset result
 ├── results/b6_multitask_unet/       # Accepted B6.2 result and three seed records
-├── results/b7_full_layout/           # Original B7 failure and accepted B7.1 evidence
+├── results/b7_full_layout/           # B7/B7.1 evidence and failed B7.2 audit
 ├── real_layouts_tt/               # Input .oas layout files
 ├── training_datasets/             # Training pipeline data per layout (generated locally)
 ├── inference_results/             # Inference pipeline results per layout (generated locally)
@@ -687,7 +692,7 @@ The `--reuse-scans-only` guard makes B7.1 fail rather than silently repeat GPU
 inference if any cache is missing or stale. Compact measured evidence is stored
 under [`results/b7_full_layout/`](results/b7_full_layout/).
 
-### B7.2 KLayout competitiveness audit (ready to run)
+### B7.2 KLayout competitiveness audit (complete; accelerator rejected)
 
 B7.2 compares the frozen B7.1 pipeline with exact KLayout on the same six
 unseen layouts and both source/injected variants. The KLayout runner warms once
@@ -697,21 +702,28 @@ that every injected-layout edge pair exactly matches the cached authoritative
 RDB. It also measures an already-loaded rule-only case and known 10 µm changed
 regions.
 
-The CNN timer now synchronizes CUDA before and after a scan. The Colab launcher
-reruns B7.1 on GPU without reusing scan caches, then runs the exact KLayout
-baseline and shows one 200×200 input, exact central mask, probability map,
-final overlay, and recovered edge coordinates:
+The CNN timer synchronizes CUDA before and after a scan. The Colab launcher can
+resume hash-matched completed work and shows one 200×200 input, exact central
+mask, probability map, final overlay, and recovered edge coordinates:
 [`notebooks/B7_2_KLayout_Competitiveness.ipynb`](notebooks/B7_2_KLayout_Competitiveness.ipynb)
 or the canonical [Drive/Colab copy](https://colab.research.google.com/drive/1U6EBCcYkDBqJBDk6xDoGK9MRhkeLuaB2).
 
-The hard gate is intentionally strict: at least 2× complete-pipeline speedup,
-at least 99.5% violation recall, no registered severe or near-threshold miss,
-no clean-layout false alarm, exact-pair precision of one, and lower p95
-latency. The existing B7.1 quality result already falls below this threshold;
-B7.2 measures the performance gap and records the kill decision rather than
-opening another detector-tuning loop. An optimized KLayout CLI mode/thread
-sweep is required only if the CNN unexpectedly survives this exact Stage-A
-audit; the project cannot make a positive speed claim from a weak baseline.
+The hard gate required at least 2× complete-pipeline speedup, at least 99.5%
+violation recall, no registered severe or near-threshold miss, no clean-layout
+false alarm, exact-pair precision of one, and lower p95 latency. It failed:
+
+| Split | CNN total | KLayout median | KLayout faster by | CNN recall |
+|---|---:|---:|---:|---:|
+| Validation | 4,693.87 s | 18.35 s | 255.85x | 95.33% |
+| Development confirmation | 1,392.87 s | 8.59 s | 162.21x | 95.51% |
+
+KLayout timing includes parse, M1 materialization, exact checking, and RDB
+writing; the CNN total excludes model/layout load and result serialization, so
+the boundary already favors the CNN. Exact-pair precision remained one only for
+proposals that KLayout checked. The detector branch is closed and does not need
+another run. See [`results/b7_full_layout/`](results/b7_full_layout/) for the
+measured JSON evidence. The next step is the preregistered
+[B8.0 actionability pilot](B8_ACTIONABILITY_PROTOCOL.md), not CNN tuning.
 
 ### B4 on an Apple-silicon Mac
 

@@ -32,9 +32,11 @@ ADVLSI2 2026 Project/
 │   ├── B5_ensemble/b5_ensemble/
 │   ├── B5_2_failure_audit/
 │   ├── B6_localization/
-│   └── B7_full_layout/
-│       ├── b7_2_cnn_gpu/<UTC run tag>/
-│       └── b7_2_klayout_benchmark/<UTC run tag>/
+│   ├── B7_full_layout/
+│   │   ├── b7_2_cnn_gpu/<UTC run tag>/
+│   │   └── b7_2_klayout_benchmark/<UTC run tag>/
+│   └── B8_action_control/
+│       └── b8_0_actionability/<protocol hash>/
 └── reports/
     ├── ADVLSI2 DRC CNN — Project Progress
     └── proposal presentation
@@ -99,10 +101,18 @@ hash-verified artifacts already exist. B7 depends on the accepted B6.2
 checkpoints and B6 localization dataset. B3 and B5 depend on the accepted B2
 checkpoints; B5 also uses B4 checkpoints.
 
-The next research phase is not another training run. Run the B7.2 KLayout
-competitiveness audit defined in [MODEL_ROADMAP.md](MODEL_ROADMAP.md) first. It
-writes each fresh synchronized GPU result below
-`experiments/B7_full_layout/b7_2_cnn_gpu/<UTC run tag>/` and exact comparison
-evidence below
-`experiments/B7_full_layout/b7_2_klayout_benchmark/<UTC run tag>/`. Each root
-contains `LATEST_RUN.txt`; reruns never silently reuse a previous scan cache.
+B7.2 is complete and failed its accelerator hard gate. Its synchronized GPU
+result is below
+`experiments/B7_full_layout/b7_2_cnn_gpu/20260817T195310Z/`; the exact KLayout
+comparison is in the canonical run referenced by that phase's
+`LATEST_RUN.txt`. The resumable launcher reuses only hash-matched completed
+validation scans and incrementally materialized development components; it
+does not silently accept stale checkpoints or layout/report caches. No B7.2
+rerun or CNN retraining is planned.
+
+The next execution phase is the B8.0 OpenROAD actionability pilot defined in
+[`B8_ACTIONABILITY_PROTOCOL.md`](B8_ACTIONABILITY_PROTOCOL.md). Its
+implementation must write one hash-bound record per full flow below
+`experiments/B8_action_control/b8_0_actionability/<protocol hash>/`, persist
+after every run, and resume without keeping the 126-run matrix in notebook
+memory. Run the nine-flow harness smoke test before the full matrix.

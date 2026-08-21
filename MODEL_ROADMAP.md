@@ -6,25 +6,27 @@ Produce a publishable result that solves a problem an exact DRC engine does not
 already solve better. A learned system is useful only if it creates a measured
 workflow benefit while KLayout remains the source of truth.
 
-The original classifier/localizer work through B7.1 is retained as a completed
-feasibility study. It is **not yet a competitive DRC accelerator**: on the B7.1
-development layouts it recovered 1,489 of 1,559 violations (95.51% recall),
-flagged one clean layout, and used 2,116.7 CPU-seconds to process 0.268 mm².
-KLayout is exact for the implemented rule and already supports local,
-hierarchical, tiled, and multicore checking. Until a direct controlled
-benchmark proves otherwise, do not claim that the CNN is faster than, replaces,
-or competes with KLayout.
+The original classifier/localizer work through B7.2 is retained as a completed
+feasibility study and negative competitiveness result. The controlled B7.2
+audit rejected the CNN as a DRC accelerator. On the validation layouts, the
+complete learned pipeline took 4,693.87 seconds while KLayout's median was
+18.35 seconds (KLayout was 255.85x faster), and CNN violation recall was only
+95.33% versus the registered 99.5% requirement. On development confirmation,
+the corresponding times were 1,392.87 and 8.59 seconds (KLayout was 162.21x
+faster) with 95.51% recall and one clean-layout false alarm. Exact recovered-
+pair precision was 100% only after KLayout checked the CNN proposals; it does
+not recover the violations the CNN never proposed. Do not tune or present this
+detector as an accelerator, replacement, or competitor to KLayout.
 
 The revised research goal is therefore:
 
-1. measure the complete learned pipeline against optimized KLayout on identical
-   layouts, hardware, rule scope, and process conditions;
-2. stop the detection-accelerator branch if it cannot deliver a material
-   end-to-end advantage at near-signoff recall;
-3. use exact downstream DRC as the outcome oracle for a harder task—predicting
+1. preserve the controlled B7.2 negative result and stop the
+   detection-accelerator branch;
+2. use exact downstream DRC as the outcome oracle for a harder task—predicting
    the consequences of available flow actions and choosing an action before
-   detailed routing—rather than relearning a deterministic spacing check; and
-4. release a reproducible, family-disjoint benchmark and an honest Pareto
+   an expensive place-and-route run—rather than relearning a deterministic
+   spacing check; and
+3. release a reproducible, family-disjoint benchmark and an honest Pareto
    comparison against deterministic baselines.
 
 [*Design Rule Checking with a CNN Based Feature
@@ -54,11 +56,11 @@ Therefore, “a CNN can detect an error” is not a sufficient contribution.
 
 | Candidate contribution | Benefit over exact DRC | Decision |
 |---|---|---|
-| Finished-layout `m1.2` detection and coordinates | None unless end-to-end latency is materially lower at near-perfect recall; KLayout already reports exact coordinates | Audit in B7.2, then stop if the hard gate fails |
-| Incremental changed-region screening | Potential lower interactive latency, but only if it beats KLayout's local check including all preprocessing | Keep only as a measured B7.2 deployment scenario |
+| Finished-layout `m1.2` detection and coordinates | None: B7.2 measured much lower recall and 162x–256x slower end-to-end execution | Closed after failed B7.2 hard gate |
+| Incremental changed-region screening | KLayout already performs exact local checks, and the learned full-layout path failed before an incremental claim was justified | Closed with the detector branch |
 | Verified repair ranking | KLayout can accept/reject edits but does not encode which legal edit best preserves design intent and cost | Possible downstream extension, but current repair work is crowded |
 | Pre-route hotspot prediction only | Exact polygon DRC cannot run before final geometry exists | Useful baseline, but prediction alone is already crowded |
-| Action-conditioned DRC prevention | Predicts the DRC/PPA consequence of available flow actions before expensive routing and selects an action | Recommended publication track, subject to B8.0 actionability gate |
+| Action-conditioned flow control | Amortizes action selection across unseen designs and seeks to reduce expensive full-flow trials while exact DRC remains authoritative | Recommended publication track, subject to B8.0 actionability and learnability gates |
 
 The research landscape is also moving beyond binary detection: recent work
 studies [AI-guided detailed routing](https://doi.org/10.1145/3769306),
@@ -569,10 +571,11 @@ threshold `0.92` with the unchanged segmentation threshold `0.4`, minimum area
 `16` pixels, merge gap `2` pixels, and recovery radius `140` nm. Development
 confirmation achieved 95.51% violation recall, 81.44% candidate-component
 precision, 87.92% component F1, and 100% exact recovered-pair precision. All
-registered gates passed. The final holdout remained unopened. The revised plan
-requires the B7.2 KLayout competitiveness audit before any B8 work.
+registered gates passed. The final holdout remained unopened. B7.2 then tested
+whether this accepted internal policy created any workflow advantage over exact
+KLayout.
 
-### B7.2 — KLayout competitiveness audit (mandatory next phase)
+### B7.2 — KLayout competitiveness audit (complete; accelerator rejected)
 
 **Question:** is there any density, layout size, or interactive-change regime
 where the learned detector reduces end-to-end latency enough to justify its
@@ -621,53 +624,110 @@ engineering claim, not a signoff-equivalence claim. If any requirement fails,
 archive the CNN detection branch as a negative result and do not spend another
 phase tuning it.
 
-The current B7.1 result fails the quality side of this gate before runtime is
-compared, so B7.2 is an audit and likely kill decision, not a promised win.
+**Measured result:** the Stage-A audit completed on the same six layouts and
+both source/injected variants. KLayout used five measured repetitions after one
+warm-up; the CNN timing is one complete synchronized GPU run, so a CNN p95 is
+not available. This does not affect the decision because both quality and
+median-speed requirements fail by large margins.
 
-### B8 — Action-conditioned, uncertainty-aware DRC prevention
+| Split | CNN total | KLayout median | KLayout conservative p95 | KLayout speed advantage | CNN recall | Quality gate |
+|---|---:|---:|---:|---:|---:|---|
+| Validation | 4,693.87 s | 18.35 s | 21.15 s | 255.85x | 95.33% | Fail |
+| Development confirmation | 1,392.87 s | 8.59 s | 10.65 s | 162.21x | 95.51% | Fail |
 
-**Research question:** before detailed routing creates final geometry, can a
-model predict the DRC, runtime, and PPA consequences of several available flow
-actions and select the best action for an unseen design?
+Validation had no clean-layout false alarm but missed registered near-threshold
+and severe-slice violations. Development confirmation flagged one clean layout
+and missed near-threshold violations. Exact recovered-pair precision was 100%
+for proposed candidates because local KLayout recovery is authoritative; it
+does not change end-to-end recall. The audit's comparison boundary already
+favored the CNN by excluding model/layout load and result serialization, while
+KLayout included layout parse, M1 materialization, exact rule execution, and
+RDB writing.
 
-OpenROAD already exposes controls such as placement density and padding, macro
-halos, routing-layer capacity adjustments, routing layers, effort, and random
-seeds. The contribution is not adding another knob. It is a counterfactual
-controller that predicts “what will happen if this action is chosen,” selects a
-design-specific or region-specific action, reports uncertainty, and falls back
-to the standard flow when the case is out of distribution. Detailed routing and
-exact KLayout verification remain authoritative.
+**Decision:** the hard gate failed. Stage B optimization is unnecessary because
+the CNN did not survive Stage A. Freeze B7.2 as a negative result, do not rerun
+or retune the detector, keep B9 unopened, and proceed to B8.0.
 
-This goes beyond another hotspot detector. Existing work already predicts
-pre-route DRC maps, injects predicted violations into routing, or learns global
-router cost schedules. A publishable result must make action selection,
-multi-objective consequences, uncertainty, and generalization the central
-contribution.
+### B8 — Amortized, action-conditioned OpenROAD control
+
+**Research question:** from a frozen snapshot after floorplan/PDN and before
+global placement, can a model choose a complete OpenROAD configuration for an
+unseen design using zero or one expensive trial, while matching or improving
+the exact post-route DRC/PPA result reached by per-design search?
+
+This does **not** change KLayout or OpenROAD's algorithms. It selects existing
+OpenROAD controls before the flow runs; the normal tools execute the chosen
+configuration, and exact post-route verification decides whether the result is
+acceptable. The early decision checkpoint is deliberate: placement and routing
+controls are both still legal, and the model cannot inspect outcomes from the
+run it is trying to avoid.
+
+[OpenROAD AutoTuner](https://openroad-flow-scripts.readthedocs.io/en/latest/user/InstructionsForAutoTuner.html)
+already supports random/grid search, Bayesian and evolutionary methods, and
+tuning of command-line flow variables. Therefore automated parameter tuning is
+not the novelty. The testable contribution is **amortized cross-design action
+selection**: learn counterfactual action rankings from previous design families,
+recommend an action for a new family before repeated full flows, quantify
+uncertainty, and fall back when confidence is insufficient. AutoTuner is a
+required named baseline under the same number of expensive full-flow trials.
+
+The paper is viable only if this controller reduces online trials or turnaround
+versus default, fixed heuristics, and AutoTuner while preserving exact DRC and
+PPA. It must also report the offline dataset cost and the number of unseen
+designs required to amortize that cost. A hotspot map, a tuned global default,
+or a result that wins only with a larger search budget is not sufficient.
+
+The executable preregistration is in
+[`B8_ACTIONABILITY_PROTOCOL.md`](B8_ACTIONABILITY_PROTOCOL.md).
 
 #### B8.0 — Actionability pilot and kill gate
 
-Run a small, reproducible OpenROAD experiment before building a large dataset:
+Use the pinned OpenROAD-flow-scripts container and `sky130hd` platform. First
+run a nine-flow harness smoke test: three official design families, three
+actions, and one seed. It validates resume/checkpoint behavior, metric parsing,
+exact verification, and deterministic action serialization; it cannot support a
+scientific claim.
 
-- five to eight design families;
-- eight to twelve configurations per design;
-- at least two placement/router seeds;
-- one open PDK initially;
-- exact post-route DRC plus timing, wirelength, via count, runtime, and other
-  available PPA proxies for every run.
+If the harness passes, run the frozen actionability matrix on the seven official
+`sky130hd` families (`aes`, `chameleon`, `gcd`, `ibex`, `jpeg`, `microwatt`,
+and `riscv32i`): nine actions by two seeds, for 126 full flows. The initial
+action grid is the Cartesian product of
+`PLACE_DENSITY_LB_ADDON = {0.00, 0.05, 0.10}` and
+`ROUTING_LAYER_ADJUSTMENT = {0.20, 0.35, 0.50}`. Seeds are paired nuisance
+repetitions, not actions. Do not add macro-specific knobs until this gate passes.
 
-Candidate actions include placement density, global or instance-class padding,
-macro extension/halo, routing-layer capacity adjustment, allowed routing layer
-range, congestion-driven placement settings, and detailed-routing effort or
-ordering seed. Freeze the action space before inspecting model results.
+Record flow success, exact post-route DRC total and per rule, stage/total
+runtime, wirelength, vias, WNS/TNS, power/area proxies, the resolved placement
+density, source snapshot/features, tool/container hashes, action, and seed.
 
-**Gate:** continue only if actions materially change DRC/turnaround outcomes,
-no single fixed configuration dominates nearly every design, and useful
-pre-route features contain information about which action will win. If a simple
-fixed heuristic or cheap bisection solves the pilot, there is no ML problem.
+Continue to B8.1 only if all preregistered conditions hold:
+
+1. **Action effect:** on at least four of seven families, an action changes an
+   exact DRC/PPA-feasibility outcome or improves DRC by at least 20%; if exact
+   DRC ties, a 20% runtime improvement without registered PPA regression counts.
+2. **Winner diversity:** no one fixed action is the acceptable Pareto winner on
+   five or more of the seven families.
+3. **Oracle headroom:** the per-design oracle action materially outperforms the
+   best fixed action across families; otherwise selection cannot add value.
+4. **Seed stability:** paired action effects exceed the corresponding seed
+   variation often enough that the target is an action signal, not router noise.
+5. **Pre-action learnability:** leave-one-family-out transparent baselines from
+   only checkpoint-available features beat the best fixed action in normalized
+   regret and recover the oracle in their top two recommendations often enough
+   to justify collecting more families.
+
+The exact scalarization and PPA tolerances are frozen in the protocol before
+the first matrix result is inspected. Failure of action effect, winner
+diversity, or oracle headroom stops the controller project. Failure only of
+learnability permits one registered fallback: move the checkpoint later and
+restrict the action set to controls that remain legal, then repeat the pilot as
+a new hypothesis rather than silently changing the task.
 
 #### B8.1 — Action-conditioned trajectory dataset
 
-For each pre-detailed-routing snapshot and candidate action, store:
+Only after B8.0 passes, expand to at least 20 independent design families before
+making a learned generalization claim. For each frozen pre-global-placement
+snapshot and candidate action, store:
 
 - spatial features: macro, cell, pin, routing-demand, congestion, blockage, and
   layer-utilization maps;
@@ -678,10 +738,11 @@ For each pre-detailed-routing snapshot and candidate action, store:
   wirelength, vias, WNS/TNS, power/area proxies, and DRC-clean status.
 
 Keep design families and generators disjoint across training, development, and
-final holdout. Hash every source snapshot, action configuration, tool version,
-and output. CircuitNet can be used for representation pretraining or external
-comparison, but the action labels and end-to-end claims must come from the
-reproducible flow generated here.
+final holdout. Never split action runs or seeds from one design family across
+partitions. Hash every source snapshot, action configuration, tool version,
+container, and output. CircuitNet can be used for representation pretraining or
+external comparison, but the action labels and end-to-end claims must come from
+the reproducible flow generated here.
 
 #### B8.2 — Counterfactual multi-modal model
 
@@ -694,8 +755,9 @@ conditioning. For each candidate action, predict:
 - timing, wirelength, via, and power/area deltas; and
 - calibrated predictive uncertainty.
 
-Start with transparent baselines before a large model: per-action mean,
-linear/gradient-boosted models, a spatial CNN, and a design-level graph model.
+Start with transparent baselines before a large model: best fixed action,
+per-action mean, linear/gradient-boosted rankers, a spatial CNN, and a
+design-level graph model.
 Only add CNN+GNN/point fusion when simpler models establish that spatial and
 connectivity information are complementary. The controller enumerates the
 declared candidate actions, rejects high-uncertainty predictions, and selects
@@ -708,7 +770,8 @@ Compare the selected action against:
 - default OpenROAD configuration;
 - documented manual heuristic or bisection;
 - random and grid search at the same full-flow run budget;
-- Bayesian optimization at the same budget;
+- official OpenROAD AutoTuner, including its Bayesian/search methods, at the
+  same full-flow run budget;
 - a hotspot predictor without action conditioning; and
 - the oracle best measured action as an upper bound.
 
@@ -716,6 +779,10 @@ Primary metrics are system outcomes, not pixel accuracy: number of expensive
 full routing attempts, total design-turnaround time, exact final DRC count,
 DRC-clean completion rate, routing iterations, PPA change, action-selection
 regret, inference overhead, calibration, and out-of-distribution fallback rate.
+Report both the online unseen-design cost and the lifecycle break-even point
+after charging the learned method for offline trajectory generation and
+training. The main comparison fixes the number of expensive full flows, not
+just model inference time.
 
 **Acceptance gate:** on family-disjoint development data, reduce full routing
 attempts by at least 25% or total turnaround time by at least 1.3x versus the
@@ -752,16 +819,21 @@ The paper must separate four claims:
 The title and abstract must not imply replacement of signoff DRC. KLayout is
 the exact oracle and final acceptance authority.
 
-## Immediate sequence after B7.1
+## Immediate sequence after B7.2
 
-1. Preserve B0–B7.1 as historical evidence; do not tune on their development
-   results again.
-2. Run B7.2 and make the accelerator go/no-go decision before any new training.
-3. If the hard gate fails, record the negative result and move to B8.0.
-4. Run the small B8.0 OpenROAD actionability pilot and freeze the action space.
-5. Build the action-conditioned trajectory dataset and non-learned baselines.
-6. Train a counterfactual controller only if B8.0 proves the task is
-   non-trivial and learnable.
+1. Merge the B7.2 audit, measured evidence, and frozen B8.0 preregistration;
+   do not rerun or tune the detector.
+2. Implement the B8.0 resume-safe OpenROAD harness and pass the nine-flow smoke
+   test before launching the matrix.
+3. Run the frozen 126-flow actionability matrix and publish all run manifests,
+   failures, exact metrics, seed variation, and gate decisions.
+4. Stop if actions do not create stable, design-dependent oracle headroom. Do
+   not train a controller merely because the infrastructure works.
+5. If every B8.0 gate passes, expand to at least 20 family-disjoint designs and
+   establish fixed-action, heuristic, and AutoTuner baselines before a large
+   learned model.
+6. Train and evaluate the counterfactual controller under equal full-flow
+   budgets, including uncertainty fallback and lifecycle cost.
 7. Open the final holdout once in B9 and state only claims supported by it.
 
 ## Experiment record template

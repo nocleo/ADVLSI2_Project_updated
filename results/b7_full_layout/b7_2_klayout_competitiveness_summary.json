@@ -1,0 +1,82 @@
+{
+  "all_klayout_pairs_match_cached_reports": true,
+  "cnn_summary": "/content/drive/MyDrive/ADVLSI2 2026 Project/experiments/B7_full_layout/b7_2_cnn_gpu/20260817T195310Z/summary.json",
+  "comparison": {
+    "development_confirmation": {
+      "cnn_device": "cuda",
+      "cnn_p95_available": false,
+      "cnn_recorded_end_to_end_seconds": 1392.8729089309998,
+      "cnn_speedup_over_klayout": 0.00616471792863705,
+      "cnn_timing_repetitions": 1,
+      "cnn_violation_recall": 0.9550994227068633,
+      "comparison_boundary": {
+        "bias": "favors_cnn",
+        "cnn": "rasterization + inference + stitching + local exact recovery; excludes model/layout load and result serialization",
+        "klayout": "layout parse + M1 materialization + exact rule + RDB write"
+      },
+      "decision_reason": "Quality gate failed; stop detector tuning and proceed to B8.0.",
+      "hard_gate_passed": false,
+      "klayout_batch_conservative_p95_seconds": 10.648194876800199,
+      "klayout_batch_median_seconds": 8.586668593999775,
+      "klayout_speedup_over_cnn": 162.21342348117602,
+      "layout_variants": 6,
+      "p95_gate_evaluable": false,
+      "quality_checks": {
+        "exact_pair_precision_is_one": true,
+        "no_clean_layout_false_alarm": false,
+        "no_near_threshold_misses": false,
+        "no_registered_severe_slice_misses": true,
+        "violation_recall_at_least_0_995": false
+      },
+      "quality_gate_passed": false,
+      "speed_gate_passed": false
+    },
+    "validation": {
+      "cnn_device": "cuda",
+      "cnn_p95_available": false,
+      "cnn_recorded_end_to_end_seconds": 4693.86993721,
+      "cnn_speedup_over_klayout": 0.003908589369842156,
+      "cnn_timing_repetitions": 1,
+      "cnn_violation_recall": 0.9532967032967034,
+      "comparison_boundary": {
+        "bias": "favors_cnn",
+        "cnn": "rasterization + inference + stitching + local exact recovery; excludes model/layout load and result serialization",
+        "klayout": "layout parse + M1 materialization + exact rule + RDB write"
+      },
+      "decision_reason": "Quality gate failed; stop detector tuning and proceed to B8.0.",
+      "hard_gate_passed": false,
+      "klayout_batch_conservative_p95_seconds": 21.148500076799838,
+      "klayout_batch_median_seconds": 18.34641014000067,
+      "klayout_speedup_over_cnn": 255.84677881892313,
+      "layout_variants": 6,
+      "p95_gate_evaluable": false,
+      "quality_checks": {
+        "exact_pair_precision_is_one": true,
+        "no_clean_layout_false_alarm": true,
+        "no_near_threshold_misses": false,
+        "no_registered_severe_slice_misses": false,
+        "violation_recall_at_least_0_995": false
+      },
+      "quality_gate_passed": false,
+      "speed_gate_passed": false
+    }
+  },
+  "groups": [
+    "validation",
+    "development_confirmation"
+  ],
+  "hard_gate_passed": false,
+  "layout_variant_count": 12,
+  "phase": "B7.2",
+  "positive_latency_claim_requires_equalized_boundaries": true,
+  "protocol": "unseen_layout_v1",
+  "repeats": 5,
+  "same_host_required": true,
+  "schema_version": 1,
+  "status": "complete",
+  "variants": [
+    "source",
+    "injected"
+  ],
+  "warmups": 1
+}
