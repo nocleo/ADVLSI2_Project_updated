@@ -101,6 +101,7 @@ ADVLSI2_Project_updated/
 ├── notebooks/B7_Full_Layout_Stitching.ipynb # B7 complete-layout GPU launcher
 ├── notebooks/B7_2_KLayout_Competitiveness.ipynb # Same-layout CNN/KLayout audit
 ├── B8_ACTIONABILITY_PROTOCOL.md # Frozen B8.0 action matrix and kill gates
+├── B8_RUNBOOK.md                # Persistent-host, resume-safe B8.0 execution
 ├── training/train_classifier.py   # Reproducible baseline CNN training CLI
 ├── training/classifier_models.py  # Frozen baseline and B4 architecture registry
 ├── training/localization_dataset.py # B6 family-disjoint paired image/mask loader
@@ -125,6 +126,7 @@ ADVLSI2_Project_updated/
 ├── scripts/run_b6_multitask_unet.py # Three-seed B6.2 training/evaluation runner
 ├── scripts/run_b7_full_layout.py # B7 validation selection and layout evaluation
 ├── scripts/run_b7_2_klayout_benchmark.py # B7.2 exact competitiveness audit
+├── scripts/run_b8_actionability.py       # B8.0 ORFS plan/run/status harness
 ├── scripts/benchmark_classifier_architectures.py # Paired CPU/ONNX cost benchmark
 ├── scripts/verify_classifier_flow.py # Fast dataset→train→ONNX→inference check
 ├── results/b2_baselines/          # Accepted B2 aggregate and six run-metric JSONs
@@ -724,6 +726,10 @@ proposals that KLayout checked. The detector branch is closed and does not need
 another run. See [`results/b7_full_layout/`](results/b7_full_layout/) for the
 measured JSON evidence. The next step is the preregistered
 [B8.0 actionability pilot](B8_ACTIONABILITY_PROTOCOL.md), not CNN tuning.
+The pilot runs through the persistent-host, resume-safe
+[`scripts/run_b8_actionability.py`](scripts/run_b8_actionability.py) harness;
+setup and one-flow-first instructions are in [`B8_RUNBOOK.md`](B8_RUNBOOK.md).
+It does not depend on a long-lived Colab GPU session.
 
 ### B4 on an Apple-silicon Mac
 
